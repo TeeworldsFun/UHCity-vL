@@ -12,7 +12,6 @@
 #include "base/rapidjson/filereadstream.h"
 #include "base/rapidjson/filewritestream.h"
 #include "base/rapidjson/error/en.h"
-//#include "game/server/gamecontext.h"
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#include <tchar.h>
@@ -49,27 +48,25 @@ void CAccount::Login(char *Username, char *Password)
 	if(m_pPlayer->m_AccData.m_UserID)
 	{
 		dbg_msg("account", "Account login failed ('%s' - Already logged in)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Already logged in");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
 		return;
 	}
-	else if(strlen(Username) > 15 || !strlen(Username))
+	/*else if(strlen(Username) > 15 || !strlen(Username))
 	{
-		str_format(aBuf, sizeof(aBuf), "Username too %s", strlen(Username)?"long":"short");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Username too {str:ls}"), strlen(Username)?"long":"short");
 		return;
     }
 	else if(strlen(Password) > 15 || !strlen(Password))
 	{
-		str_format(aBuf, sizeof(aBuf), "Password too %s!", strlen(Password)?"long":"short");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password too {str:ls}"), strlen(Password)?"long":"short");
 		return;
-    }
+    }*/
 	else if(!Exists(Username))
 	{
 		if (!OldLogin(Username, Password)) {
 			dbg_msg("account", "Account login failed ('%s' - Missing)", Username);
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "This account does not exist.");
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Please register first. (/register <user> <pass>)");
+			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("This account does not exist."));
+			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please register first. (/register <user> <pass>)"));
 		}
 
 		return;
@@ -89,10 +86,11 @@ void CAccount::Login(char *Username, char *Password)
 
 	if (res.IsError()) {
 		dbg_msg("account", "parse error");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Sorry, your account data can't be read, We were deleted your account"));
 		return;
 	}
 
-	assert(AccD.IsObject());
+	tl_assert(AccD.IsObject());
 	Value::ConstMemberIterator itr;
 
 	if (AccD["user"].HasMember("accdata")) {
@@ -112,7 +110,7 @@ void CAccount::Login(char *Username, char *Password)
 			if(GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->m_AccData.m_UserID == user["accdata"]["accid"].GetInt())
 			{
 				dbg_msg("account", "Account login failed ('%s' - already in use (local))", Username);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Account already in use");
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account already in use"));
 				return;
 			}
 
@@ -122,7 +120,7 @@ void CAccount::Login(char *Username, char *Password)
 			if(user["accdata"]["accid"].GetInt() == GameServer()->m_aaExtIDs[i][j])
 			{
 				dbg_msg("account", "Account login failed ('%s' - already in use (extern))", Username);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Account already in use");
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account already in use"));
 				return;
 			}
 		}
@@ -131,14 +129,14 @@ void CAccount::Login(char *Username, char *Password)
 	if(strcmp(Username, user["accdata"]["username"].GetString()))
 	{
 		dbg_msg("account", "Account login failed ('%s' - Wrong username)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Wrong username or password");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Wrong username or password1"));
 		return;
 	}
 
 	if(strcmp(Password, user["accdata"]["password"].GetString()))
 	{
-		dbg_msg("account", "Account login failed ('%s' - Wrong password)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Wrong username or password");
+		dbg_msg("account", "Account login failed ('%s' - %s -Wrong password)", Password, user["accdata"]["password"].GetString());
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Wrong username or password2"));
 		return;
 	}
 
@@ -195,6 +193,9 @@ void CAccount::Login(char *Username, char *Password)
 	}
 	if (user.HasMember("donor"))
 		m_pPlayer->m_AccData.m_Donor = user["donor"].GetInt();
+
+	if (user.HasMember("language"))
+		m_pPlayer->SetLanguage(user["language"].GetString());
 	
 	if (user.HasMember("event")) {
 		if (user["event"].HasMember("bounty"))
@@ -269,37 +270,52 @@ void CAccount::Login(char *Username, char *Password)
 	if (m_pPlayer->m_AccData.m_Bounty) {
 		char numBuf[32];
 		GameServer()->FormatInt(m_pPlayer->m_AccData.m_Bounty, numBuf);
-		str_format(aBuf, sizeof aBuf, "'%s' joined with a bounty of %s$", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), numBuf);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "");
+		GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("'{str:ClientName}' joined with a bounty of {str:Bounty}$"), "ClientName", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), "Bounty", numBuf);
 		GameServer()->AddToBountyList(m_pPlayer->GetCID());
 	}
   	
 	dbg_msg("account", "Account login sucessful ('%s')", Username);
-	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Login succesful");
+	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login succesful"));
  
 	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
 		m_pPlayer->m_AccData.m_GunFreeze = 3;
 }
 
-void CAccount::Register(char *Username, char *Password)
+void CAccount::Register(char *Username, char *Password, char *TruePassword)
 {
 	char aBuf[125];
+	if(str_comp(Username, "++UserIDs++") == 0)
+	{
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("?"));
+		return;
+	}
+
+	if(str_comp(Username, "") == 0)
+	{
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("?"));
+		return;
+	}
+
+	if(Exists(Username))
+	{
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_JOIN, _("Username already exists"));
+		return;
+	}
+
 	if(m_pPlayer->m_AccData.m_UserID)
 	{
 		dbg_msg("account", "Account registration failed ('%s' - Logged in)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Already logged in");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
 		return;
 	}
 	if(strlen(Username) > 15 || !strlen(Username))
 	{
-		str_format(aBuf, sizeof(aBuf), "Username too %s", strlen(Username)?"long":"short");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Username too {str:ls}"), strlen(Password)?"long":"short");
 		return;
     }
-	else if(strlen(Password) > 15 || !strlen(Password))
+	else if(strlen(TruePassword) > 15 || !strlen(TruePassword))
 	{
-		str_format(aBuf, sizeof(aBuf), "Password too %s!", strlen(Password)?"long":"short");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password too {str:ls}"), strlen(Password)?"long":"short");
 		return;
     }
 
@@ -309,8 +325,8 @@ void CAccount::Register(char *Username, char *Password)
 	char *p = strpbrk(Username, Filter);
 	if(!p)
 	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Don't use invalid chars for username!");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "A - Z, a - z, 0 - 9, . - _");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Don't use invalid chars for username!"));
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("A - Z, a - z, 0 - 9, . - _"));
 		return;
 	}
 	
@@ -407,6 +423,9 @@ void CAccount::Register(char *Username, char *Password)
 
 	writer.Key("donor");
 	writer.Int(m_pPlayer->m_AccData.m_Donor);
+
+	writer.Key("language");
+	writer.String(m_pPlayer->GetLanguage());
 
 	writer.Key("event");
 	writer.StartObject();
@@ -519,7 +538,7 @@ void CAccount::Register(char *Username, char *Password)
 
 	dbg_msg("account", "Registration succesful ('%s')", Username);
 	str_format(aBuf, sizeof(aBuf), "Registration succesful - ('/login %s %s'): ", Username, Password);
-	GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Registration succesful - ('/login {str:Username} {str:Password}')"), "Username", Username, "Password", TruePassword, NULL);
 	Login(Username, Password);
 }
 
@@ -614,6 +633,9 @@ void CAccount::Apply()
 
 	writer.Key("donor");
 	writer.Int(m_pPlayer->m_AccData.m_Donor);
+
+	writer.Key("language");
+	writer.String(m_pPlayer->GetLanguage());
 
 	writer.Key("event");
 	writer.StartObject();
@@ -745,6 +767,7 @@ void CAccount::Reset()
 	m_pPlayer->m_AccData.m_Money = 0;
 	m_pPlayer->m_AccData.m_Health = 10;
 	m_pPlayer->m_AccData.m_Armor = 10;
+	m_pPlayer->SetLanguage("en");
 
 	m_pPlayer->m_AccData.m_Donor = 0;
 	m_pPlayer->m_AccData.m_VIP = 0;
@@ -818,10 +841,10 @@ void CAccount::Delete()
 		str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", m_pPlayer->m_AccData.m_Username);
 		std::remove(aBuf);
 		dbg_msg("account", "Account deleted ('%s')", m_pPlayer->m_AccData.m_Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Account deleted!");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account deleted!"));
 	}
 	else
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Please, login to delete your account");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please, login to delete your account"));
 }
 
 void CAccount::NewPassword(char *NewPassword)
@@ -829,14 +852,14 @@ void CAccount::NewPassword(char *NewPassword)
 	char aBuf[128];
 	if(!m_pPlayer->m_AccData.m_UserID)
 	{
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Please, login to change the password");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please, login to change the password"));
 		return;
 	}
 
 	if(strlen(NewPassword) > 15 || !strlen(NewPassword))
 	{
 		str_format(aBuf, sizeof(aBuf), "Password too %s!", strlen(NewPassword)?"long":"short");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_DEFAULT, _("Password too {str:ls}!"), "ls", strlen(NewPassword)?"long":"short", NULL);
 		return;
     }
 
@@ -845,7 +868,7 @@ void CAccount::NewPassword(char *NewPassword)
 
 	
 	dbg_msg("account", "Password changed - ('%s')", m_pPlayer->m_AccData.m_Username);
-	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Password successfully changed!");
+	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password successfully changed!"));
 }
 
 int CAccount::NextID()
@@ -959,7 +982,7 @@ bool CAccount::OldLogin(char *Username, char *Password)
 		&m_pPlayer->m_AccData.m_Armor, // Done
 		&m_pPlayer->m_Score, // Done
 
-		&m_pPlayer->m_AccData.m_VIP, 
+		&m_pPlayer->m_AccData.m_Donor,
 		&m_pPlayer->m_AccData.m_VIP, // Done
 		&m_pPlayer->m_AccData.m_Arrested, // Done
 
@@ -1013,7 +1036,7 @@ bool CAccount::OldLogin(char *Username, char *Password)
 		m_pPlayer->SetTeam(TEAM_RED);
   	
 	dbg_msg("account", "Account login sucessful ('%s')", Username);
-	GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Login succesful");
+	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login succesful"));
  
 	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
 		m_pPlayer->m_AccData.m_GunFreeze = 3;
@@ -1047,12 +1070,12 @@ void CAccount::SetAuth(char *Username, int lvl) {
 	ParseResult res = AccD.Parse(AccText);
 
 	if (res.IsError()) {
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), " Parse Error: Please contact UrinStone to get this fixed.");
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _(" Parse Error: Please contact UrinStone to get this fixed."));
 		dbg_msg("account", "parse error");
 		return;
 	}
 
-	assert(AccD.IsObject());
+	tl_assert(AccD.IsObject());
 
 	AccD["user"]["auth"]["authlvl"].SetInt(lvl);
 

@@ -245,7 +245,7 @@ void CGameContext::SendPrivate(int From, int To, const char *pText, int SpamProt
 	if(From >= 0 && From < MAX_CLIENTS)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", From, Team, Server()->ClientName(From), pText);
 	else
-		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
+		str_format(aBuf, sizeof(aBuf), "!!! %s", pText);
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "teamchat", aBuf);
 
 	CNetMsg_Sv_Chat Msg;
@@ -277,7 +277,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	if(ChatterClientID >= 0 && ChatterClientID < MAX_CLIENTS)
 		str_format(aBuf, sizeof(aBuf), "%d:%d:%s: %s", ChatterClientID, Team, Server()->ClientName(ChatterClientID), pText);
 	else
-		str_format(aBuf, sizeof(aBuf), "*** %s", pText);
+		str_format(aBuf, sizeof(aBuf), "!!! %s", pText);
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, Team!=CHAT_ALL?"teamchat":"chat", aBuf);
 
 	if(Team == CHAT_ALL)
@@ -328,6 +328,148 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID)
 	CNetMsg_Sv_Broadcast Msg;
 	Msg.m_pMessage = pText;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::SendChatTarget_Localization(int To, int Category, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
+	CNetMsg_Sv_Chat Msg;
+	Msg.m_Team = 0;
+	Msg.m_ClientID = -1;
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			switch(Category)
+			{
+				case CHATCATEGORY_INFO:
+					Buffer.append("| ");
+					break;
+				case CHATCATEGORY_JOIN:
+					Buffer.append("★ | ");
+					break;
+			}
+			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
+			
+			Msg.m_pMessage = Buffer.buffer();
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+		}
+	}
+	
+	va_end(VarArgs);
+}
+
+void CGameContext::SendChatTarget_Localization_P(int To, int Category, int Number, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
+	CNetMsg_Sv_Chat Msg;
+	Msg.m_Team = 0;
+	Msg.m_ClientID = -1;
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			switch(Category)
+			{
+				case CHATCATEGORY_INFO:
+					Buffer.append("| ");
+					break;
+				case CHATCATEGORY_JOIN:
+					Buffer.append("★ | ");
+					break;
+			}
+			Server()->Localization()->Format_VLP(Buffer, m_apPlayers[i]->GetLanguage(), Number, pText, VarArgs);
+			
+			Msg.m_pMessage = Buffer.buffer();
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+		}
+	}
+	
+	va_end(VarArgs);
+}
+
+void CGameContext::AddBroadcast(int ClientID, const char* pText, int Priority, int LifeSpan)
+{
+	if(LifeSpan > 0)
+	{
+		if(m_BroadcastStates[ClientID].m_TimedPriority > Priority)
+			return;
+			
+		str_copy(m_BroadcastStates[ClientID].m_TimedMessage, pText, sizeof(m_BroadcastStates[ClientID].m_TimedMessage));
+		m_BroadcastStates[ClientID].m_LifeSpanTick = LifeSpan;
+		m_BroadcastStates[ClientID].m_TimedPriority = Priority;
+	}
+	else
+	{
+		if(m_BroadcastStates[ClientID].m_Priority > Priority)
+			return;
+			
+		str_copy(m_BroadcastStates[ClientID].m_NextMessage, pText, sizeof(m_BroadcastStates[ClientID].m_NextMessage));
+		m_BroadcastStates[ClientID].m_Priority = Priority;
+	}
+}
+
+void CGameContext::SendBroadcast_Localization(int To, int Priority, int LifeSpan, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
+			SendBroadcast(Buffer.buffer(), To);
+		}
+	}
+	
+	va_end(VarArgs);
+}
+
+void CGameContext::SendBroadcast_Localization_P(int To, int Priority, int LifeSpan, int Number, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Server()->Localization()->Format_VLP(Buffer, m_apPlayers[i]->GetLanguage(), Number, pText, VarArgs);
+			AddBroadcast(i, Buffer.buffer(), Priority, LifeSpan);
+		}
+	}
+	
+	va_end(VarArgs);
 }
 
 //
@@ -658,9 +800,9 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
-	SendChatTarget(ClientID, "Welcome on UH|City");
-	SendChatTarget(ClientID, "Made by NoHack2Win & Urinstone");
-	SendChatTarget(ClientID, "use /help for some help");
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Welcome on UH|City"));
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Made by NoHack2Win & Urinstone"));
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("use /help for some help"));
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
@@ -900,7 +1042,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "Unknown command: '%s'", aCommand[0]);
-				SendChatTarget(ClientID, aBuf);
+				SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("Unknown command: '{str:command}'"), "command", aCommand[0], NULL);
 			}
 		}
 		else
@@ -1333,13 +1475,11 @@ void CGameContext::DisableDmg(int Owner, int Target) {
 	if (!m_NoDmgIDs[Owner][Target]) {
 		m_NoDmgIDs[Owner][Target] = 1;
 
-		str_format(aBuf, sizeof aBuf, "You won't hurt %s anymore", Server()->ClientName(Target));
-		SendChatTarget(Owner, aBuf);
-		str_format(aBuf, sizeof aBuf, "'%s' disabled dmg on you", Server()->ClientName(Owner));
-		SendChatTarget(Target, aBuf);
+		SendChatTarget_Localization(Owner, CHATCATEGORY_INFO, _("You won't hurt {str:cn} anymore"), "cn", Server()->ClientName(Target), NULL);
+		SendChatTarget_Localization(Target, CHATCATEGORY_INFO, _("'{str:cn}' disabled dmg on you"), "cn", Server()->ClientName(Owner), NULL);
 	}
 	else 
-		SendChatTarget(Owner, "You already disabled dmg on this player");
+		SendChatTarget_Localization(Owner, CHATCATEGORY_INFO, _("You already disabled dmg on this player"));
 }
 
 void CGameContext::EnableDmg(int Owner, int Target) {
@@ -1348,13 +1488,11 @@ void CGameContext::EnableDmg(int Owner, int Target) {
 	if (m_NoDmgIDs[Owner][Target]) {
 		m_NoDmgIDs[Owner][Target] = 0;
 
-		str_format(aBuf, sizeof aBuf, "You will hurt %s now", Server()->ClientName(Target));
-		SendChatTarget(Owner, aBuf);
-		str_format(aBuf, sizeof aBuf, "'%s' enabled dmg on you", Server()->ClientName(Owner));
-		SendChatTarget(Target, aBuf);
+		SendChatTarget_Localization(Owner, CHATCATEGORY_INFO, _("You will hurt {str:cn} now"), "cn", Server()->ClientName(Target));
+		SendChatTarget_Localization(Target, CHATCATEGORY_INFO, _("'{str:cn}' enable dmg on you"), "cn", Server()->ClientName(Owner), NULL);
 	}
 	else 
-		SendChatTarget(Owner, "You already enabled dmg on this player");
+		SendChatTarget_Localization(Owner, CHATCATEGORY_INFO, _("You already enabled dmg on this player"));
 }
 
 bool CGameContext::HasDmgDisabled(int Owner, int Target) {
@@ -1860,6 +1998,15 @@ void CGameContext::OnConsoleInit()
 	#include "game/server/city/chatcmds.h"
 	#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 	#include "game/server/city/rconcmds.h"
+}
+
+void CGameContext::SetClientLanguage(int ClientID, const char *pLanguage)
+{
+	Server()->SetClientLanguage(ClientID, pLanguage);
+	if(m_apPlayers[ClientID])
+	{
+		m_apPlayers[ClientID]->SetLanguage(pLanguage);
+	}
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)

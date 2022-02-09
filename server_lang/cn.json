@@ -1,0 +1,1381 @@
+{
+    "translation":
+    [
+        {
+            "key": "Already logged in",
+            "value": "您已经登陆了一个账号"
+        },
+        {
+            "key": "Username too {str:ls}",
+            "value": "用户名的长度不合适"
+        },
+        {
+            "key": "Password too {str:ls}",
+            "value": "密码的长度不合适"
+        },
+        {
+            "key": "This account does not exist.",
+            "value": "不存在此账号"
+        },
+        {
+            "key": "Please register first. (/register <user> <pass>)",
+            "value": "请先注册一个账号 (/register <用户名> <密码>)"
+        },
+        {
+            "key": "Account already in use",
+            "value": "此账号正在使用"
+        },
+        {
+            "key": "Wrong username or password",
+            "value": "错误的密码或用户名"
+        },
+        {
+            "key": "Login succesful",
+            "value": "登录成功"
+        },
+        {
+            "key": "Don't use invalid chars for username!",
+            "value": "不要使用无效的字符作为用户名"
+        },
+        {
+            "key": "Registration succesful - ('/login {str:Username} {str:Password}')",
+            "value": "注册成功 - ('/login {str:Username} {str:Password}')"
+        },
+        {
+            "key": "Account deleted!",
+            "value": "账号删除"
+        },
+        {
+            "key": "Please, login to delete your account",
+            "value": "请登录后删除账号"
+        },
+        {
+            "key": "Please, login to change the password",
+            "value": "请登录后修改密码"
+        },
+        {
+            "key": "Password successfully changed!",
+            "value": "密码顺利更改"
+        },
+        {
+            "key": "usage: /register <username> <password>",
+            "value": "使用方法：/register <用户名> <密码>"
+        },
+        {
+            "key": "Logout succesful",
+            "value": "退出登录成功"
+        },
+        {
+            "key": "usage: /changepw <password>",
+            "value": "使用方法：/changepw <密码>"
+        },
+        {
+            "key": "Password changed",
+            "value": "密码已更改"
+        },
+        {
+            "key": "You can't do this at the moment",
+            "value": "你不能在此时做此事"
+        },
+        {
+            "key": "This is a donor feature",
+            "value": "这是Donor的能力"
+        },
+        {
+            "key": "Welcome Home :)",
+            "value": "欢迎回家 :D"
+        },
+        {
+            "key": "{str:RD} Rainbow",
+            "value": "彩虹状态切换"
+        },
+        {
+            "key": "{str:RD} Crown",
+            "value": "皇冠状态切换"
+        },
+        {
+            "key": "This is a vip feature",
+            "value": "这是VIP的能力"
+        },
+        {
+            "key": "Only for police",
+            "value": "只有警察能使用"
+        },
+        {
+            "key": "Jailrifle {str:RD}",
+            "value": "电击枪状态切换"
+        },
+        {
+            "key": "God {str:RD}",
+            "value": "无敌状态切换"
+        },
+        {
+            "key": "Instagib is not enabled",
+            "value": "激光瞬杀未被开启"
+        },
+        {
+            "key": "{str:PName} {str:RD} Instagib",
+            "value": "玩家{str:PName} 加入/离开 了激光瞬杀"
+        },
+        {
+            "key": "Monster is not enabled",
+            "value": "怪物未被开启"
+        },
+        {
+            "key": "usage: /transfer <amount>",
+            "value": "使用方法：/transfer <钱数>"
+        },
+        {
+            "key": "usage: /pm <name> <message>",
+            "value": "使用方法: /pm <谁> <信息>"
+        },
+        {
+            "key": "No such user",
+            "value": "没有这个用户"
+        },
+        {
+            "key": "You can't pm yourself",
+            "value": "你不能对自己发私信"
+        },
+        {
+            "key": "Out of range",
+            "value": "超出了范围"
+        },
+        {
+            "key": "No such player",
+            "value": "没有这个玩家"
+        },
+        {
+            "key": "usage: /setpm <name>",
+            "value": "使用方法: /setpm <谁>"
+        },
+        {
+            "key": "You can't set yourself as pm partner",
+            "value": "你不能设置自己为私信对象"
+        },
+        {
+            "key": "{str:VT} is now your pm partner",
+            "value": "{str:VT} 是你的私信对象了"
+        },
+        {
+            "key": "usage: /disabledmg <id>",
+            "value": "使用方法：/disabledmg <玩家ID>"
+        },
+        {
+            "key": "You can't disabledmg on yourself",
+            "value": "你不能解除对自己的伤害"
+        },
+        {
+            "key": "usage: /enabledmg <id>",
+            "value": "使用方法：/enabledmg <玩家ID>"
+        },
+        {
+            "key": "You can't enabledmg on yourself",
+            "value": "你不能对自己开启伤害"
+        },
+        {
+            "key": "Visit a coach first",
+            "value": "请先前往一个训练馆"
+        },
+        {
+            "key": "usage: /train <weapon> ?<amount>",
+            "value": "使用方法: /train <武器名> [数量]"
+        },
+        {
+            "key": "'{str:W}' does not exist",
+            "value": "武器'{str:W}' 不存在"
+        },
+        {
+            "key": "You can't train more than 100ep at once",
+            "value": "你不能一次性训练100EP"
+        },
+        {
+            "key": "Bad boy...",
+            "value": "坏孩子..."
+        },
+        {
+            "key": "You already reached the max level",
+            "value": "你已经打到了最高等级"
+        },
+        {
+            "key": "This would cost {str:D}$",
+            "value": "这将要花费{str:D}$"
+        },
+        {
+            "key": "Not enough money",
+            "value": "没有足够的钱"
+        },
+        {
+            "key": "Money: {str:Num0} (-{str:Num1}$)",
+            "value": "钱: {str:Num0} (-{str:Num1}$)"
+        },
+        {
+            "key": "There are no bounties to hunt",
+            "value": "它没有赏金"
+        },
+        {
+            "key": "There are no bounties here",
+            "value": "没有赏金"
+        },
+        {
+            "key": "Stop fooling around",
+            "value": "别再胡闹了"
+        },
+        {
+            "key": "'{str:CN}': {str:BL}$",
+            "value": "'{str:CN}': {str:BL}$"
+        },
+        {
+            "key": "/bountylist {int:ID}",
+            "value": "/bountylist {int:ID}"
+        },
+        {
+            "key": "usage: /checkbounty <id>",
+            "value": "使用方法：/checkbounty <玩家ID>"
+        },
+        {
+            "key": "This player has no bounty",
+            "value": "这名玩家没有赏金"
+        },
+        {
+            "key": "{str:CN} has a bounty of {str:nB}$",
+            "value": "玩家{str:CN}以{str:nB}美元的价格被悬赏"
+        },
+        {
+            "key": "usage: /setbounty <id> <amount>",
+            "value": "使用方法：/setbounty <玩家ID> <数量>"
+        },
+        {
+            "key": "Put a bounty of at least 1.000$",
+            "value": "至少悬赏1000美元"
+        },
+        {
+            "key": "Not enough money",
+            "value": "你没有足够的钱"
+        },
+        {
+            "key": "Usage: /mcbuy <amount>",
+            "value": "使用方法：/mcbuy <数量>"
+        },
+        {
+            "key": "You need to be inside the Moneycollector",
+            "value": "你需要先进入金钱控制器"
+        },
+        {
+            "key": "Pfff...",
+            "value": "噗..."
+        },
+        {
+            "key": "~~ Money Collector Help ~~",
+            "value": "~~ 金钱机器帮助 ~~"
+        },
+        {
+            "key": "The Money Collector collects 4% of the farmed income on the server.",
+            "value": "金钱市场控制器会收集玩家获得的钱的4%"
+        },
+        {
+            "key": "This money ends up in the pot.",
+            "value": "这些钱被放入POT中"
+        },
+        {
+            "key": "The pot is increased by 50% every hour.",
+            "value": "POT每一个小时增长50%"
+        },
+        {
+            "key": "The price is reduced by 5% every 10 minutes",
+            "value": "金钱机器的购买价格每10分钟降低5%"
+        },
+        {
+            "key": "The Holder can collect the money from the pot.",
+            "value": "机器持有者可以获取机器收集到的钱"
+        },
+        {
+            "key": "Checkout /mccmds to get more information.",
+            "value": "输入/mccmds获取更多关于金钱机器的帮助"
+        },
+        {
+            "key": "~~ Money Collector Cmds ~~",
+            "value": "~~ 金钱机器の指令 ~~"
+        },
+        {
+            "key": "/mcbuy",
+            "value": "/mcbuy <数字> - 用此指令购买金钱机器, 指令后的数字必须大于当前金钱机器的价格(Price)"
+        },
+        {
+            "key": "/mccollect",
+            "value": "/mccollect - 持股人使用这个指令收集到金钱机器的钱(Pot)"
+        },
+        {
+            "key": "/mchelp",
+            "value": "/mchelp - 获得金钱机器的帮助"
+        },
+        {
+            "key": "---------- STATS ----------",
+            "value": "---------- 数据 ----------"
+        },
+        {
+            "key": "AccID: {int:id}",
+            "value": "账号ID: {int:id}"
+        },
+        {
+            "key": "Username: {str:un}",
+            "value": "用户名: {str:un}"
+        },
+        {
+            "key": "Level: {int:lv}",
+            "value": "等级: {int:lv}"
+        },
+        {
+            "key": "Exp: {str:exp} / {str:nB}",
+            "value": "经验值: {str:exp} / {str:nB}"
+        },
+        {
+            "key": "Hammer: {int:h} Gun: {int:g}, Shotgun: {int:sg}, Grenade: {int:gr}, Rifle: {int:r}",
+            "value": "武器等级：锤子: {int:h}, 手枪: {int:g}, 散弹枪: {int:sg}, 榴弹枪: {int:gr}, 激光枪: {int:r}"
+        },
+        {
+            "key": "Money: {str:Money}$",
+            "value": "钱: {str:Money}$"
+        },
+        {
+            "key": "Bounty: {str:B}$",
+            "value": "赏金: {str:B}$"
+        },
+        {
+            "key": "---------- COMMAND LIST ----------",
+            "value": "---------- 指令列表！ ----------"
+        },
+        {
+            "key": "/info -- Infos about the server",
+            "value": "/info -- 获取此服务器信息"
+        },
+        {
+            "key": "/help -- Help if you are new",
+            "value": "/help -- 能够帮助到你"
+        },
+        {
+            "key": "/me -- Account stats",
+            "value": "/me -- 显示账号数据"
+        },
+        {
+            "key": "/disabledmg -- Disables damage on someone",
+            "value": "/disabledmg -- 令你无法对另一个造成伤害"
+        },
+        {
+            "key": "/enabledmg -- Enables damage on someone",
+            "value": "/enabledmg -- 开启对另一个人的伤害"
+        },
+        {
+            "key": "/transfer -- Drops money at your cursors position",
+            "value": "/transfer -- 将你的钱丢到指针指的位置"
+        },
+        {
+            "key": "/donor -- Infos about Donor",
+            "value": "/donor -- 关于Donor"
+        },
+        {
+            "key": "/vip -- Infos about VIP",
+            "value": "/vip -- 关于VIP"
+        },
+        {
+            "key": "/upgrcmds -- Get a list of all Upgrade commands",
+            "value": "/upgrcmds -- 获取在商店里购买的物品的使用指令"
+        },
+        {
+            "key": "/instagib -- Play insta",
+            "value": "/insta -- 游玩激光献祭"
+        },
+        {
+            "key": "/cmdlist 1 -- see more commands",
+            "value": "/cmdlist 1 -- 查看更多指令"
+        },
+        {
+            "key": "/ids -- Display all IDs",
+            "value": "/ids -- 显示所有玩家ID"
+        },
+        {
+            "key": "/event -- Gives the current event infos",
+            "value": "/event -- 获取当前活动信息"
+        },
+        {
+            "key": "/setbounty -- Put a bounty on someone",
+            "value": "/setbounty -- 悬赏某个人"
+        },
+        {
+            "key": "/checkbounty -- Check if a player has a bounty",
+            "value": "/checkbounty -- 检查某个玩家是否被悬赏且有奖金"
+        },
+        {
+            "key": "/bountylist -- Get a list of all bounties",
+            "value": "/bountylist -- 获取悬赏列表"
+        },
+        {
+            "key": "/writestats -- Writes your weaponlevel down",
+            "value": "/writestats -- 把你的武器等级用对话的形式打出来"
+        },
+        {
+            "key": "/lang cn|en -- Change you server language",
+            "value": "/lang cn|en -- 选择其中一个语言来切换"
+        },
+        {
+            "key": "We don't have so many commands :(",
+            "value": "我们没有更多指令了 D:"
+        },
+        {
+            "key": "---------- HELP ----------",
+            "value": "---------- 帮助 ----------"
+        },
+        {
+            "key": "You need to register enter the game.",
+            "value": "你需要注册才能进入游戏"
+        },
+        {
+            "key": "-- /register <username> <password>",
+            "value": "使用 /register <用户名> <密码>注册账号(不用打<和>)"
+        },
+        {
+            "key": "If you already have an account you can login with",
+            "value": "如果你已经有了一个账号"
+        },
+        {
+            "key": "那么请 /login输入 <用户名> <密码>登录账号(也不用打<和>)",
+            "value": ""
+        },
+        {
+            "key": "If you have any questions you can always ask a team member.",
+            "value": "如果你有疑问你可以询问制作团队成员"
+        },
+        {
+            "key": "Join our discord to contact us https://discord.gg/Rstb8ge",
+            "value": "加入我们的QQ群来联系我们: 834323539"
+        },
+        {
+            "key": "---------- INFO ----------",
+            "value": "---------- 关于 ----------"
+        },
+        {
+            "key": "UH|City is made by UrinStone.",
+            "value": "UH|City 作者：UrinStone，多语言制作人：FlowerFell-Sans"
+        },
+        {
+            "key": "Join our Discord to be always informed about the latest updates.",
+            "value": "加入我们的QQ群来获取最新的更新：834323539"
+        },
+        {
+            "key": "If you forget your password or wish to donate, please ONLY contact UrinStone#8404 on Discord.",
+            "value": "如果你忘记了密码或者想要充值，那么请加QQ好友1421709710，其他人无效"
+        },
+        {
+            "key": "---------- RULES ----------",
+            "value": "---------- 玩家守则 ----------"
+        },
+        {
+            "key": "- Don't use Bots / Lua scripts",
+            "value": "-不能使用Bot / Lua 脚本"
+        },
+        {
+            "key": "- no Multiacc (logging in with multiple accounts)",
+            "value": "-禁止多重账号 (同时注册两个账号)"
+        },
+        {
+            "key": "- Don't abuse Bugs!",
+            "value": "-不要恶意利用bug！"
+        },
+        {
+            "key": "- Don't insult other players",
+            "value": "-不要侮辱别的玩家"
+        },
+        {
+            "key": "- Don't Spam",
+            "value": "-不要刷屏！"
+        },
+        {
+            "key": "- Don't Funvote",
+            "value": "-不要刷屏！！"
+        },
+        {
+            "key": "- Don't place unfair lights",
+            "value": "-不要放置不适宜的激光墙(出生点门口等)"
+        },
+        {
+            "key": "- Respect the Police",
+            "value": "如果发现请告知警察"
+        },
+        {
+            "key": "You will be punished if you disregard the rules",
+            "value": "如果你违反了规则那么你将收到处罚"
+        },
+        {
+            "key": "---------- DONOR ----------",
+            "value": "---------- DONOR! ----------"
+        },
+        {
+            "key": "Donor costs 10€",
+            "value": "Donor 价格10元"
+        },
+        {
+            "key": "Contact UrinStone#8404 at discord",
+            "value": "加QQ1421709710购买Donor"
+        },
+        {
+            "key": "Donor provides following features:",
+            "value": "Donor带来的能力有"
+        },
+        {
+            "key": "- x5 Money and Exp",
+            "value": "- 五倍钱和经验值加成"
+        },
+        {
+            "key": "- The nice crown",
+            "value": "- GREAT到不行的皇冠"
+        },
+        {
+            "key": "- Rainbow",
+            "value": "- 彩虹TEE!"
+        },
+        {
+            "key": "- Your own House",
+            "value": "- 你自己的房子！（请联系管理员给你）"
+        },
+        {
+            "key": "- Home teleport",
+            "value": "- 随时传送到你的房子里"
+        },
+        {
+            "key": "- Save and load a position",
+            "value": "- 保存/读取你的坐标"
+        },
+        {
+            "key": "- Exclusive 1000$ money tiles that give x6 money & exp",
+            "value": "- 在1000$每秒的椅子上获得6倍钱和EXP"
+        },
+        {
+            "key": "Checkout /donorcmds for more information.",
+            "value": "输入/donorcmds获取更多帮助"
+        },
+        {
+            "key": "---------- DONORCMDS ----------",
+            "value": "---------- DONORの指令 ---------"
+        },
+        {
+            "key": " /save -- Saves your position",
+            "value": "/save -- 保存你的坐标"
+        },
+        {
+            "key": " /load -- Teleports you to the saved position",
+            "value": "/load -- 传送到你保存的坐标"
+        },
+        {
+            "key": " /rainbow -- Gives you rainbow colors",
+            "value": "/rainbow -- 彩虹Tee让我Boki了（?）"
+        },
+        {
+            "key": " /crown -- The nice crown",
+            "value": "/crown -- GREAT到不行的皇冠"
+        },
+        {
+            "key": " /home -- Teleports you Into your Home",
+            "value": "/home -- 传送到你的房子(联系管理元获得房子)"
+        },
+        {
+            "key": "Checkout /donor to get more information.",
+            "value": "输入/donor获得信息"
+        },
+        {
+            "key": "---------- IDS ----------",
+            "value": "---------- 玩家ID ----------"
+        },
+        {
+            "key": "[{int:id}] {str:CN}",
+            "value": "[{int:id}] {str:CN}"
+        },
+        {
+            "key": "/ids {int:page}",
+            "value": "/ids {int:page}"
+        },
+        {
+            "key": "---------- VIP ----------",
+            "value": "---------- VIP ----------"
+        },
+        {
+            "key": "VIP gives you x3 money and exp.",
+            "value": "VIP将获得3倍金钱和EXP"
+        },
+        {
+            "key": "Use movement cmds:",
+            "value": "可以使用以下的强制移动指令："
+        },
+        {
+            "key": "- /up",
+            "value": "- /up -- 上移"
+        },
+        {
+            "key": "- /down",
+            "value": "- /down -- 下移"
+        },
+        {
+            "key": "- /left",
+            "value": "- /left -- 左移"
+        },
+        {
+            "key": "- /right",
+            "value": "- /right -- 右移"
+        },
+        {
+            "key": "- /tele",
+            "value": "- /tele -- 传送到指针所指的位置"
+        },
+        {
+            "key": "---------- UPGRADE CMDS ----------",
+            "value": "---------- 特殊物品指令 ----------"
+        },
+        {
+            "key": "/walls -- Laser walls",
+            "value": "/walls -- 激光墙"
+        },
+        {
+            "key": "/hammerkill -- Your target can't escape!",
+            "value": "/hammerkill -- 你的目标不可能在HK的攻击下活下去"
+        },
+        {
+            "key": "/plasma -- Beat them with your Plasma",
+            "value": "/plasma -- 你的等离子体将跟踪敌人直到你死"
+        },
+        {
+            "key": "/portal -- Opens a portal to teleport between two points",
+            "value": "/portal -- 在两端打开传送门"
+        },
+        {
+            "key": "/fgun -- Freeze gun",
+            "value": "/fgun -- 使用手枪将敌人冰冻"
+        },
+        {
+            "key": "/swap -- Swaps the position with your target",
+            "value": "/swap -- 与你的目标交换位置(极其好用！)"
+        },
+        {
+            "key": "/rplasma -- Rifle plasma",
+            "value": "/rplasma -- 激光枪发射 《强森の等离子体》"
+        },
+        {
+            "key": "/fly -- Fly",
+            "value": "/fly -- 就像在新年穿上新内裤一样飞起来"
+        },
+        {
+            "key": "/bhook -- Boost other players",
+            "value": "/bhook -- 钩子产生反作用力！但是无法对自己生效.."
+        },
+        {
+            "key": "/hhook -- Increases the hooked players healthregen",
+            "value": "/hhook -- 给你的敌人回血，哈哈哈哈哈"
+        },
+        {
+            "key": "/nfly -- Ninja fly",
+            "value": "/nfly -- 忍者起飞！"
+        },
+        {
+            "key": "/nbomber -- Bomb your enemys away",
+            "value": "/nbomber -- 破坏环境的道具"
+        },
+        {
+            "key": "/pushaura -- Pushes the other players",
+            "value": "/pushaura -- 推开周围的玩家"
+        },
+        {
+            "key": "/pullaura -- Pull the other players",
+            "value": "/pullaura -- 将周围的玩家拉过来"
+        },
+        {
+            "key": "Please use '/upgrcmds <item>'",
+            "value": "请使用 /upgrcmds <物品名>"
+        },
+        {
+            "key": "You can checkout following items:",
+            "value": "你可以查看以下物品"
+        },
+        {
+            "key": "Enter a shop first",
+            "value": "请先进入一个商店"
+        },
+        {
+            "key": "Use /shop <item> to see the items you want.",
+            "value": "使用/shop <商品类别> 来查看你想要的物品"
+        },
+        {
+            "key": "Example: '/shop hammer' will show all hammer upgrades.",
+            "value": "示例：'/shop hammer' 显示所有关于锤子的商品"
+        },
+        {
+            "key": "To switch between pages use f3 or f4.",
+            "value": "切换同一类别的商品使用F3或F4"
+        },
+        {
+            "key": "Available menus are:",
+            "value": "以下是可以使用的："
+        },
+        {
+            "key": "Visit a coach first",
+            "value": "请先前往武器训练馆"
+        },
+        {
+            "key": "One exp costs 1.000.000$.",
+            "value": "1EXP消耗100'0000$"
+        },
+        {
+            "key": "Use /train <weapon> ?<amount>.",
+            "value": "使用 /train <武器> <数量> 训练武器"
+        },
+        {
+            "key": "Available weapons are:",
+            "value": "以下是可以使用的武器:"
+        },
+        {
+            "key": "Buy Walls first!",
+            "value": "请先买激光墙!"
+        },
+        {
+            "key": "{str:RD} Walls",
+            "value": "激光墙的状态切换了"
+        },
+        {
+            "key": "Buy Plasma first!",
+            "value": "请先购买等离子体"
+        },
+        {
+            "key": "{str:plasma} Plasma",
+            "value": "扁桃体的状态切换了"
+        },
+        {
+            "key": "Buy Hammerkill first!",
+            "value": "请先购买 血の诅咒！"
+        },
+        {
+            "key": "{str:hk} Hammerkill",
+            "value": "血の诅咒的状态发生了转变"
+        },
+        {
+            "key": "Buy Gunfreeze first!",
+            "value": "请先购买冰冻枪"
+        },
+        {
+            "key": "{str:gf} Gunfreeze",
+            "value": "冰冻枪的状态切换了"
+        },
+        {
+            "key": "Buy Rifleplasma first!",
+            "value": "请先购买等离子体激光枪"
+        },
+        {
+            "key": "{str:rp} Rifleplasma",
+            "value": "等离子体激光枪开启/关闭了"
+        },
+        {
+            "key": "Buy Swap first!",
+            "value": "请先购买《换位思考》"
+        },
+        {
+            "key": "{str:ed} Swap",
+            "value": "换位思考技能开启/关闭了！"
+        },
+        {
+            "key": "Buy Fly first!",
+            "value": "请先购买无限跳跃(2级)！"
+        },
+        {
+            "key": "{str:ed} Fly",
+            "value": "飞行状态开启/关闭了"
+        },
+        {
+            "key": "Buy Healhook first!",
+            "value": "请先购买意大利钩"
+        },
+        {
+            "key": "{str:ed} Healhook",
+            "value": "意大利钩开启/关闭了"
+        },
+        {
+            "key": "Buy Boosthook first!",
+            "value": "请先购买反作用力钩！"
+        },
+        {
+            "key": "{str:ed} Boosthook",
+            "value": "反作用力钩生效/失效了"
+        },
+        {
+            "key": "Buy Portal first!",
+            "value": "请先购买传送门"
+        },
+        {
+            "key": "{str:ed} Portal",
+            "value": "传送门开启/关闭了"
+        },
+        {
+            "key": "Buy PushAura first!",
+            "value": "请先购买推送磁场"
+        },
+        {
+            "key": "You can use this aura in {int:cd} seconds again",
+            "value": "你得在{int:cd}秒后才能再次使用这个磁场"
+        },
+        {
+            "key": "Buy PullAura first!",
+            "value": "请先购买拉取磁场"
+        },
+        {
+            "key": "Buy Ninjafly first!",
+            "value": "请先购买忍者飞行！"
+        },
+        {
+            "key": "{str:ED} Ninjafly",
+            "value": "忍者飞行生效/失效了"
+        },
+        {
+            "key": "Buy Ninjabomber first!",
+            "value": "请先购买忍者轰炸机！"
+        },
+        {
+            "key": "{str:ed} Ninjabomber",
+            "value": "忍者轰炸机启动/关闭了"
+        },
+        {
+            "key": "Available languages: {str:ListOfLanguage}",
+            "value": "当前可以使用的语言：{str:ListOfLanguage}"
+        },
+        {
+            "key": "All weapons",
+            "value": "所有武器(自杀后生效)"
+        },
+        {
+            "key": "Gun freeze",
+            "value": "冷冻枪"
+        },
+        {
+            "key": "Gun spread",
+            "value": "手枪子弹散射"
+        },
+        {
+            "key": "Fast reload",
+            "value": "快速填装"
+        },
+        {
+            "key": "Grenade spread",
+            "value": "榴弹散射"
+        },
+        {
+            "key": "Grenade bounce",
+            "value": "榴弹反弹"
+        },
+        {
+            "key": "Gun explode",
+            "value": "手枪爆炸"
+        },
+        {
+            "key": "Hammer walls",
+            "value": "激光墙"
+        },
+        {
+            "key": "Hammer shot",
+            "value": "等离子体"
+        },
+        {
+            "key": "Hammer kill",
+            "value": "血の诅咒"
+        },
+        {
+            "key": "Portal",
+            "value": "传送门"
+        },
+        {
+            "key": "Health",
+            "value": "血量"
+        },
+        {
+            "key": "Armor",
+            "value": "甲"
+        },
+        {
+            "key": "Health regeneration",
+            "value": "血量恢复"
+        },
+        {
+            "key": "Endless Hook",
+            "value": "无限钩"
+        },
+        {
+            "key": "Heal Hook",
+            "value": "意大利钩"
+        },
+        {
+            "key": "Boost Hook",
+            "value": "反作用力钩"
+        },
+        {
+            "key": "Infinity ammo",
+            "value": "无限子弹"
+        },
+        {
+            "key": "Infinity jumps",
+            "value": "无限跳跃"
+        },
+        {
+            "key": "Ninja Permanent",
+            "value": "无限忍者"
+        },
+        {
+            "key": "Ninja at Start",
+            "value": "出生时获得忍者"
+        },
+        {
+            "key": "Ninja Switch",
+            "value": "可从忍者切换到其他武器"
+        },
+        {
+            "key": "Ninja fly",
+            "value": "忍者飞行"
+        },
+        {
+            "key": "Ninja Bomber",
+            "value": "忍者轰炸机"
+        },
+        {
+            "key": "No self damage",
+            "value": "不会对自己造成伤害"
+        },
+        {
+            "key": "Pullaura",
+            "value": "拉取磁场"
+        },
+        {
+            "key": "Pushaura",
+            "value": "推送磁场"
+        },
+        {
+            "key": "Rifle spread",
+            "value": "激光枪散射"
+        },
+        {
+            "key": "Rifle swap",
+            "value": "《换位思考》"
+        },
+        {
+            "key": "Rifle plasma",
+            "value": "等离子体激光枪"
+        },
+        {
+            "key": "Shotgun spread",
+            "value": "散弹枪散射"
+        },
+        {
+            "key": "Shotgun explode",
+            "value": "散弹枪子弹爆炸"
+        },
+        {
+            "key": "VIP",
+            "value": "VIP"
+        },
+        {
+            "key": "Only the holder can collect this money",
+            "value": "只有持股人可以收集Pot里的钱"
+        },
+        {
+            "key": "There is nothing to collect :(",
+            "value": "Pot里没有什么可收集的 D:"
+        },
+        {
+            "key": "You collected {str:m}$",
+            "value": "你收集到了{str:m}$"
+        },
+        {
+            "key": "You must pay more than the indicated price",
+            "value": "你必须付出比当前的金钱机器更高的价格才能购买金钱机器"
+        },
+        {
+            "key": "You don't have enough money",
+            "value": "你没有足够的钱"
+        },
+        {
+            "key": "{str:n} is the new holder of the Moneycollector with a value of {str:m}$",
+            "value": "{str:n}是当前的金钱市场操作器的持有人，他付出了{str:m}$，可恶的资本家！"
+        },
+        {
+            "key": "Money: {str:m}$",
+            "value": "钱: {str:m}$"
+        },
+        {
+            "key": "Not enough money\n{str:Name}: {str:nb0}$\nMoney: {str:nb1}$",
+            "value": "没有足够的钱\n{str:Name}: {str:nb0}$\n钱: {str:nb1}$"
+        },
+        {
+            "key": "Maximum '{str:Name}' ({int:Upgr}/{int:Max})",
+            "value": "最大值 '{str:Name}' ({int:Upgr}/{int:Max})"
+        },
+        {
+            "key": "{str:Name} ({int:upgr}/{int:max})\nCost: {str:cost}$\nMoney: {str:money}$",
+            "value": "{str:Name} ({int:upgr}/{int:max})\n耗费: {str:cost}$\n钱: {str:money}$"
+        },
+        {
+            "key": "You leveled up! You are now level: {int:LV}",
+            "value": "你的等级提升了！你现在的等级：{int:LV}"
+        },
+        {
+            "key": "You need {int:cost} TC",
+            "value": "你需要至少{int:cost}$"
+        },
+        {
+            "key": "Ever seen a 0$ bill?",
+            "value": "？"
+        },
+        {
+            "key": "Are you trying to cheat money?",
+            "value": "？"
+        },
+        {
+            "key": "Not enough money.",
+            "value": "穷鬼"
+        },
+        {
+            "key": "Too many transfers",
+            "value": "太多的钱袋了"
+        },
+        {
+            "key": "The wall doesn't need money...",
+            "value": "墙壁不需要钱"
+        },
+        {
+            "key": "Protected zone entered",
+            "value": "进入保护区域"
+        },
+        {
+            "key": "Protected zone left",
+            "value": "离开保护区域"
+        },
+        {
+            "key": "Gamezone entered",
+            "value": "进入游戏区域"
+        },
+        {
+            "key": "Gamezone left",
+            "value": "离开游戏区域"
+        },
+        {
+            "key": "~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp",
+            "value": "~ 金钱市场操作器 ~\n当前持股人: {str:h}\n机器价格: {str:p}$\nPOT: {str:po}$\n输入/mchelp获取帮助"
+        },
+        {
+            "key": "Welcome to the coach!\nWrite /coach for more information",
+            "value": "欢迎来到武器训练馆！\n输入/coach获取更多帮助！"
+        },
+        {
+            "key": "{str:PP} has put a bounty of {str:m}$ on {str:vt}",
+            "value": "玩家 {str:PP} 花费{str:m}美元悬赏{str:vt}，杀死他的人可以获得这笔钱"
+        },
+        {
+            "key": "Welcome to the Shop!",
+            "value": "欢迎来到商店！"
+        },
+        {
+            "key": "Type /shop for more informations",
+            "value": "输入/shop获取更多帮助"
+        },
+        {
+            "key": "~~~~~ BOUNTY EVENT ~~~~~",
+            "value": "~~~~~ 赏金猎人 ~~~~~"
+        },
+        {
+            "key": "~~~~~ MONEY&EXP EVENT ~~~~~",
+            "value": "~~~~~ 钱＆经验 ~~~~~"
+        },
+        {
+            "key": "~~~~~ RISING MC ~~~~~",
+            "value": "~~~~~ 资本家の胜利 ~~~~~"
+        },
+        {
+            "key": "We accept only dead tees.",
+            "value": "我们需要死去的Tee"
+        },
+        {
+            "key": "Duration: {int:s}",
+            "value": "有效期：{int:s}"
+        },
+        {
+            "key": "The Moneycollectors pot will rise",
+            "value": "金钱市场操控机将会变本加厉"
+        },
+        {
+            "key": "There is no event :(",
+            "value": "当前没有活动正在执行 D;"
+        },
+        {
+            "key": "You got a bounty of {str:m}$",
+            "value": "你得到了{str:m}美元的赏金"
+        },
+        {
+            "key": "Event Over!",
+            "value": "活动结束！"
+        },
+        {
+            "key": "Sorry, your account data can't be read, We were deleted your account",
+            "value": "我们真的是非常抱歉呢，你的账号无法读取，我们将会删除你的账号"
+        },
+        {
+            "key": "'{str:ClientName}' joined with a bounty of {str:Bounty}$",
+            "value": "玩家'{str:ClientName}'曾被通缉{str:Bounty}美元，现在杀死他仍然可以获得赏金！"
+        },
+        {
+            "key": " Parse Error: Please contact UrinStone to get this fixed.",
+            "value": " 无法读取: 请联系QQ1421709710解决"
+        },
+        {
+            "key": "You received money from {str:Owner}",
+            "value": "你捡到了{str:Owner}的钱"
+        },
+        {
+            "key": "Account Backup Create!",
+            "value": "成功创建账号备份"
+        },
+        {
+            "key": "Visit our Discord server https://discord.gg/Rstb8ge",
+            "value": "请加入我们的QQ群：834323539"
+        },
+        {
+            "key": "Player {str:PN} is now in the House {int:Number}",
+            "value": "玩家{str:PN}入住了{int:Number}号房间！恭喜！"
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        }
+    ]
+}

@@ -42,6 +42,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 
 	if(m_AccData.m_UserID)
 		m_pAccount->Apply();
+
+	SetLanguage(Server()->GetClientLanguage(ClientID));
 }
 
 CPlayer::~CPlayer()
@@ -60,7 +62,7 @@ void CPlayer::Tick()
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 	Server()->SetClientAccID(m_ClientID, m_AccData.m_UserID);
-
+	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
 
 	if(Server()->Tick()%50 == 0)
 	{
@@ -167,13 +169,19 @@ void CPlayer::Tick()
 		str_copy(m_aRank, "[*Donor*]", sizeof(m_aRank));
 	else if(m_AccData.m_VIP)
 		str_copy(m_aRank, "[*Vip*]", sizeof(m_aRank));
+	else if(m_PlayerFlags&PLAYERFLAG_IN_MENU)
+		str_copy(m_aRank, "[*CHAT*]", sizeof(m_aRank));		
 
 	const char *pMatchAdmin = str_find_nocase(Server()->ClientClan(GetCID()), "Admin");
 	const char *pMatchVip = str_find_nocase(Server()->ClientClan(GetCID()), "Vip");
 	const char *pMatchDonor = str_find_nocase(Server()->ClientClan(GetCID()), "Donor");
 	const char *pMatchPolice = str_find_nocase(Server()->ClientClan(GetCID()), "Police");
+	const char *pMatchMod = str_find_nocase(Server()->ClientClan(GetCID()), "Mod");
+	const char *pMatchMapper = str_find_nocase(Server()->ClientClan(GetCID()), "Mapper");
+	const char *pMatchChat = str_find_nocase(Server()->ClientClan(GetCID()), "CHAT");
 
-	if(pMatchAdmin || pMatchVip || pMatchDonor || pMatchPolice)
+
+	if(pMatchAdmin || pMatchVip || pMatchDonor || pMatchPolice || pMatchChat || pMatchMapper || pMatchMod)
 		Server()->SetClientClan(GetCID(), "");
 
 	if (Server()->Tick() % 50 == 0) {
@@ -441,4 +449,14 @@ void CPlayer::FakeSnap(int SnappingClient)
 	StrToInts(&pClientInfo->m_Name0, 4, " ");
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
 	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+}
+
+const char* CPlayer::GetLanguage()
+{
+	return m_aLanguage;
+}
+
+void CPlayer::SetLanguage(const char* pLanguage)
+{
+	str_copy(m_aLanguage, pLanguage, sizeof(m_aLanguage));
 }

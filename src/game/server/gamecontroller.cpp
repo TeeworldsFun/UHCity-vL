@@ -464,7 +464,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 					GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				}
 
-				pKiller->GetCharacter()->GameServer()->SendChatTarget_Localization(pKiller->GetCID(), CHATCATEGORY_INFO, _("+{str:b1}$ || Current: {str:b0}$ || {str:IK} Insta-Kills"), "b1", numBuf[1], "b0", numBuf[0], "IK", pKiller->GetCharacter()->m_InstaKills);
+				pKiller->GetCharacter()->GameServer()->SendChatTarget_Localization(pKiller->GetCID(), CHATCATEGORY_INFO, _("+{str:b1}$ || Current: {str:b0}$ || {int:IK} Insta-Kills"), "b1", numBuf[1], "b0", numBuf[0], "IK", pKiller->GetCharacter()->m_InstaKills);
 
 				if(pVictim->m_InstaKills >= 5)
 				{

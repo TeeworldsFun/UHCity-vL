@@ -6,6 +6,11 @@
 			"name": "english"
 		},
 		{
+			"file": "ru",
+			"name": "Русский",
+			"parent": "en"
+		},
+		{
 			"file": "cn",
 			"name": "白话文",
 			"parent": "en"

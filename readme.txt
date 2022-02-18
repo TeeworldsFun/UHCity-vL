@@ -1,3 +1,5 @@
+====== UH|City Version.Localization by ST-Chara ======
+
 Copyright (c) 2011 Magnus Auvinen
 
 

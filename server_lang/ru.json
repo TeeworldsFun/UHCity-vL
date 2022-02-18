@@ -1079,11 +1079,11 @@
         },
         {
             "key": "~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp",
-            "value": ""
+            "value": "~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp"
         },
         {
             "key": "Welcome to the coach!\nWrite /coach for more information",
-            "value": ""
+            "value": "Добро пожаловать к тренеру!\nНапиши /coach для детальной информацию"
         },
         {
             "key": "{str:PP} has put a bounty of {str:m}$ on {str:vt}",

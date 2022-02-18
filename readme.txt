@@ -1,7 +1,6 @@
 ====== UH|City Version.Localization by ST-Chara ======
-
-
-
+Our discord channel
+<iframe src="https://discord.com/widget?id=944126460338262036&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 
 

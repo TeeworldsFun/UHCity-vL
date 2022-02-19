@@ -1,6 +1,6 @@
-====== UH|City Version.Localization by ST-Chara ======
+====== UH|City Version.Localization ======
 
-A City-like Teeworlds mod, base on uTown.
+A City Teeworlds mod, base on uTown.
 
 
 Our discord channel

@@ -1,0 +1,3 @@
+[submodule "src/game/server/discord/DPP"]
+	path = src/game/server/discord/DPP
+	url = https://ddns.mmotee.workers.dev/brainboxdotcc/DPP.git

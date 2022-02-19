@@ -155,7 +155,7 @@ void CPlayer::Tick()
 	RainbowColor = (RainbowColor + 1) % 256;
 	m_RainbowColor = RainbowColor * 0x010000 + 0xff00;
 
-	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS)
+	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS && !m_Zomb)
 		SetTeam(TEAM_SPECTATORS);
 
 	

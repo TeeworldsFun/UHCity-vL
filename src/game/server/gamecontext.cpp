@@ -1249,7 +1249,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 
 		// City
-		if(g_Config.m_SvTournamentMode && pPlayer->GetTeam() == TEAM_SPECTATORS && !pPlayer->m_AccData.m_UserID)
+		if(g_Config.m_SvTournamentMode && pPlayer->GetTeam() == TEAM_SPECTATORS && !pPlayer->m_AccData.m_UserID && !pPlayer->m_Zomb)
 		{
 			SendBroadcast("You must be logged in to join the game", ClientID);
 			return;

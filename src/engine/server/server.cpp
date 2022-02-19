@@ -533,7 +533,7 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 		{
 			// broadcast
 			int i;
-			for(i = 0; i < MAX_CLIENTS; i++)
+			for(i = 0; i < MAX_PLAYERS; i++)
 				if(m_aClients[i].m_State == CClient::STATE_INGAME)
 				{
 					Packet.m_ClientID = i;
@@ -566,7 +566,7 @@ void CServer::DoSnapshot()
 	}
 
 	// create snapshots for all clients
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_PLAYERS; i++)
 	{
 		// client must be ingame to recive snapshots
 		if(m_aClients[i].m_State != CClient::STATE_INGAME && m_aClients[i].m_State != CClient::STATE_BOT)
@@ -1106,7 +1106,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
@@ -1183,7 +1183,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 	int Skip = Offset;
 	int Take = ClientsPerPacket;
 
-	for(i = 0; i < MAX_CLIENTS; i++)
+	for(i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
@@ -1214,7 +1214,7 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 
 void CServer::UpdateServerInfo()
 {
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < MAX_PLAYERS; ++i)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
@@ -1455,7 +1455,7 @@ int CServer::Run()
 				NewTicks++;
 
 				// apply new input
-				for(int c = 0; c < MAX_CLIENTS; c++)
+				for(int c = 0; c < MAX_PLAYERS; c++)
 				{
 					if(m_aClients[c].m_State == CClient::STATE_EMPTY || m_aClients[c].m_State == CClient::STATE_BOT)
 						continue;

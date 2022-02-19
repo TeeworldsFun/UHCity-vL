@@ -418,6 +418,9 @@ int CNetServer::Recv(CNetChunk *pChunk)
 
 int CNetServer::Send(CNetChunk *pChunk)
 {
+	if(pChunk->m_ClientID > 48)
+		return -1;
+	
 	if(pChunk->m_DataSize >= NET_MAX_PAYLOAD)
 	{
 		dbg_msg("netserver", "packet payload too big. %d. dropping packet", pChunk->m_DataSize);

@@ -552,6 +552,15 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 		pChr->GiveWeapon(WEAPON_HAMMER, -1);
 		pChr->SetWeapon(WEAPON_HAMMER);
 	}
+
+	if(pChr->GetPlayer()->m_onMonster)
+	{	
+		pChr->GiveWeapon(WEAPON_HAMMER, 10);
+		pChr->GiveWeapon(WEAPON_GUN, 10);
+		pChr->GiveWeapon(WEAPON_RIFLE, 10);
+		pChr->GiveWeapon(WEAPON_GRENADE, 10);
+		pChr->GiveWeapon(WEAPON_SHOTGUN, 10);
+	}
 }
 
 void IGameController::DoWarmup(int Seconds)

@@ -2179,28 +2179,6 @@ bool CGameContext::IsClientPlayer(int ClientID)
 	return m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS ? false : true;
 }
 
-CMonster *CGameContext::GetValidMonster(int MonsterID) const
-{
-    if(MonsterID >= MAX_MONSTERS || MonsterID < 0)
-        return 0;
-
-    if(!m_apMonsters[MonsterID])
-        return 0;
-
-    return m_apMonsters[MonsterID];
-}
-
-void CGameContext::OnMonsterDeath(int MonsterID)
-{
-    if(!GetValidMonster(MonsterID))
-        return;
-
-    m_apMonsters[MonsterID]->Destroy();
-
-    delete m_apMonsters[MonsterID];
-    m_apMonsters[MonsterID] = 0;
-}
-
 bool CGameContext::IsValidPlayer(int PlayerID)
 {
     if(PlayerID >= MAX_CLIENTS || PlayerID < 0)
@@ -2245,7 +2223,7 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode)
 
     dbg_msg("dummy", "Dummy connected: %d", DummyID);
 
-    OnClientEnter(DummyID);
+    //OnClientEnter(DummyID);
 
     return DummyID;
 }

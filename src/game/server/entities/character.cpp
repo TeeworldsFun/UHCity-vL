@@ -2156,7 +2156,13 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 
 	m_Core.m_Vel += Force;	
 
-	 // these will have force impact
+	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
+		return false;
+	
+	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
+		return false;
+	
+	// these will have force impact
 	if (m_pPlayer->m_God 
 	|| GameServer()->HasDmgDisabled(From, m_pPlayer->GetCID()) 
 	|| (m_GameZone && From == m_pPlayer->GetCID()))
@@ -2165,26 +2171,23 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
 		return false;
 
-/*	//City
-	if(!FromMonster)
-	{
-		if(m_pPlayer->m_AccData.m_NoSelfDMG && From == m_pPlayer->GetCID())
-			return false;
+	//City
+	if(m_pPlayer->m_AccData.m_NoSelfDMG && From == m_pPlayer->GetCID())
+		return false;
 
-		int LvlDmg = 0;
+	int LvlDmg = 0;
 
-		if (GameServer()->ValidID(From))
-			LvlDmg = floor(GameServer()->m_apPlayers[From]->m_AccData.m_LvlWeapon[Weapon] / 10.0);
+	if (GameServer()->ValidID(From))
+		LvlDmg = floor(GameServer()->m_apPlayers[From]->m_AccData.m_LvlWeapon[Weapon] / 10.0);
 
-		if (LvlDmg > g_Config.m_SvWLvlDmgMax)
-			LvlDmg = g_Config.m_SvWLvlDmgMax;
+	if (LvlDmg > g_Config.m_SvWLvlDmgMax)
+		LvlDmg = g_Config.m_SvWLvlDmgMax;
 	
-		// m_pPlayer only inflicts half damage on self
-		if(From == m_pPlayer->GetCID())
-			Dmg = max(1, Dmg/2);
-		else if (Weapon >= 0 && Weapon <= WEAPON_RIFLE)
-			Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others
-	}*/
+	// m_pPlayer only inflicts half damage on self
+	if(From == m_pPlayer->GetCID())
+		Dmg = max(1, Dmg/2);
+	else if (Weapon >= 0 && Weapon <= WEAPON_RIFLE)
+		Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others
 
 	m_DamageTaken++;
 	if (GameServer()->ValidID(From)) {

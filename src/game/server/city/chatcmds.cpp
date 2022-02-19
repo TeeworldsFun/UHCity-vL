@@ -414,7 +414,7 @@ void CGameContext::ConChatTransfer(IConsole::IResult *pResult, void *pUserData)
     if (!pChr)
         return;
 
-    if (pChr->m_Frozen || pChr->m_GameZone || pP->m_Insta) {
+    if (pChr->m_Frozen || pChr->m_GameZone || pP->m_Insta || pP->m_onMonster) {
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("You can't do this at the moment"));
         return;
     }
@@ -1286,7 +1286,7 @@ void CGameContext::ConChatSwap(IConsole::IResult *pResult, void *pUserData)
     if (!pChr)
         return;
 
-    if (pP->m_Insta || pChr->m_GameZone)
+    if (pP->m_Insta || pChr->m_GameZone || pP->m_onMonster)
         return;
 
     if (!pP->m_AccData.m_RifleSwap) {
@@ -1309,7 +1309,7 @@ void CGameContext::ConChatFly(IConsole::IResult *pResult, void *pUserData)
     if (!pChr)
         return;
 
-    if (pP->m_Insta || pChr->m_GameZone)
+    if (pP->m_Insta || pChr->m_GameZone || pP->m_onMonster)
         return;
 
     if (!(pP->m_AccData.m_InfinityJumps == 2)) {
@@ -1331,7 +1331,7 @@ void CGameContext::ConChatHealHook(IConsole::IResult *pResult, void *pUserData)
     if (!pChr)
         return;
 
-    if (pP->m_Insta || pChr->m_GameZone)
+    if (pP->m_Insta || pChr->m_GameZone || pP->m_onMonster)
         return;
 
     if (!pP->m_AccData.m_HealHook) {
@@ -1353,7 +1353,7 @@ void CGameContext::ConChatBoostHook(IConsole::IResult *pResult, void *pUserData)
     if (!pChr)
         return;
 
-    if (!pChr->IsAlive() || pP->m_Insta || pChr->m_GameZone)
+    if (!pChr->IsAlive() || pP->m_Insta || pChr->m_GameZone || pP->m_onMonster)
         return;
 
     if (!pP->m_AccData.m_BoostHook) {

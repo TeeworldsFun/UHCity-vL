@@ -372,9 +372,8 @@ public:
 	
 	//int m_TeleID[MAX_CLIENTS];
 
-	CMonster *m_apMonsters[MAX_MONSTERS];
-    CMonster *GetValidMonster(int MonsterID) const;
-	void OnMonsterDeath(int MonsterID);
+/*    CMonster *GetValidMonster(int MonsterID) const;
+	void OnMonsterDeath(int MonsterID);*/
 	bool IsValidPlayer(int PlayerID);
 
 	//Zomb2

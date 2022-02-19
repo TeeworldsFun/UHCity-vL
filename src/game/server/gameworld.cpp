@@ -270,7 +270,7 @@ void CGameWorld::Tick()
 }
 
 // TODO: should be more general
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis, bool IgnoreCollide)
+CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -299,8 +299,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return pClosest;
 }
 
-
-CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis, bool IgnoreCollide)
+CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis)
 {
 	// Find other players
 	float ClosestRange = Radius*2;
@@ -311,12 +310,6 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
  	{
 		if(p == pNotThis)
 			continue;
-
-        if(!IgnoreCollide)
-        {
-            if(GameServer()->Collision()->IntersectLine2(Pos, p->m_Pos))
-                continue;
-        }
 
 		float Len = distance(Pos, p->m_Pos);
 		if(Len < p->m_ProximityRadius+Radius)
@@ -332,7 +325,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 	return pClosest;
 }
 
-CMonster *CGameWorld::ClosestMonster(vec2 Pos, float Radius, CEntity *pNotThis)
+/*CMonster *CGameWorld::ClosestMonster(vec2 Pos, float Radius, CEntity *pNotThis)
 {
 	// Find other players
 	float ClosestRange = Radius*2;
@@ -385,4 +378,4 @@ CMonster *CGameWorld::IntersectMonster(vec2 Pos0, vec2 Pos1, float Radius, vec2&
 	}
 
 	return pClosest;
-}
+}*/

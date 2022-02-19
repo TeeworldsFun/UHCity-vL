@@ -28,6 +28,9 @@ void CHammerKill::Reset()
 
 void CHammerKill::Tick()
 {	
+	if(GameServer()->m_apPlayers[m_Owner]->m_onMonster)
+		return;
+
 	CCharacter *Victim = GameServer()->GetPlayerChar(m_Victim);
 	CCharacter *Owner = GameServer()->GetPlayerChar(m_Owner);
 		

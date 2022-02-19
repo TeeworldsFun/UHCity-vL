@@ -193,6 +193,12 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
+void CNetConnection::BotConnect()
+{
+    m_State = NET_CONNSTATE_BOT;
+}
+
+
 int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 {
 	int64 Now = time_get();
@@ -296,6 +302,7 @@ int CNetConnection::Update()
 	// check for timeout
 	if(State() != NET_CONNSTATE_OFFLINE &&
 		State() != NET_CONNSTATE_CONNECT &&
+		State() != NET_CONNSTATE_BOT &&
 		(Now-m_LastRecvTime) > time_freq()*10)
 	{
 		m_State = NET_CONNSTATE_ERROR;

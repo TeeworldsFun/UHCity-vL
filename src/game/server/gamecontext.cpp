@@ -19,6 +19,7 @@
 #include "gamemodes/mod.h"
 #include <algorithm>
 
+#include "entities/pickup.h"
 enum
 {
 	RESET,
@@ -817,7 +818,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	// Check which team the player should be on
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam);
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam, 0);
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -877,7 +878,7 @@ void CGameContext::FormatInt(long long n, char* out) {
 		digit = i % 10;
 
 		if ((out_index + 1) % 4 == 0) {
-			out[out_index++] = '.';
+			out[out_index++] = ',';
 		}
 		out[out_index++] = digit + '0';
 	}
@@ -1893,6 +1894,9 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 	else if(str_comp_nocase(pType, "kick") == 0)
 	{
 		int KickID = str_toint(pValue);
+		if(KickID >= MAX_PLAYERS)
+			return;
+		
 		if(KickID < 0 || KickID >= MAX_CLIENTS || !pSelf->m_apPlayers[KickID])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
@@ -2208,6 +2212,64 @@ bool CGameContext::IsValidPlayer(int PlayerID)
     return true;
 }
 
+void CGameContext::OnZombie(int ClientID, int Zomb)
+{
+}
+
+int CGameContext::CreateNewDummy(int DummyID, int DummyMode)
+{
+    if (DummyID < 0)
+    {
+        dbg_msg("dummy", "Can't get ClientID. Server is full or something like that.");
+        return -1;
+    }
+
+    if (m_apPlayers[DummyID])
+    {
+        /*m_apPlayers[DummyID]->OnDisconnect("");
+        delete m_apPlayers[DummyID];
+        m_apPlayers[DummyID] = 0;*/
+		return -1;
+    }
+
+    m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, TEAM_RED, DummyMode);	
+	m_apPlayers[DummyID]->m_TeeInfos.m_UseCustomColor = 0;
+	m_apPlayers[DummyID]->m_TeeInfos.m_ColorFeet = 16776960;
+	m_apPlayers[DummyID]->m_TeeInfos.m_ColorBody = 16776960;
+    Server()->BotJoin(DummyID, DummyMode);
+
+	if(DummyMode <= 13) //Zombie dummy
+		str_copy(m_apPlayers[DummyID]->m_TeeInfos.m_SkinName, "voodoo_tee", MAX_NAME_LENGTH);
+	else // don't know :D
+		str_copy(m_apPlayers[DummyID]->m_TeeInfos.m_SkinName, "pinky", MAX_NAME_LENGTH);
+
+    dbg_msg("dummy", "Dummy connected: %d", DummyID);
+
+    OnClientEnter(DummyID);
+
+    return DummyID;
+}
+
+void CGameContext::OnZombieKill(int ClientID)
+{
+	for(int i = 0; i++; i < 10)
+	{
+		CPickup *pPickup = new CPickup(&this->m_World, POWERUP_HEALTH, POWERUP_HEALTH);
+		pPickup->m_Pos = m_apPlayers[ClientID]->GetCharacter()->m_Pos;
+	}
+	if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
+		m_apPlayers[ClientID]->DeleteCharacter();
+	if(m_apPlayers[ClientID])
+		delete m_apPlayers[ClientID];
+	m_apPlayers[ClientID] = 0;
+
+	// update spectator modes
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
+			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
+	}
+}
 
 const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }
 const char *CGameContext::Version() { return GAME_VERSION; }

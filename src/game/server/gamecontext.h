@@ -377,6 +377,12 @@ public:
 	void OnMonsterDeath(int MonsterID);
 	bool IsValidPlayer(int PlayerID);
 
+	//Zomb2
+	void OnZombie(int ClientID, int Zomb);
+	void OnZombieKill(int ClientID);
+
+	int CreateNewDummy(int DummyID, int DummyMode);
+
 private:
 	int m_BountyList[MAX_CLIENTS];
 

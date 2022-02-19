@@ -5,7 +5,7 @@ A City Teeworlds mod, base on uTown.
 
 Our discord channel
 
-[![Discord Link](./image/discord)](https://discord.gg/PhgUmS2qey)
+[![Discord Link](./image/discord/thunder.png)](https://discord.gg/PhgUmS2qey)
 
 ======== Teeworlds =======
 

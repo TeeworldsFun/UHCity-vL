@@ -262,7 +262,6 @@ find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
-find_package(ICU)
 add_subdirectory(other/DPP)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")

@@ -262,7 +262,7 @@ find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
-
+add_subdirectory(other/DPP)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -891,6 +891,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/shopitems/shotgun.h
   city/shopitems/vip.cpp
   city/shopitems/vip.h
+  discord/bot.cpp
+  discord/bot.h
   entity.cpp
   entity.h
   eventhandler.cpp
@@ -929,9 +931,12 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:engine-shared>
   $<TARGET_OBJECTS:game-shared>
 )
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES})
+
+target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
-target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS})
+target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
+
+
 
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
@@ -1333,6 +1338,11 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
+
+  set_target_properties(${target} PROPERTIES
+    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD_REQUIRED ON
+)
 
   if(ICU_FOUND)
 	target_include_directories(${target} PRIVATE ${ICU_INCLUDE_DIRS})

@@ -19,6 +19,8 @@
 #include "game/server/city/moneycollector.h"
 #include "game/server/city/items/portal.h"
 
+#include <game/server/discord/bot.h>
+
 #include "entities/monster/monster.h"
 #include <city/components/localization.h>
 
@@ -66,6 +68,7 @@ class CGameContext : public IGameServer
 	class CFileSys *m_pFilesys;
 	class CMoneyCollector *m_pMoneyCollector;
 	class CGameEvent *m_pGameEvent;
+	CDiscordBot *m_pDiscord;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -99,7 +102,8 @@ public:
 	CMoneyCollector *MoneyCollector() { return m_pMoneyCollector; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-
+	CDiscordBot *Discord() { return m_pDiscord; }
+	
 	CGameContext();
 	~CGameContext();
 
@@ -163,6 +167,7 @@ public:
 	void SendChatTarget(int To, const char *pText);
 	void SendPrivate(int ChatterClientID, int To, const char *pText, int SpamProtectionClientID = -1);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendChatFromDiscord(const char *pText);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID);

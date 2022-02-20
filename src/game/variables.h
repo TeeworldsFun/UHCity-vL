@@ -143,7 +143,6 @@ MACRO_CONFIG_INT(SvDeathAnimation, monster_death_animation, 0, 0, 1, CFGFLAG_SER
 
 /* # Discord # */
 MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's token.")
-MACRO_CONFIG_STR(SvDiscordServer, sv_discord_server, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed server's ID.")
 MACRO_CONFIG_STR(SvDiscordChannel, sv_discord_channel, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed channel's ID.")
 /* # Discord # */
 

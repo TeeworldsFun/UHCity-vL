@@ -1074,7 +1074,7 @@
             "value": "欢迎来到商店！"
         },
         {
-            "key": "Type /shop for more informations",
+            "key": "Or use /shop to quick Switch Shop menu",
             "value": "输入/shop获取更多帮助"
         },
         {
@@ -1094,8 +1094,8 @@
             "value": "我们需要死去的Tee"
         },
         {
-            "key": "Duration: {int:s}",
-            "value": "有效期：{int:s}"
+            "key": "Duration: {sec:s}",
+            "value": "有效期：{sec:s}"
         },
         {
             "key": "The Moneycollectors pot will rise",
@@ -1142,7 +1142,7 @@
             "value": "玩家{str:PN}入住了{int:Number}号房间！恭喜！"
         },
         {
-            "key": "",
+            "key": "Use F3 and F4 to switch the shop menu",
             "value": ""
         },
         {

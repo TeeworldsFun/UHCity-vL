@@ -88,10 +88,6 @@ CGui::CGui(CGameWorld *pGameWorld, int Owner)
 	group.push_back(new CFastReload(GameWorld(), m_Owner, m_Pos));
 	group.push_back(new CHealthRegen(GameWorld(), m_Owner, m_Pos));
 	group.push_back(new CNoSelfDMG(GameWorld(), m_Owner, m_Pos));
-	group.push_back(new CInfJumps(GameWorld(), m_Owner, m_Pos));
-	
-	group.push_back(new CPushAura(GameWorld(), m_Owner, m_Pos));
-	group.push_back(new CPullAura(GameWorld(), m_Owner, m_Pos));
 
 	m_aShop.push_back(group);
 	group.clear();
@@ -99,6 +95,13 @@ CGui::CGui(CGameWorld *pGameWorld, int Owner)
 	group.push_back(new CHook(GameWorld(), m_Owner, m_Pos, 1));
 	group.push_back(new CHook(GameWorld(), m_Owner, m_Pos, 2));
 	group.push_back(new CHook(GameWorld(), m_Owner, m_Pos, 3));
+
+	m_aShop.push_back(group);
+	group.clear();
+
+	group.push_back(new CInfJumps(GameWorld(), m_Owner, m_Pos));
+	group.push_back(new CPushAura(GameWorld(), m_Owner, m_Pos));
+	group.push_back(new CPullAura(GameWorld(), m_Owner, m_Pos));
 
 	m_aShop.push_back(group);
 	group.clear();
@@ -179,7 +182,8 @@ void CGui::Menu()
 
 	if (m_MsgFlag) {
 		GameServer()->SendChatTarget_Localization(pOwner->GetPlayer()->GetCID(), CHATCATEGORY_JOIN, _("Welcome to the Shop!"));
-		GameServer()->SendChatTarget_Localization(pOwner->GetPlayer()->GetCID(), CHATCATEGORY_JOIN, _("Type /shop for more informations"));
+		GameServer()->SendChatTarget_Localization(pOwner->GetPlayer()->GetCID(), CHATCATEGORY_JOIN, _("Use F3 and F4 to switch the shop menu"));
+		GameServer()->SendChatTarget_Localization(pOwner->GetPlayer()->GetCID(), CHATCATEGORY_JOIN, _("Or use /shop to quick Switch Shop menu"));
 		m_MsgFlag = false;
 	}
 	

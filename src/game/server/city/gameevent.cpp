@@ -81,7 +81,7 @@ void CGameEvent::EventInfo(int ClientID) {
             return;
         case EVENT_MONEYEXP:
             GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("~~~~~ MONEY&EXP EVENT ~~~~~"));
-            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s} "), "s", &m_Timer, NULL);
+            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
             str_format(aBuf, sizeof aBuf, "Money: x%d", m_Multiplier);
             GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
             str_format(aBuf, sizeof aBuf, "Exp: x%d", m_Multiplier);

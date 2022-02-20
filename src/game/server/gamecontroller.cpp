@@ -437,7 +437,10 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 				char aBuf[128];
 				char numBuf[2][32];
 				long long KillReward = 500 + pVictim->GetPlayer()->m_AccData.m_Bounty;
+				if(pVictim->GetPlayer()->m_Zomb)
+					KillReward += 10000;
 				pKiller->m_AccData.m_Money += KillReward;
+				pKiller->m_AccData.m_ExpPoints += KillReward;
 
 				GameServer()->FormatInt(pKiller->m_AccData.m_Money, numBuf[0]);
 				GameServer()->FormatInt(KillReward, numBuf[1]);

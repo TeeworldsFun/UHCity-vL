@@ -90,6 +90,7 @@ void CCharacterCore::Reset()
 	m_HookedPlayer = -1;
 	m_Jumped = 0;
 	m_TriggeredEvents = 0;
+	m_Fly = false;
 
 	// Zomb2
 	m_Zooker = false;
@@ -161,7 +162,7 @@ void CCharacterCore::Tick(bool UseInput)
 			m_Jumped &= ~1;
 
 		// handle hook
-		if(m_Input.m_Hook)
+		if(m_Input.m_Hook && !m_Fly)
 		{
 			if(m_HookState == HOOK_IDLE)
 			{

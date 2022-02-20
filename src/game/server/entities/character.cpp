@@ -530,7 +530,31 @@ void CCharacter::HandleWeaponSwitch()
 void CCharacter::SwitchShop(int Value) {
 	if(GameServer()->Collision()->TileShop(m_Pos))
 	{
-		m_ShopPage += Value * 6;
+		m_Shop++;
+
+		if (m_Shop < ITEM_HAMMER)
+			m_Shop = ITEM_JUMP;
+		else if (m_Shop > ITEM_JUMP)
+			m_Shop = ITEM_HAMMER;
+		else if (m_Shop == ITEM_HAMMER)
+        	m_ShopGroup = ITEM_HAMMER;
+		else if (m_Shop == ITEM_GUN)
+        	m_ShopGroup = ITEM_GUN;
+	    else if (m_Shop == ITEM_SHOTGUN)
+    	    m_ShopGroup = ITEM_SHOTGUN;
+    	else if (m_Shop == ITEM_GRENADE)
+        	m_ShopGroup = ITEM_GRENADE;
+	    else if (m_Shop == ITEM_RIFLE)
+	        m_ShopGroup = ITEM_RIFLE;
+    	else if (m_Shop == ITEM_NINJA)
+        	m_ShopGroup = ITEM_NINJA;
+	    else if (m_Shop == ITEM_GENERAL)
+			m_ShopGroup = ITEM_GENERAL;
+		else if (m_Shop == ITEM_HOOK)
+        	m_ShopGroup = ITEM_HOOK;
+		else if (m_Shop == ITEM_JUMP)
+        	m_ShopGroup = ITEM_JUMP;
+
 		return;
 	}
 }
@@ -720,6 +744,9 @@ void CCharacter::FireWeapon()
 			{
 				int ShotSpread = m_pPlayer->m_AccData.m_GunSpread;
 
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 0;
+
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
 
@@ -763,6 +790,9 @@ void CCharacter::FireWeapon()
 			if(!m_GameZone)
 			{
 				int ShotSpread = 2+m_pPlayer->m_AccData.m_ShotgunSpread;
+
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 2;
 
 				if(m_GameZone)
 					ShotSpread = 2;
@@ -833,6 +863,9 @@ void CCharacter::FireWeapon()
 			{
 				int ShotSpread = m_pPlayer->m_AccData.m_GrenadeSpread;
 
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 0;
+
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
 
@@ -893,6 +926,8 @@ void CCharacter::FireWeapon()
 				else if(m_pPlayer->m_AccData.m_RifleSpread && !m_pPlayer->m_AciveUpgrade[m_ActiveWeapon])
 				{
 					int ShotSpread = m_pPlayer->m_AccData.m_RifleSpread;
+					if(m_pPlayer->m_onMonster)
+						ShotSpread = 0;
 					float Spreading[18*2+1];
 
 					for(int i = 0; i < 18*2+1; i++)
@@ -936,7 +971,7 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
-	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone) // -1 == unlimited
+	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone && !m_pPlayer->m_Zomb) // -1 == unlimited
 		m_aWeapons[m_ActiveWeapon].m_Ammo--;
 
 	if(!m_ReloadTimer)
@@ -1029,7 +1064,7 @@ void CCharacter::HandleWeapons()
 
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_ActiveWeapon].m_Ammoregentime;
-	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo)
+	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Zomb)
 	{
 		// If equipped and not active, regen ammo?
 		if (m_ReloadTimer <= 0)
@@ -1901,19 +1936,26 @@ void CCharacter::Tick()
 
 	if(!m_Frozen && !m_pPlayer->m_Insta && !m_GameZone && !m_Water && !m_SingleWater)
 	{
-		if(m_pPlayer->m_AccData.m_InfinityJumps == 2 && m_pPlayer->m_AciveUpgrade[ITEM_JUMP] == UPGRADE_FLY) {
-			if (m_Input.m_Jump && m_GravityY != -0.3) {
-				m_GravityY = -0.3;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID());
+		if(m_pPlayer->m_AccData.m_InfinityJumps == 2 && m_pPlayer->m_AciveUpgrade[ITEM_HOOK] == UPGRADE_FLY)
+		{
+			m_Core.m_Fly = true;
+			if (m_Input.m_Hook && m_GravityY != -0.3)
+			{
+				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 1.5f));
+				
 			}
-			else if (!m_Input.m_Jump && m_GravityY < 0) {
+			else if (!m_Input.m_Hook && m_GravityY < 0) {
 				
 				m_GravityY = 0.5;
 				GameServer()->SendTuningParams(m_pPlayer->GetCID());
 			}
+			else
+				m_Core.m_Fly = false;
 		}
 		else if(m_pPlayer->m_AccData.m_InfinityJumps >= 1)
 			m_Core.m_Jumped &= ~2;
+		else
+			m_Core.m_Fly = false;
 	}
 
 	if(m_Frozen)
@@ -2154,13 +2196,13 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if((Protected() && !m_GameZone) || m_pPlayer->m_Insta)
 		return false;
 
-	m_Core.m_Vel += Force;	
+	m_Core.m_Vel += Force;
 
 //	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
 //		return false;
 	
-	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
-		return false;
+//	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
+//		return false;
 	
 	// these will have force impact
 	if (m_pPlayer->m_God 
@@ -2175,7 +2217,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if(m_pPlayer->m_AccData.m_NoSelfDMG && From == m_pPlayer->GetCID())
 		return false;
 
-	int LvlDmg = 0;
+/*	int LvlDmg = 0;
 
 	if (GameServer()->ValidID(From))
 		LvlDmg = floor(GameServer()->m_apPlayers[From]->m_AccData.m_LvlWeapon[Weapon] / 10.0);
@@ -2187,7 +2229,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if(From == m_pPlayer->GetCID())
 		Dmg = max(1, Dmg/2);
 	else if (Weapon >= 0 && Weapon <= WEAPON_RIFLE)
-		Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others
+		Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others*/
 
 	m_DamageTaken++;
 	if (GameServer()->ValidID(From)) {

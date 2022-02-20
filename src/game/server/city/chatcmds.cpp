@@ -1125,7 +1125,7 @@ void CGameContext::ConChatShop(IConsole::IResult *pResult, void *pUserData)
     else if (!str_comp_nocase(Upgr, "general"))
         pChr->m_ShopGroup = ITEM_GENERAL;
     else if (!str_comp_nocase(Upgr, "hook"))
-        pChr->m_ShopGroup = ITEM_JUMP; // should be ITEM_HOOK, but we have no specials yet
+        pChr->m_ShopGroup = ITEM_HOOK; // should be ITEM_HOOK, but we have no specials yet
     else {
         pChr->m_ShopPage = Page;
         pSelf->SendChatTarget_Localization(pResult->GetClientID(), CHATCATEGORY_INFO, _("Use /shop <item> to see the items you want."));
@@ -1317,8 +1317,8 @@ void CGameContext::ConChatFly(IConsole::IResult *pResult, void *pUserData)
         return;
     }
 
-    pChr->ChangeUpgrade(ITEM_JUMP, UPGRADE_FLY);
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:ed} Fly"), "ed", pP->m_AciveUpgrade[ITEM_JUMP] == UPGRADE_FLY ?"Enabled":"Disabled", NULL);
+    pChr->ChangeUpgrade(ITEM_HOOK, UPGRADE_FLY);
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:ed} Fly"), "ed", pP->m_AciveUpgrade[ITEM_HOOK] == UPGRADE_FLY ?"Enabled":"Disabled", NULL);
 }
 
 void CGameContext::ConChatHealHook(IConsole::IResult *pResult, void *pUserData)

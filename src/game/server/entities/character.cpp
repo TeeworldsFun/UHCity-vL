@@ -119,7 +119,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if (GetPlayer()->m_AccData.m_EndlessHook)
 		m_Core.m_EndlessHook = true;
 
-	m_SpawnProtection = Server()->Tick();
+	if(!m_pPlayer->GetZomb()) m_SpawnProtection = Server()->Tick(); else m_SpawnProtection = 0;
 
 	new CGui(GameWorld(), m_pPlayer->GetCID());
 	new CCrown(GameWorld(), m_pPlayer->GetCID());

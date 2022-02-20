@@ -2156,8 +2156,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 
 	m_Core.m_Vel += Force;	
 
-	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
-		return false;
+//	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
+//		return false;
 	
 	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
 		return false;

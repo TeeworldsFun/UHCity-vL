@@ -1,57 +1,73 @@
+/* (c) Paul 'Anime.pdf'. */
 #include <game/server/gamecontext.h>
+#include <iostream>
+#include <sstream>
+#include <cstdint>
+#include <thread>
 
 CGameContext *CGS;
 
-CDiscordBot::CDiscordBot(CGameContext *GameServer, DiscordConfig Config)
+CDiscordBot::CDiscordBot(CGameContext *GameServer)
 {
-    CGS = GameServer;
-    m_Bot = new dpp::cluster(Config.token);
+    try
+    {
+        CGS = GameServer;
+        m_Bot = new dpp::cluster(g_Config.m_SvDiscordToken);
+        m_Bot->intents = dpp::intents::i_all_intents;
+        std::istringstream iss(std::string(g_Config.m_SvDiscordChannel));
+        iss >> m_Channel;
+        dpp::cluster* bot_prt = m_Bot;
 
-    bot->on_ready([&bot](const auto & event) {
-        dbg_msg("Discord", "Logged in as %s", bot.me.username);
-    });
+        m_Bot->on_ready([bot_prt](const auto & event) {
+            dbg_msg("Discord", "Logged in");
+        });
 
-    bot->on_message_create([&bot](const auto & event) {
-        std::string Content { event.msg.content };
-        
-        //if(CGS && m_Channel && !Object.msg.is_bot())
-            //CGS->SendChatFromDiscord(Object.msg.author.username.c_str(), Content.c_str());
-    });
+        m_Bot->on_message_create([&](const dpp::message_create_t &event) {
+            if(!event.msg.author.is_bot() || !event.msg.content.empty())
+                CGS->SendChatFromDiscord(std::string("[Discord] " + ((event.msg.member.nickname.empty() == true) ? event.msg.author.username : event.msg.member.nickname) + ": " + event.msg.content).c_str());
+        });
 
-    m_Bot->start(false);
+        std::thread aT([bot_prt]() { bot_prt->start(false); });
+
+        aT.detach();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 void CDiscordBot::LogChat(int Team, std::string Nickname, std::string Message)
 {
-    if(!m_Channel || !m_Bot)
-        return;
-
-    dpp::message msg;
-    if(Team == TEAM_RED)
-        msg(g_Config.m_SvDiscordChannel, "**[RED] " + Nickname + "**: " + Message);
-    else if(Team == TEAM_BLUE)
-        msg(g_Config.m_SvDiscordChannel, "**[BLUE] " + Nickname + "**: " + Message);
-    else if(Team == TEAM_SPECTATORS)
-        msg(g_Config.m_SvDiscordChannel, "**[SPEC] " + Nickname + "**: " + Message);
-    else
-        msg(g_Config.m_SvDiscordChannel, "**" + Nickname + "**: " + Message);
-    dpp::message_create_t::send(msg);
+    dpp::embed* embed;
+    if(Team == -1)
+    {
+        embed = new dpp::embed();
+        embed->set_color(0x00d4ff);
+        embed->set_description("`[SPEC]` **" + Nickname +"**: "+Message);
+    }else{
+        embed = new dpp::embed();
+        embed->set_color(0x00d4ff);
+        embed->set_description("**" + Nickname +"**: "+Message);
+    }
+    dpp::message msg(m_Channel, *embed);
+    m_Bot->message_create(msg);
 }
 
 void CDiscordBot::LogEnter(std::string Nickname)
 {
-    if(!m_Channel || !m_Bot)
-        return;
-    
-    msg(g_Config.m_SvDiscordChannel, "`##` **" + Nickname + "** has entered the game. `##`");
-    dpp::message_create_t::send(msg);
+    dpp::embed embed = dpp::embed().
+        set_color(0x00ff11).
+        set_description("**"+Nickname + "** has entered the game.");
+    dpp::message msg(m_Channel, embed);
+    m_Bot->message_create(msg);
 }
 
 void CDiscordBot::LogExit(std::string Nickname)
-{
-    if(!m_Channel || !m_Bot)
-        return;
-    
-    msg(g_Config.m_SvDiscordChannel, "`##` **" + Nickname + "** has left the game. `##`");
-    dpp::message_create_t::send(msg);
+{ 
+    dpp::embed embed = dpp::embed().
+        set_color(0xff002e).
+        set_description("**"+Nickname + "** has left the game.");
+    dpp::message msg(m_Channel, embed);
+    m_Bot->message_create(msg);
 }

@@ -3,22 +3,16 @@
 
 #include <dpp/dpp.h>
 
-struct DiscordConfig
-{
-    std::string Token;
-    dpp::snowflake ChannelID;
-};
-
 class CDiscordBot
 {
 public:
-    CDiscordBot(CGameContext *GameServer, DiscordConfig Config);
+    CDiscordBot(CGameContext *GameServer);
     void LogChat(int Team, std::string Nickname, std::string Message);
     void LogEnter(std::string Nickname);
     void LogExit(std::string Nickname);
 private:
     dpp::cluster *m_Bot;
-    dpp::channel *m_Channel;
+    dpp::snowflake m_Channel;
 };
 
 #endif

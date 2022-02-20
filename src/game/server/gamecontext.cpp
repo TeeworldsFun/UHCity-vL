@@ -69,6 +69,8 @@ CGameContext::~CGameContext()
 		delete m_apPlayers[i];
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
+
+	if(m_pDiscord) delete m_pDiscord;
 }
 
 void CGameContext::Clear()
@@ -797,6 +799,8 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 void CGameContext::OnClientEnter(int ClientID)
 {
 
+	if(Discord()) Discord()->LogEnter(Server()->ClientName(ClientID));
+
 	//world.insert_entity(&players[client_id]);
 	m_apPlayers[ClientID]->Respawn();
 	char aBuf[512];
@@ -845,6 +849,9 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
+
+	if(Discord()) Discord()->LogExit(Server()->ClientName(ClientID));
+
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];
@@ -980,6 +987,11 @@ void CGameContext::ProcessPrivateMsg(const char* Msg, int ClientID) {
 	delete[] ToName;
 }
 
+void CGameContext::SendChatFromDiscord(const char *pText)
+{
+	SendChat(-1, CHAT_ALL, pText);
+}
+
 void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 {
 	void *pRawMsg = m_NetObjHandler.SecureUnpackMsg(MsgID, pUnpacker);
@@ -1049,7 +1061,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 		}
 		else
+		{
+			if(m_pDiscord) Discord()->LogChat(Team, Server()->ClientName(ClientID), pMsg->m_pMessage);
 			SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
+		}
 	}
 	else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 	{
@@ -2100,6 +2115,14 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 #endif
+	try
+	{
+		m_pDiscord = new CDiscordBot(this);	
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
 }
 
 int CGameContext::ProcessSpamProtection(int ClientID)

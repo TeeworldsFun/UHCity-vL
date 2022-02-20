@@ -886,6 +886,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/shopitems/shotgun.h
   city/shopitems/vip.cpp
   city/shopitems/vip.h
+  discord/bot.cpp
+  discord/bot.h
   entity.cpp
   entity.h
   eventhandler.cpp

@@ -92,8 +92,8 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
 )
 
-set(SERVER_EXECUTABLE teeworlds_srv CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE teeworlds CACHE STRING "Name of the build client executable")
+set(SERVER_EXECUTABLE UHCity-Server CACHE STRING "Name of the built server executable")
+set(CLIENT_EXECUTABLE UHCity-Client CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # Compiler flags
@@ -297,7 +297,6 @@ function(show_dependency_status OUTPUT_NAME NAME)
 endfunction()
 
 if(SERVER_COMPILE)
-  show_dependency_status("ICU" ICU TRUE)
   show_dependency_status("OpenSSL" OPENSSL FALSE)
 endif()
 
@@ -308,6 +307,7 @@ show_dependency_status("Freetype" FREETYPE)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
+show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL" SDL)
@@ -360,6 +360,9 @@ add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
 list(APPEND TARGETS_DEP md5)
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+if(NOT CRYPTO_FOUND)
+  set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+endif()
 
 ########################################################################
 # COPY DATA AND DLLS
@@ -372,7 +375,6 @@ set(COPY_FILES
 )
 
 set(COPY_FILES_SERVER
-  ${ICU_COPY_FILES}
   ${OPENSSL_COPY_FILES}
 )
 
@@ -589,11 +591,16 @@ set(GAME_GENERATED_SHARED
 
 set(DEPS ${DEP_MD5} ${ZLIB_DEP} ${DEP_JSON_SRC})
 
+find_package(ICU REQUIRED COMPONENTS uc i18n)
+
 # Libraries
 set(LIBS
   ${CMAKE_THREAD_LIBS_INIT} 
   ${ZLIB_LIBRARIES} 
-  ${PLATFORM_LIBS})
+  ${PLATFORM_LIBS}
+  ${ICU_LIBRARIES}
+  ${CRYPTO_LIBRARIES}
+)
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -784,7 +791,6 @@ set_glob(ENGINE_SERVER GLOB src/engine/server
 )
 
 set(SERVER_INCLUDES_DIRS
-  ${ICU_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIRS}
 )
 
@@ -896,14 +902,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/ctf.cpp
-  gamemodes/ctf.h
-  gamemodes/dm.cpp
-  gamemodes/dm.h
-  gamemodes/mod.cpp
-  gamemodes/mod.h
-  gamemodes/tdm.cpp
-  gamemodes/tdm.h
+  gamemodes/city.cpp
+  gamemodes/city.h
   gameworld.cpp
   gameworld.h
   player.cpp
@@ -933,7 +933,7 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:game-shared>
 )
 
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} dpp)
+target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
 target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
 

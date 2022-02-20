@@ -13,10 +13,7 @@
 #include <game/version.h>
 #include <game/collision.h>
 #include <game/gamecore.h>
-#include "gamemodes/dm.h"
-#include "gamemodes/tdm.h"
-#include "gamemodes/ctf.h"
-#include "gamemodes/mod.h"
+#include "gamemodes/city.h"
 #include <algorithm>
 
 #include "entities/pickup.h"
@@ -560,9 +557,7 @@ void CGameContext::CheckPureTuning()
 	if(!m_pController)
 		return;
 
-	if(	str_comp(m_pController->m_pGameType, "DM")==0 ||
-		str_comp(m_pController->m_pGameType, "TDM")==0 ||
-		str_comp(m_pController->m_pGameType, "CTF")==0)
+	if(	str_comp(m_pController->m_pGameType, "DM")==0)
 	{
 		CTuningParams p;
 		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)

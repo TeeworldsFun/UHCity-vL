@@ -745,7 +745,7 @@ void CCharacter::FireWeapon()
 				int ShotSpread = m_pPlayer->m_AccData.m_GunSpread;
 
 				if(m_pPlayer->m_onMonster)
-					ShotSpread = 0;
+					ShotSpread = 1;
 
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
@@ -864,7 +864,7 @@ void CCharacter::FireWeapon()
 				int ShotSpread = m_pPlayer->m_AccData.m_GrenadeSpread;
 
 				if(m_pPlayer->m_onMonster)
-					ShotSpread = 0;
+					ShotSpread = 1;
 
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
@@ -927,7 +927,7 @@ void CCharacter::FireWeapon()
 				{
 					int ShotSpread = m_pPlayer->m_AccData.m_RifleSpread;
 					if(m_pPlayer->m_onMonster)
-						ShotSpread = 0;
+						ShotSpread = 1;
 					float Spreading[18*2+1];
 
 					for(int i = 0; i < 18*2+1; i++)

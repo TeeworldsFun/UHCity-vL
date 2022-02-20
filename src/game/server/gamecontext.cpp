@@ -18,6 +18,7 @@
 #include "gamemodes/ctf.h"
 #include "gamemodes/mod.h"
 #include <algorithm>
+#include <city/components/localization.h>
 
 #include "entities/pickup.h"
 enum

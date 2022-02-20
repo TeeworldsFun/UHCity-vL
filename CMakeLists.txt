@@ -263,7 +263,7 @@ find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
 find_package(ICU)
-
+add_subdirectory(other/DPP)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -792,7 +792,7 @@ set(SERVER_LIBRARIES
   ${ICU_LIBRARIES}
 )
 
-file(GLOB CITY "src/teeother/components/*.cpp" "src/teeother/components/*.h" "src/teeother/tl/*.h" "src/teeother/system/*.h")
+file(GLOB CITY "src/city/components/*.cpp" "src/city/components/*.h" "src/city/tl/*.h" "src/city/system/*.h")
 
 set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/character.cpp
@@ -930,9 +930,12 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:engine-shared>
   $<TARGET_OBJECTS:game-shared>
 )
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+
+target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} dpp)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
-target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS})
+target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
+
+
 
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
@@ -1334,6 +1337,11 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
+
+  set_target_properties(${target} PROPERTIES
+    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD_REQUIRED ON
+)
 
   if(ICU_FOUND)
 	target_include_directories(${target} PRIVATE ${ICU_INCLUDE_DIRS})

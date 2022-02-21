@@ -66,12 +66,15 @@ void CHammer::Tick()
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_HammerKill, g_Config.m_EuHammerKill, Click, 1);
 		break;
 	case 4:
+		Server()->Localization()->Format_L(Buffer, pLanguage, _("Hammer explode"));
+		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_HammerExplode, g_Config.m_EuHammerExplode, Click, 1);
+		break;
+	case 5:
 		Server()->Localization()->Format_L(Buffer, pLanguage, _("Portal"));
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_Portal, g_Config.m_EuPortal, Click, 1);
 		break;
 	}
 }
-
 
 void CHammer::Snap(int SnappingClient)
 {

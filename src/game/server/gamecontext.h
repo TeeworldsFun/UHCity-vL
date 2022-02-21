@@ -303,6 +303,7 @@ public:
 
 		static void ConChatWalls(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatHammerkill(IConsole::IResult* pResult, void* pUserData);
+		static void ConChatHammerExplode(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatPortal(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatPlasma(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatGunfreeze(IConsole::IResult* pResult, void* pUserData);

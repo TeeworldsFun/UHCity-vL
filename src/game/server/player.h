@@ -171,6 +171,7 @@ public:
 		int m_HammerWalls;
 		int m_HammerShot;
 		int m_HammerKill;
+		int m_HammerExplode;
 
 		int m_NinjaPermanent;
 		int m_NinjaStart;

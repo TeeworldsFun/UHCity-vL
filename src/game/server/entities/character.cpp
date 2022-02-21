@@ -714,6 +714,8 @@ void CCharacter::FireWeapon()
 
 					GameServer()->m_aPortals[m_pPlayer->GetCID()]->Reset();
 				}
+			} else if (m_pPlayer->m_AccData.m_HammerExplode && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMEREXPLODE && !m_GameZone) {
+				GameServer()->CreateExplosion(m_Pos + vec2(m_Input.m_TargetX,m_Input.m_TargetY), m_pPlayer->GetCID(), WEAPON_HAMMER, false);
 			}
 		} break;
 

@@ -63,6 +63,7 @@ CONSOLE_COMMAND("event", "", CFGFLAG_CHAT, ConChatEvent, this, "")
 // items
 CONSOLE_COMMAND("walls", "", CFGFLAG_CHAT, ConChatWalls, this, "")
 CONSOLE_COMMAND("hammerkill", "", CFGFLAG_CHAT, ConChatHammerkill, this, "")
+CONSOLE_COMMAND("hammerexplode", "", CFGFLAG_CHAT, ConChatHammerExplode, this, "")
 CONSOLE_COMMAND("portal", "", CFGFLAG_CHAT, ConChatPortal, this, "")
 
 CONSOLE_COMMAND("plasma", "", CFGFLAG_CHAT, ConChatPlasma, this, "")

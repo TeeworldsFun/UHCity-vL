@@ -43,6 +43,8 @@ CGui::CGui(CGameWorld *pGameWorld, int Owner)
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 1));
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 2));
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 3));
+	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 4));
+	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 5));
 
 	m_aShop.push_back(group);
 	group.clear();

@@ -14,6 +14,11 @@
 			"file": "cn",
 			"name": "白话文",
 			"parent": "en"
+		},
+		{
+			"file": "pl",
+			"name": "Polski",
+			"parent": "en"
 		}
 	]
 }

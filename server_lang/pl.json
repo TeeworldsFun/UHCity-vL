@@ -653,6 +653,10 @@
             "value": ""
         },
         {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": ""
+        },
+        {
             "key": "/plasma -- Beat them with your Plasma",
             "value": ""
         },
@@ -767,6 +771,14 @@
         {
             "key": "{str:hk} Hammerkill",
             "value": ""
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
         },
         {
             "key": "Buy Gunfreeze first!",

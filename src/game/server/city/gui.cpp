@@ -43,6 +43,8 @@ CGui::CGui(CGameWorld *pGameWorld, int Owner)
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 1));
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 2));
 	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 3));
+	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 4));
+	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 5));
 
 	m_aShop.push_back(group);
 	group.clear();
@@ -82,7 +84,7 @@ CGui::CGui(CGameWorld *pGameWorld, int Owner)
 	m_aShop.push_back(group);
 	group.clear();
 
-	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 4));
+	group.push_back(new CHammer(GameWorld(), m_Owner, m_Pos, 5));
 	group.push_back(new CInfAmmo(GameWorld(), m_Owner, m_Pos));
 	group.push_back(new CAllWeapons(GameWorld(), m_Owner, m_Pos));
 	group.push_back(new CFastReload(GameWorld(), m_Owner, m_Pos));

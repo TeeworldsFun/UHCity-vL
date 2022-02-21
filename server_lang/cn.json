@@ -638,6 +638,10 @@
             "value": "/hammerkill -- 你的目标不可能在HK的攻击下活下去"
         },
         {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": "/hammerexplode -- Explosion power!"
+        },
+        {
             "key": "/plasma -- Beat them with your Plasma",
             "value": "/plasma -- 你的等离子体将跟踪敌人直到你死"
         },
@@ -752,6 +756,14 @@
         {
             "key": "{str:hk} Hammerkill",
             "value": "血の诅咒的状态发生了转变"
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
         },
         {
             "key": "Buy Gunfreeze first!",

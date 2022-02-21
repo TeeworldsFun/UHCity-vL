@@ -1036,6 +1036,7 @@ void CGameContext::ConChatUpgrCmds(IConsole::IResult *pResult, void *pUserData)
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("---------- UPGRADE CMDS ----------"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/walls -- Laser walls"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/hammerkill -- Your target can't escape!"));
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/hammerexplode -- Explosion power!"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/plasma -- Beat them with your Plasma"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/portal -- Opens a portal to teleport between two points"));
         return;
@@ -1234,6 +1235,26 @@ void CGameContext::ConChatHammerkill(IConsole::IResult *pResult, void *pUserData
     pChr->ChangeUpgrade(ITEM_HAMMER, UPGRADE_HAMMERKILL);
     str_format(aBuf, sizeof(aBuf), "%s Hammerkill", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMERKILL ?"Enabled":"disabled");
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerkill"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMERKILL ?"Enabled":"Disabled", NULL);
+}
+
+void CGameContext::ConChatHammerExplode(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    CCharacter *pChr = pP->GetCharacter();
+    char aBuf[128];
+
+    if (!pChr)
+        return;
+
+    if (!pP->m_AccData.m_HammerExplode) {
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Buy Hammerkill first!"));
+        return;
+    }
+
+    pChr->ChangeUpgrade(ITEM_HAMMER, UPGRADE_HAMMEREXPLODE);
+    str_format(aBuf, sizeof(aBuf), "%s Hammerexplode", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"disabled");
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerkill"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"Disabled", NULL);
 }
 
 void CGameContext::ConChatGunfreeze(IConsole::IResult *pResult, void *pUserData)

@@ -21,6 +21,7 @@ CDiscordBot::CDiscordBot(CGameContext *GameServer)
 
         m_Bot->on_ready([bot_prt](const auto & event) {
             dbg_msg("Discord", "Logged in");
+            bot_prt->set_presence(dpp::presence(dpp::ps_idle, dpp::at_watching, "UH|Cicy Chat"));
         });
 
         m_Bot->on_message_create([bot_prt, chann_ptr](const dpp::message_create_t &event) {

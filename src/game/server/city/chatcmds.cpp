@@ -1270,13 +1270,13 @@ void CGameContext::ConChatHammerExplode(IConsole::IResult *pResult, void *pUserD
         return;
 
     if (!pP->m_AccData.m_HammerExplode) {
-        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Buy Hammerkill first!"));
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Buy Hammerexplode first!"));
         return;
     }
 
     pChr->ChangeUpgrade(ITEM_HAMMER, UPGRADE_HAMMEREXPLODE);
     str_format(aBuf, sizeof(aBuf), "%s Hammerexplode", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"disabled");
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerkill"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"Disabled", NULL);
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerexpllode"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"Disabled", NULL);
 }
 
 void CGameContext::ConChatGunfreeze(IConsole::IResult *pResult, void *pUserData)

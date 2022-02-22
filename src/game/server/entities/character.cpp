@@ -9,7 +9,6 @@
 #include "laser.h"
 #include "projectile.h"
 #include "game/server/city/items/plasma.h"
-#include "game/server/city/items/hammerkill.h"
 #include "game/server/city/wall.h"
 #include "game/server/city/gui.h"
 #include "game/server/city/items/crown.h"
@@ -173,40 +172,43 @@ bool CCharacter::IsGrounded()
 void CCharacter::Tele()
 {
 	vec2 TelePos = m_Pos + vec2(m_Input.m_TargetX,m_Input.m_TargetY);
-
-	if (!GameServer()->Collision()->IsTile(TelePos, TILE_SOLID) || m_pPlayer->m_God)
+	
+	if (!Server()->IsAdmin(m_pPlayer->GetCID()))
 	{
-		float Dist = distance(TelePos, m_Pos);
-
-		if (Dist > 500) {
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Out of Range"));
-			return;
-		}
-
-		for (int i = 1; i < Dist; i += 32)
+		if (!GameServer()->Collision()->IsTile(TelePos, TILE_SOLID) || m_pPlayer->m_God)
 		{
-			vec2 TestPos = m_Pos + normalize(TelePos - m_Pos) * i;
-			if (!m_pPlayer->m_God)
+			float Dist = distance(TelePos, m_Pos);
+
+			if (Dist > 500) {
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Out of Range"));
+				return;
+			}
+
+			for (int i = 1; i < Dist; i += 32)
 			{
-				if (GameServer()->Collision()->IsTile(TestPos, TILE_ANTI_TELE)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_POLICE)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_ADMIN)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_DONOR))
+				vec2 TestPos = m_Pos + normalize(TelePos - m_Pos) * i;
+				if (!m_pPlayer->m_God)
 				{
-					GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't teleport there."));
-					return;
+					if (GameServer()->Collision()->IsTile(TestPos, TILE_ANTI_TELE)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_POLICE)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_ADMIN)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_DONOR))
+					{
+						GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't teleport there."));
+						return;
+					}
 				}
 			}
-		}
 
-		if (Protected())
-		{
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't tele while being protected"));
-			return;
+			if (Protected())
+			{
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't tele while being protected"));
+				return;
+			}
 		}
+		else
+			return;
 	}
-	else
-		return;
 
 	m_Core.m_Pos = TelePos;
 	CNetEvent_Spawn* pEvent = (CNetEvent_Spawn*)GameServer()->m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
@@ -646,9 +648,19 @@ void CCharacter::FireWeapon()
 				else
 					Dir = vec2(0.f, -1.f);
 
-				if (m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == 3 && !GameServer()->HasDmgDisabled(m_pPlayer->GetCID(), pTarget->m_pPlayer->GetCID())) {
-					new CHammerKill(GameWorld(), m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
-					pTarget->m_IsHammerKilled = true;
+				if (m_IsHammerKilled && m_HammerKill)
+				{
+					m_HammerKill->m_HammerCount += 1;
+					m_HammerKill->m_VictimTick += 30;
+
+				} else if (m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == 3 && !GameServer()->HasDmgDisabled(m_pPlayer->GetCID(), pTarget->m_pPlayer->GetCID())) {
+					if (!pTarget->m_IsHammerKilled)
+					{
+						pTarget->m_HammerKill = new CHammerKill(GameWorld(), m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
+						pTarget->m_IsHammerKilled = true;
+					}
+					else 
+						pTarget->m_HammerKill->m_VictimTick -= 60;
 				}
 
 				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,

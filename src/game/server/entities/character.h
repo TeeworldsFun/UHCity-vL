@@ -10,6 +10,7 @@
 #include <game/gamecore.h>
 
 #include "game/server/city/items/gravaura.h"
+#include "game/server/city/items/hammerkill.h"
 
 enum
 {
@@ -165,6 +166,7 @@ public:
 	int64 m_LastSwitch;
 
 	CGravAura* m_GravAura;
+	CHammerKill* m_HammerKill;
 
 	// the player core for the physics
 	CCharacterCore m_Core;

@@ -369,7 +369,12 @@ void CGameContext::ConChatInstagib(IConsole::IResult *pResult, void *pUserData)
 
     pP->m_Insta ^= 1;
     pChr->Die(pP->GetCID(), WEAPON_GAME);
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:PName} {str:RD} Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), "RD", pP->m_Insta ? "joined" : "left", NULL);
+//    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:PName} {str:RD} Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), "RD", pP->m_Insta ? "joined" : "left", NULL);
+    pSelf->SendChatTarget_Localization_P(-1, CHATCATEGORY_INFO, pP->m_Insta, _P("{str:PName} left Instagib", "{str:PName} joined Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), NULL);
+    if(pP->m_Insta)
+        pSelf->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("{str:PName} left Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), NULL);
+    else
+        pSelf->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("{str:PName} joined Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), NULL);
 }
 
 void CGameContext::ConChatMonster(IConsole::IResult *pResult, void *pUserData)
@@ -748,6 +753,7 @@ void CGameContext::ConChatSetbounty(IConsole::IResult *pResult, void *pUserData)
         pSelf->Server()->ClientName(Victim));
     pSelf->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("{str:PP} has put a bounty of {str:m}$ on {str:vt}"), "PP", pSelf->Server()->ClientName(pP->GetCID()), "m", numBuf, "vt", pSelf->Server()->ClientName(Victim), NULL);
 
+    pSelf->SCT_Discord(aBuf, "Bounty");
     if (Amount != pTarget->m_AccData.m_Bounty) {
         pSelf->FormatInt(Amount, numBuf);
         str_format(aBuf, sizeof aBuf, "%ss bounty raised to %s$",
@@ -915,6 +921,7 @@ void CGameContext::ConChatInfo(IConsole::IResult *pResult, void *pUserData)
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("UH|City is made by UrinStone."));
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Join our Discord to be always informed about the latest updates."));
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("If you forget your password or wish to donate, please ONLY contact TeeFlowerFell-Sans#9358 on Discord."));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Thanks Anime-pdf, Puppet, ST-Chara for keeping development!"));
 }
 
 void CGameContext::ConChatWriteStats(IConsole::IResult *pResult, void *pUserData)
@@ -1036,6 +1043,7 @@ void CGameContext::ConChatUpgrCmds(IConsole::IResult *pResult, void *pUserData)
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("---------- UPGRADE CMDS ----------"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/walls -- Laser walls"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/hammerkill -- Your target can't escape!"));
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/hammerexplode -- Explosion power!"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/plasma -- Beat them with your Plasma"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("/portal -- Opens a portal to teleport between two points"));
         return;
@@ -1125,7 +1133,9 @@ void CGameContext::ConChatShop(IConsole::IResult *pResult, void *pUserData)
     else if (!str_comp_nocase(Upgr, "general"))
         pChr->m_ShopGroup = ITEM_GENERAL;
     else if (!str_comp_nocase(Upgr, "hook"))
-        pChr->m_ShopGroup = ITEM_HOOK; // should be ITEM_HOOK, but we have no specials yet
+        pChr->m_ShopGroup = ITEM_HOOK;
+    else if (!str_comp_nocase(Upgr, "jump"))
+        pChr->m_ShopGroup = ITEM_JUMP;
     else {
         pChr->m_ShopPage = Page;
         pSelf->SendChatTarget_Localization(pResult->GetClientID(), CHATCATEGORY_INFO, _("Use /shop <item> to see the items you want."));
@@ -1140,6 +1150,7 @@ void CGameContext::ConChatShop(IConsole::IResult *pResult, void *pUserData)
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- ninja"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- general"));
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- hook"));
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- jump"));
     }
 }   
 
@@ -1173,6 +1184,18 @@ void CGameContext::ConChatEvent(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     
     pSelf->GameEvent()->EventInfo(pResult->GetClientID());
+}
+
+void CGameContext::ConChatCredits(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("---- The Credits list ----"));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- Pikotee : Author of uTown"));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- UrinStone : Author of UH|City"));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- Anime-pdf, Puppet, ST-Chara : Author of UH|City-vL"));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("- Special thanks : Kurosio, Kaffine, Necropotame, TsFreddie and others."));
 }
 
 // items
@@ -1234,6 +1257,26 @@ void CGameContext::ConChatHammerkill(IConsole::IResult *pResult, void *pUserData
     pChr->ChangeUpgrade(ITEM_HAMMER, UPGRADE_HAMMERKILL);
     str_format(aBuf, sizeof(aBuf), "%s Hammerkill", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMERKILL ?"Enabled":"disabled");
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerkill"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMERKILL ?"Enabled":"Disabled", NULL);
+}
+
+void CGameContext::ConChatHammerExplode(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *) pUserData;
+    CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
+    CCharacter *pChr = pP->GetCharacter();
+    char aBuf[128];
+
+    if (!pChr)
+        return;
+
+    if (!pP->m_AccData.m_HammerExplode) {
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Buy Hammerexplode first!"));
+        return;
+    }
+
+    pChr->ChangeUpgrade(ITEM_HAMMER, UPGRADE_HAMMEREXPLODE);
+    str_format(aBuf, sizeof(aBuf), "%s Hammerexplode", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"disabled");
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:hk} Hammerexpllode"), "hk", pP->m_AciveUpgrade[ITEM_HAMMER] == UPGRADE_HAMMEREXPLODE ?"Enabled":"Disabled", NULL);
 }
 
 void CGameContext::ConChatGunfreeze(IConsole::IResult *pResult, void *pUserData)

@@ -111,15 +111,19 @@
         },
         {
             "key": "Instagib is not enabled",
-            "value": "激光瞬杀未被开启"
+            "value": "激光瞬杀游戏已被禁止"
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
-            "value": "玩家{str:PName} 加入/离开 了激光瞬杀"
+            "key": "{str:PName} joined Instagib",
+            "value": "玩家'{str:PName}'加入了激光瞬杀"
+        },
+        {
+            "key": "{str:PName} left Instagib",
+            "value": "玩家'{str:PName}'离开了激光瞬杀"
         },
         {
             "key": "Zomb is not enabled",
-            "value": "怪物未被开启"
+            "value": "僵尸末日游戏已被禁止"
         },
         {
             "key": "usage: /transfer <amount>",
@@ -638,6 +642,10 @@
             "value": "/hammerkill -- 你的目标不可能在HK的攻击下活下去"
         },
         {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": "/hammerexplode -- Explosion power!"
+        },
+        {
             "key": "/plasma -- Beat them with your Plasma",
             "value": "/plasma -- 你的等离子体将跟踪敌人直到你死"
         },
@@ -752,6 +760,14 @@
         {
             "key": "{str:hk} Hammerkill",
             "value": "血の诅咒的状态发生了转变"
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
         },
         {
             "key": "Buy Gunfreeze first!",

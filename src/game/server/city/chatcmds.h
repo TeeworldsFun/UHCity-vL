@@ -54,15 +54,17 @@ CONSOLE_COMMAND("donorcmds", "", CFGFLAG_CHAT, ConChatDonorCmds, this, "")
 CONSOLE_COMMAND("vip", "", CFGFLAG_CHAT, ConChatVip, this, "")
 CONSOLE_COMMAND("upgrcmds", "?s", CFGFLAG_CHAT, ConChatUpgrCmds, this, "")
 CONSOLE_COMMAND("rules", "?s", CFGFLAG_CHAT, ConChatRules, this, "")
-//CONSOLE_COMMAND("shop", "?s", CFGFLAG_CHAT, ConChatShop, this, "")
+CONSOLE_COMMAND("shop", "?s", CFGFLAG_CHAT, ConChatShop, this, "")
 CONSOLE_COMMAND("coach", "", CFGFLAG_CHAT, ConChatCoach, this, "")
 CONSOLE_COMMAND("writestats", "", CFGFLAG_CHAT, ConChatWriteStats, this, "")
 CONSOLE_COMMAND("ids", "?i", CFGFLAG_CHAT, ConChatIDs, this, "")
 CONSOLE_COMMAND("event", "", CFGFLAG_CHAT, ConChatEvent, this, "")
+CONSOLE_COMMAND("credits", "", CFGFLAG_CHAT, ConChatCredits, this, "")
 
 // items
 CONSOLE_COMMAND("walls", "", CFGFLAG_CHAT, ConChatWalls, this, "")
 CONSOLE_COMMAND("hammerkill", "", CFGFLAG_CHAT, ConChatHammerkill, this, "")
+CONSOLE_COMMAND("hammerexplode", "", CFGFLAG_CHAT, ConChatHammerExplode, this, "")
 CONSOLE_COMMAND("portal", "", CFGFLAG_CHAT, ConChatPortal, this, "")
 
 CONSOLE_COMMAND("plasma", "", CFGFLAG_CHAT, ConChatPlasma, this, "")

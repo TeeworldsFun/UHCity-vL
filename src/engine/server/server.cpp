@@ -1516,6 +1516,7 @@ int CServer::Run()
 			net_socket_read_wait(m_NetServer.Socket(), 5);
 		}
 	}
+
 	// disconnect all clients on shutdown
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -1709,6 +1710,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
+	CServer* pServer = (CServer *)pUser;
+	pServer->GameServer()->SCT_Discord("Server is down! All players are offline!", "Server");
 	((CServer *)pUser)->m_RunServer = 0;
 }
 

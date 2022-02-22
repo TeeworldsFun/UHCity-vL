@@ -17,13 +17,14 @@ CDiscordBot::CDiscordBot(CGameContext *GameServer)
         std::istringstream iss(std::string(g_Config.m_SvDiscordChannel));
         iss >> m_Channel;
         dpp::cluster* bot_prt = m_Bot;
+        dpp::snowflake* chann_ptr = &m_Channel;
 
         m_Bot->on_ready([bot_prt](const auto & event) {
             dbg_msg("Discord", "Logged in");
         });
 
-        m_Bot->on_message_create([&](const dpp::message_create_t &event) {
-            if(!event.msg.author.is_bot() || !event.msg.content.empty())
+        m_Bot->on_message_create([bot_prt, chann_ptr](const dpp::message_create_t &event) {
+            if(*chann_ptr == event.msg.channel_id &&(!event.msg.author.is_bot() || !event.msg.content.empty()))
                 CGS->SendChatFromDiscord(std::string("[Discord] " + ((event.msg.member.nickname.empty() == true) ? event.msg.author.username : event.msg.member.nickname) + ": " + event.msg.content).c_str());
         });
 

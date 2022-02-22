@@ -2282,7 +2282,7 @@ int CGameContext::GetPlayerNum()
 		if(m_apPlayers[i])
 			NumPlayer++;
 	}
-	return;
+	return NumPlayer;
 }
 
 const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }

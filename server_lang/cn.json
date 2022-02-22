@@ -111,15 +111,19 @@
         },
         {
             "key": "Instagib is not enabled",
-            "value": "激光瞬杀未被开启"
+            "value": "激光瞬杀游戏已被禁止"
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
-            "value": "玩家{str:PName} 加入/离开 了激光瞬杀"
+            "key": "{str:PName} joined Instagib",
+            "value": "玩家'{str:PName}'加入了激光瞬杀"
+        },
+        {
+            "key": "{str:PName} left Instagib",
+            "value": "玩家'{str:PName}'离开了激光瞬杀"
         },
         {
             "key": "Zomb is not enabled",
-            "value": "怪物未被开启"
+            "value": "僵尸末日游戏已被禁止"
         },
         {
             "key": "usage: /transfer <amount>",

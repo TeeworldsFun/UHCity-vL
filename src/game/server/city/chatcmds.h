@@ -59,6 +59,7 @@ CONSOLE_COMMAND("coach", "", CFGFLAG_CHAT, ConChatCoach, this, "")
 CONSOLE_COMMAND("writestats", "", CFGFLAG_CHAT, ConChatWriteStats, this, "")
 CONSOLE_COMMAND("ids", "?i", CFGFLAG_CHAT, ConChatIDs, this, "")
 CONSOLE_COMMAND("event", "", CFGFLAG_CHAT, ConChatEvent, this, "")
+CONSOLE_COMMAND("credits", "", CFGFLAG_CHAT, ConChatCredits, this, "")
 
 // items
 CONSOLE_COMMAND("walls", "", CFGFLAG_CHAT, ConChatWalls, this, "")

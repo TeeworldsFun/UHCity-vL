@@ -193,6 +193,9 @@ void CAccount::Login(char *Username, char *Password)
 	}
 	if (user.HasMember("donor"))
 		m_pPlayer->m_AccData.m_Donor = user["donor"].GetInt();
+	
+	if (user.HasMember("hammerexplode"))
+		m_pPlayer->m_AccData.m_HammerExplode = user["hammerexplode"].GetInt();
 
 	if (user.HasMember("language"))
 		m_pPlayer->SetLanguage(user["language"].GetString());
@@ -228,7 +231,6 @@ void CAccount::Login(char *Username, char *Password)
 	m_pPlayer->m_AccData.m_HammerWalls = user["items"]["hammer"]["hammerwalls"].GetInt();
 	m_pPlayer->m_AccData.m_HammerShot = user["items"]["hammer"]["hammershot"].GetInt();
 	m_pPlayer->m_AccData.m_HammerKill = user["items"]["hammer"]["hammerkill"].GetInt();
-	m_pPlayer->m_AccData.m_HammerExplode = user["items"]["hammer"]["hammerexplode"].GetInt();
 	if (user["items"]["hammer"].HasMember("portal"))
 		m_pPlayer->m_AccData.m_Portal = user["items"]["hammer"]["portal"].GetInt();
 
@@ -425,6 +427,9 @@ void CAccount::Register(char *Username, char *Password, char *TruePassword)
 	writer.Key("donor");
 	writer.Int(m_pPlayer->m_AccData.m_Donor);
 
+	writer.Key("hammerexplode");
+	writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
+
 	writer.Key("language");
 	writer.String(m_pPlayer->GetLanguage());
 
@@ -503,8 +508,6 @@ void CAccount::Register(char *Username, char *Password, char *TruePassword)
     writer.Int(m_pPlayer->m_AccData.m_HammerShot);
     writer.Key("hammerkill");
     writer.Int(m_pPlayer->m_AccData.m_HammerKill);
-	writer.Key("hammerexplode");
-    writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
     writer.EndObject();
 
 	writer.Key("ninja");
@@ -637,6 +640,9 @@ void CAccount::Apply()
 	writer.Key("donor");
 	writer.Int(m_pPlayer->m_AccData.m_Donor);
 
+	writer.Key("hammerexplode");
+	writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
+
 	writer.Key("language");
 	writer.String(m_pPlayer->GetLanguage());
 
@@ -712,8 +718,6 @@ void CAccount::Apply()
     writer.Int(m_pPlayer->m_AccData.m_HammerShot);
     writer.Key("hammerkill");
     writer.Int(m_pPlayer->m_AccData.m_HammerKill);
-	writer.Key("hammerexplode");
-    writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
 	writer.Key("portal");
     writer.Int(m_pPlayer->m_AccData.m_Portal);
     writer.EndObject();

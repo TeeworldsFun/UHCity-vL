@@ -168,6 +168,7 @@ public:
 	void SendPrivate(int ChatterClientID, int To, const char *pText, int SpamProtectionClientID = -1);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
 	void SendChatFromDiscord(const char *pText);
+	void SCT_Discord(const char *pText, const char *Desp);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID);
@@ -300,6 +301,7 @@ public:
 		static void ConChatWriteStats(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatIDs(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatEvent(IConsole::IResult* pResult, void* pUserData);
+		static void ConChatCredits(IConsole::IResult* pResult, void* pUserData);
 
 		static void ConChatWalls(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatHammerkill(IConsole::IResult* pResult, void* pUserData);
@@ -388,6 +390,7 @@ public:
 
 	int CreateNewDummy(int DummyID, int DummyMode);
 
+	int GetPlayerNum();
 private:
 	int m_BountyList[MAX_CLIENTS];
 

@@ -10,6 +10,7 @@ public:
     void LogChat(int Team, std::string Nickname, std::string Message);
     void LogEnter(std::string Nickname);
     void LogExit(std::string Nickname);
+    void SendChatTarget_Discord(std::string Text, std::string Desp);
 private:
     dpp::cluster *m_Bot;
     dpp::snowflake m_Channel;

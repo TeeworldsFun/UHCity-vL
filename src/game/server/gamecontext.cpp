@@ -844,8 +844,7 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
-
-	if(Discord()) Discord()->LogExit(Server()->ClientName(ClientID));
+	if(Discord() && ClientID <= MAX_PLAYERS) Discord()->LogExit(Server()->ClientName(ClientID));
 
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
@@ -2118,6 +2117,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	{
 		std::cerr << e.what() << '\n';
 	}
+
+	Discord()->SendChatTarget_Discord("The server is start up!", "Server");
 }
 
 int CGameContext::ProcessSpamProtection(int ClientID)
@@ -2266,6 +2267,22 @@ void CGameContext::OnZombieKill(int ClientID)
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 	}
+}
+
+void CGameContext::SCT_Discord(const char *pText, const char *Desp)
+{
+	Discord()->SendChatTarget_Discord(pText, Desp);
+}
+
+int CGameContext::GetPlayerNum()
+{
+	int NumPlayer = 0;
+	for(int i = 0; i < MAX_PLAYERS; i++)
+	{
+		if(m_apPlayers[i])
+			NumPlayer++;
+	}
+	return;
 }
 
 const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }

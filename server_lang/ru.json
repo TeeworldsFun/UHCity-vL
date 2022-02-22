@@ -122,12 +122,16 @@
             "value": "Instagib не включен"
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
-            "value": "{str:PName} {str:RD} Instagib"
+            "key": "{str:PName} joined Instagib",
+            "value": "{str:PName} joined Instagib"
         },
         {
-            "key": "Monster is not enabled",
-            "value": "Monster не включен"
+            "key": "{str:PName} left Instagib",
+            "value": "{str:PName} left Instagib"
+        },
+        {
+            "key": "Zomb is not enabled",
+            "value": "Zomb не включен"
         },
         {
             "key": "usage: /transfer <amount>",
@@ -1186,7 +1190,7 @@
             "value": "Длительность: {sec:s}"
         },
         {
-            "key": "",
+            "key": "Use F3 and F4 to switch the shop menu",
             "value": ""
         },
         {

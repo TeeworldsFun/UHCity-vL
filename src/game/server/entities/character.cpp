@@ -530,7 +530,7 @@ void CCharacter::HandleWeaponSwitch()
 void CCharacter::SwitchShop(int Value) {
 	if(GameServer()->Collision()->TileShop(m_Pos))
 	{
-		m_Shop++;
+		m_Shop += Value;
 
 		if (m_Shop < ITEM_HAMMER)
 			m_Shop = ITEM_JUMP;

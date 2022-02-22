@@ -122,7 +122,11 @@
             "value": ""
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
+            "key": "{str:PName} joined Instagib",
+            "value": ""
+        },
+        {
+            "key": "{str:PName} left Instagib",
             "value": ""
         },
         {

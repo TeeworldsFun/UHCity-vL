@@ -22,11 +22,11 @@ CDiscordBot::CDiscordBot(CGameContext *GameServer)
             dbg_msg("Discord", "Logged in");
         });
 
-        m_Bot->on_message_create([&](const dpp::message_create_t &event) {
+        m_Bot->on_message_create([&](const dpp::message_create_t &event)
+        {
             if(!event.msg.author.is_bot() || !event.msg.content.empty())
                 CGS->SendChatFromDiscord(std::string("[Discord] " + ((event.msg.member.nickname.empty() == true) ? event.msg.author.username : event.msg.member.nickname) + ": " + event.msg.content).c_str());
         });
-
         std::thread aT([bot_prt]() { bot_prt->start(false); });
 
         aT.detach();
@@ -68,6 +68,19 @@ void CDiscordBot::LogExit(std::string Nickname)
     dpp::embed embed = dpp::embed().
         set_color(0xff002e).
         set_description("**"+Nickname + "** has left the game.");
+    dpp::message msg(m_Channel, embed);
+    m_Bot->message_create(msg);
+}
+
+void CDiscordBot::SendChatTarget_Discord(std::string Text, std::string Desp)
+{
+    if(CGS->GetPlayerNum() <= 0)
+        return;
+
+    dpp::embed embed = dpp::embed().
+        set_color(0x00ff11).
+        set_title(Desp).
+        set_description(Text);
     dpp::message msg(m_Channel, embed);
     m_Bot->message_create(msg);
 }

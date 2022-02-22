@@ -106,19 +106,6 @@ void CHammer::Snap(int SnappingClient)
 			pObj[i]->m_FromY = (int)m_Pos.y + 32;
 			pObj[i]->m_StartTick = Server()->Tick();
 		}
-
-		if(Server()->Tick() % 100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
-		}
-
 	}
 	else if(m_Type == 2)//Shot
 	{
@@ -137,17 +124,6 @@ void CHammer::Snap(int SnappingClient)
 			pObj[i]->m_FromY = (int)Positions[i].y;
 			pObj[i]->m_StartTick = Server()->Tick();
 		}
-		if(Server()->Tick() % 100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
-		}
 	}
 	else if(m_Type == 3)// Kill
 	{
@@ -160,18 +136,6 @@ void CHammer::Snap(int SnappingClient)
 		pP->m_Y = (int)m_Pos.y;
 		pP->m_Type = POWERUP_WEAPON;
 		pP->m_Subtype = WEAPON_HAMMER;
-
-		if(Server()->Tick() % 100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
-		}
 	}
 	else if(m_Type == 4)// Explode
 	{
@@ -182,17 +146,6 @@ void CHammer::Snap(int SnappingClient)
 				return;
 			pP->m_X = (int)m_Pos.x;
 			pP->m_Y = (int)m_Pos.y;
-		}
-		if(Server()->Tick() % 100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
 		}
 	}
 	else if(m_Type == 5)// portal
@@ -206,18 +159,6 @@ void CHammer::Snap(int SnappingClient)
 
 			pEvent->m_X = (int)m_Pos.x;
 			pEvent->m_Y = (int)m_Pos.y;
-		}
-
-		if(Server()->Tick() % 100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
 		}
 	}
 }

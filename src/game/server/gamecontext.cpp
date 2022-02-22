@@ -586,6 +586,7 @@ void CGameContext::SendTuningParams(int ClientID)
 	if (pChr) {
 		FakeParams.m_Gravity = pChr->m_GravityY != 0.5 ? pChr->m_GravityY : m_Tuning.m_Gravity;
 		FakeParams.m_PlayerCollision = (pChr->m_Core.m_Protected || pChr->m_Core.m_Afk) ? 0 : m_Tuning.m_PlayerCollision;
+		FakeParams.m_PlayerHooking = (pChr->m_Core.m_Protected || pChr->m_Core.m_Afk) ? 0 : m_Tuning.m_PlayerHooking;
 	}
 
 	int *pParams = (int *)&FakeParams;

@@ -467,7 +467,7 @@ void CCharacter::HandleNinja()
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
 
-				aEnts[i]->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
+				aEnts[i]->TakeDamage(vec2(0, -10.0f), g_Config.m_NinjaDmg, m_pPlayer->GetCID(), WEAPON_NINJA);
 			}
 		}
 
@@ -651,19 +651,19 @@ void CCharacter::FireWeapon()
 				if (m_IsHammerKilled && m_HammerKill)
 				{
 					m_HammerKill->m_HammerCount += 1;
-					m_HammerKill->m_VictimTick += 30;
+					m_HammerKill->m_VictimTick += 100;
 
 				} else if (m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == 3 && !GameServer()->HasDmgDisabled(m_pPlayer->GetCID(), pTarget->m_pPlayer->GetCID())) {
-					if (!pTarget->m_IsHammerKilled)
+					if (!pTarget->m_IsHammerKilled && !(pTarget->m_SpawnProtection && pTarget->Protected()))
 					{
 						pTarget->m_HammerKill = new CHammerKill(GameWorld(), m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
 						pTarget->m_IsHammerKilled = true;
 					}
-					else 
+					else if (pTarget->m_IsHammerKilled)
 						pTarget->m_HammerKill->m_VictimTick -= 60;
 				}
 
-				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_Config.m_HammerDmg,
 					m_pPlayer->GetCID(), m_ActiveWeapon);
 				Hits++;
 
@@ -742,7 +742,7 @@ void CCharacter::FireWeapon()
 				ProjStartPos,
 				Direction,
 				(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-				1, m_GameZone?0:m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
+				g_Config.m_GunDmg, m_GameZone?0:m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
@@ -783,7 +783,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-						1, m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
+						g_Config.m_GunDmg, m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -833,7 +833,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
-						1, m_GameZone?0:m_pPlayer->m_AccData.m_ShotgunExplode, 0, -1, WEAPON_SHOTGUN);
+						g_Config.m_ShotgunDmg, m_GameZone?0:m_pPlayer->m_AccData.m_ShotgunExplode, 0, -1, WEAPON_SHOTGUN);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -902,7 +902,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime),
-						1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
+						g_Config.m_GrenadeDmg, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -1170,7 +1170,7 @@ unsigned long long CCharacter::calcExp(int level)
   if(level >= 800)
     exp = ~0;
   else
-    exp += ((10.0 * level + pow(2, level/25.0)) + pow(level, 1.8)) * pow(level, 1.7) - 150;
+    exp += ((10.0 * level + pow(2, level/20.0)) + pow(level, 1.8)) * pow(level, 1.9) - 150;
   return exp;
 }
 
@@ -1390,7 +1390,7 @@ void CCharacter::Booster()
 
 		if(m_Luft >= 50 && m_pPlayer->m_AccData.m_HealthRegen == 0)
 		{
-			TakeDamage(vec2(0,0), 1, -1, WEAPON_GAME);
+			TakeDamage(vec2(0,0), g_Config.m_WaterDmg, -1, WEAPON_GAME);
 		m_Luft = 1;
 
 		if(m_Health <= 0)

@@ -141,6 +141,18 @@ MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SE
 MACRO_CONFIG_INT(HardNinja, monster_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "")
 MACRO_CONFIG_INT(SvDeathAnimation, monster_death_animation, 0, 0, 1, CFGFLAG_SERVER, "")
 
+//Dmg
+MACRO_CONFIG_INT(WaterDmg, water_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+
+MACRO_CONFIG_INT(HammerDmg, hammer_dmg, 6, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(GunDmg, gun_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(ShotgunDmg, shotgun_dmg, 2, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(GrenadeDmg, grenade_dmg, 3, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(LaserDmg, laser_dmg, 5, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(NinjaDmg, ninja_dmg, 10, 0, 10000000, CFGFLAG_SERVER, "")
+
+MACRO_CONFIG_INT(HammerExplodeDmg, hammer_explode_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(PlasmaDmg, plasma_dmg, 20, 0, 10000000, CFGFLAG_SERVER, "")
 
 /* # Discord # */
 MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's token.")

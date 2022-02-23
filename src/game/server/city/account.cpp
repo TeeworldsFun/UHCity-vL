@@ -282,6 +282,12 @@ void CAccount::Login(char *Username, char *Password)
  
 	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
 		m_pPlayer->m_AccData.m_GunFreeze = 3;
+	
+	if(m_pPlayer->m_AccData.m_Donor)
+		str_format(aBuf, sizeof(aBuf), "Donor '%s' logged in Account ID: %d and House ID: ", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID, m_pPlayer->m_AccData.m_HouseID);
+	else
+		str_format(aBuf, sizeof(aBuf), "Player '%s' logged in Account ID: %d", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID);
+	GameServer()->SCT_Discord(aBuf, "Account");
 }
 
 void CAccount::Register(char *Username, char *Password, char *TruePassword)
@@ -425,14 +431,21 @@ void CAccount::Register(char *Username, char *Password, char *TruePassword)
 	writer.EndObject();
 
 	writer.Key("donor");
+	writer.StartObject();
 	writer.Int(m_pPlayer->m_AccData.m_Donor);
+	writer.EndObject();
 
+	
+	writer.StartObject();
 	writer.Key("hammerexplode");
 	writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
-
+	writer.EndObject();
+	
+	writer.StartObject();
 	writer.Key("language");
 	writer.String(m_pPlayer->GetLanguage());
-
+	writer.EndObject();
+	
 	writer.Key("event");
 	writer.StartObject();
 	writer.Key("bounty");

@@ -153,8 +153,8 @@ void CGameContext::ConChatHome(IConsole::IResult *pResult, void *pUserData)
         return;
     }
 
-    if (!pP->m_AccData.m_Donor) {
-        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("This is a donor feature"));
+    if (!pP->m_AccData.m_HouseID) {
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("You don't have house!"));
         return;
     }
     

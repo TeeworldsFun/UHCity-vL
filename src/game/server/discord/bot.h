@@ -11,6 +11,7 @@ public:
     void LogEnter(std::string Nickname);
     void LogExit(std::string Nickname);
     void SendChatTarget_Discord(std::string Text, std::string Desp);
+    void DiscordStatus();
 private:
     dpp::cluster *m_Bot;
     dpp::snowflake m_Channel;

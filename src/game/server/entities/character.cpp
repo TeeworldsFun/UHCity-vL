@@ -702,12 +702,12 @@ void CCharacter::FireWeapon()
 					m_HammerPos2 = vec2(0, 0);
 				}
 			}
-			else if (m_pPlayer->m_AccData.m_HammerShot && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERSHOT && !m_GameZone)
+			else if (m_pPlayer->m_AccData.m_HammerShot && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERSHOT && !m_GameZone && !m_pPlayer->m_onMonster)
 			{
 				NewPlasma();
 				m_ReloadTimer = Server()->TickSpeed() / 3;
 			}
-			else if (m_pPlayer->m_AccData.m_HammerKill && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERKILL && !m_GameZone)
+			else if (m_pPlayer->m_AccData.m_HammerKill && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERKILL && !m_GameZone && !m_pPlayer->m_onMonster)
 			{
 				m_ReloadTimer = Server()->TickSpeed() / 3;
 			} else if (m_pPlayer->m_AccData.m_Portal && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_PORTAL && !m_GameZone)

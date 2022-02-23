@@ -6,7 +6,7 @@
 CGameControllerMOD::CGameControllerMOD(class CGameContext *pGameServer)
 : IGameController(pGameServer)
 {
-	m_pGameType = "UH|City";
+	m_pGameType = "UH|City-vL";
 }
 
 void CGameControllerMOD::Tick()

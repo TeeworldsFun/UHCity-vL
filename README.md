@@ -1,4 +1,4 @@
-====== UH|City Version.Localization ======
+====== UH|City v.L ======
 
 ![UH|City](https://user-images.githubusercontent.com/74450074/154786353-85c50c58-ede5-4216-b6af-c6823732e9c2.png)
 

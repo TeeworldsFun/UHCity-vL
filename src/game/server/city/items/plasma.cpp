@@ -11,6 +11,8 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, int Type, vec2 Pos, int Owner, int Vict
 	m_Owner = Owner;
 	m_Victim = Victim;
 	m_Type = Type;
+	m_PlasmaDamage = g_Config.m_PlasmaDmg;
+
 	GameWorld()->InsertEntity(this);
 
 	CCharacter *OwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -69,7 +71,7 @@ void CPlasma::HammerPlasma()
 
 	if(TargetChr)
 	{
-		TargetChr->TakeDamage(vec2(0, 0), 20, m_Owner, m_Type);
+		TargetChr->TakeDamage(vec2(0, 0), m_PlasmaDamage, m_Owner, m_Type);
 		Reset();
 		return;
 	}
@@ -121,7 +123,7 @@ void CPlasma::RiflePlasma()
 	CCharacter *TargetChr = GameServer()->m_World.IntersectCharacter(m_Pos, m_Pos2, 20.0f, Intersection, OwnerChar);
 
 	if(TargetChr)
-		TargetChr->TakeDamage(vec2(0, 0), 20, m_Owner, m_Type);
+		TargetChr->TakeDamage(vec2(0, 0), m_PlasmaDamage, m_Owner, m_Type);
 }
 void CPlasma::Tick()
 {

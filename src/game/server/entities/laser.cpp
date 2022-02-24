@@ -14,6 +14,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_Bounces = 0;
 	m_EvalTick = 0;
 	m_Type = Type;
+	m_LaserDamage = g_Config.m_LaserDmg;
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -33,7 +34,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		if(Hit->m_GameZone && Hit->m_Frozen && m_Type == WEAPON_RIFLE)
 			Hit->Unfreeze();
 		else if(m_Type == WEAPON_RIFLE)
-			Hit->TakeDamage(vec2(0.f, 0.f), GameServer()->Tuning()->m_LaserDamage, m_Owner, WEAPON_RIFLE);
+			Hit->TakeDamage(vec2(0.f, 0.f), m_LaserDamage, m_Owner, WEAPON_RIFLE);
 		return false;
 	}
 
@@ -62,7 +63,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, zBuf);
 	}
 	else if(!OwnerChar->GetPlayer()->m_Insta && !Hit->GetPlayer()->m_Insta)
-		Hit->TakeDamage(vec2(0.f, 0.f), GameServer()->Tuning()->m_LaserDamage, m_Owner, WEAPON_RIFLE);
+		Hit->TakeDamage(vec2(0.f, 0.f), m_LaserDamage, m_Owner, WEAPON_RIFLE);
 	
 	// City
 	if(OwnerChar && !Hit->GetPlayer()->m_AccData.m_Arrested && !Hit->GetPlayer()->m_Insta && !Hit->Protected())

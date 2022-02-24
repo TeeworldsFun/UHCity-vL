@@ -17,6 +17,7 @@ public:
 private:
 	int m_Owner;
 	int m_Victim;
+	int m_Power;
 };
 
 #endif

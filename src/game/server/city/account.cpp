@@ -12,6 +12,9 @@
 #include "base/rapidjson/filereadstream.h"
 #include "base/rapidjson/filewritestream.h"
 #include "base/rapidjson/error/en.h"
+#include <engine/server/sql_connector.h>
+#include <engine/server/sql_job.h>
+#include <engine/server/server.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#include <tchar.h>
@@ -1109,3 +1112,115 @@ void CAccount::SetAuth(char *Username, int lvl) {
 	fscanf(Accfile, "%s\n", AccText);
 	fclose(Accfile);
 }
+
+class CSqlJob_Server_Register : public CSqlJob
+{
+private:
+	CServer* m_pServer;
+	int m_ClientID;
+	CSqlString<64> m_sName;
+	CSqlString<64> m_sNick;
+	CSqlString<64> m_sPasswordHash;
+	CSqlString<64> m_sEmail;
+	
+public:
+	CSqlJob_Server_Register(CServer* pServer, int ClientID, const char* pName, const char* pPasswordHash, const char* pEmail)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+		m_sName = CSqlString<64>(pName);
+		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
+		m_sPasswordHash = CSqlString<64>(pPasswordHash);
+		if(pEmail)
+			m_sEmail = CSqlString<64>(pEmail);
+		else
+			m_sEmail = CSqlString<64>("");
+	}
+
+	virtual bool Job(CSqlServer* pSqlServer)
+	{
+
+		char aBuf[512];
+		char aAddrStr[64];
+		net_addr_str(m_pServer->m_NetServer.ClientAddr(m_ClientID), aAddrStr, sizeof(aAddrStr));
+
+		try
+		{
+			//检查数据库中的名称或昵称
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' OR Nick = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				dbg_msg("sql", "用户名/昵称 %s 已被占用",m_sNick.ClrStr());
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in used"));
+				return true;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		//Создаем сам аккаунт
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"INSERT INTO %s_Users "
+				"(Username, Nick, PasswordHash, Email, ClanID ,RegisterDate, RegisterIp) "
+				"VALUES ('%s', '%s', '%s', '%s', '0', UTC_TIMESTAMP(), '%s');"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr(), m_sPasswordHash.ClrStr(), m_sEmail.ClrStr(), aAddrStr);
+			pSqlServer->executeSql(aBuf);
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		// Получаем инфу пользователя
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' AND PasswordHash = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sPasswordHash.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				int UsedID = (int)pSqlServer->GetResults()->getInt("UserId");
+				str_format(aBuf, sizeof(aBuf), 
+					"INSERT INTO %s_uClass (UserID, Username) VALUES ('%d', '%s');"
+					, pSqlServer->GetPrefix()
+					, UsedID, m_sName.ClrStr());
+				pSqlServer->executeSql(aBuf);
+
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
+				return true;
+			}
+			else
+			{
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+				return false;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		return true;
+	}
+};

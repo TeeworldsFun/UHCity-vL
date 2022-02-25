@@ -822,6 +822,7 @@ void CGameContext::OnClientConnected(int ClientID)
 	const int StartTeam = g_Config.m_SvTournamentMode ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, ClientID, StartTeam, 0);
+	m_apPlayers[ClientID]->m_Puppy = false;
 	//players[client_id].init(client_id);
 	//players[client_id].client_id = client_id;
 
@@ -2217,7 +2218,7 @@ void CGameContext::OnZombie(int ClientID, int Zomb)
 {
 }
 
-int CGameContext::CreateNewDummy(int DummyID, int DummyMode)
+int CGameContext::CreateNewDummy(int DummyID, int DummyMode, int ClientID)
 {
     if (DummyID < 0)
     {
@@ -2237,9 +2238,11 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode)
 	m_apPlayers[DummyID]->m_TeeInfos.m_UseCustomColor = 0;
 	m_apPlayers[DummyID]->m_TeeInfos.m_ColorFeet = 16776960;
 	m_apPlayers[DummyID]->m_TeeInfos.m_ColorBody = 16776960;
-    Server()->BotJoin(DummyID, DummyMode);
+	m_apPlayers[DummyID]->m_Puppy = DummyMode < 0;
+	m_apPlayers[DummyID]->m_PuppyOwner = ClientID;
+    Server()->BotJoin(DummyID, DummyMode, DummyMode < 0);
 
-	if(DummyMode <= 13) //Zombie dummy
+	if(DummyMode >= 0 && DummyMode <= 13) //Zombie dummy
 		str_copy(m_apPlayers[DummyID]->m_TeeInfos.m_SkinName, "voodoo_tee", MAX_NAME_LENGTH);
 	else // don't know :D
 		str_copy(m_apPlayers[DummyID]->m_TeeInfos.m_SkinName, "pinky", MAX_NAME_LENGTH);

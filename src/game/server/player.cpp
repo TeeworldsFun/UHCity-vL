@@ -442,8 +442,14 @@ void CPlayer::SetTeam(int Team)
 void CPlayer::TryRespawn()
 {
 	vec2 SpawnPos;
+	if (m_Puppy) {
+		if(GameServer()->GetPlayerChar(m_PuppyOwner))
+			SpawnPos = GameServer()->GetPlayerChar(m_PuppyOwner)->m_Pos + vec2(GameServer()->GetPlayerChar(m_PuppyOwner)->m_Input.m_TargetX, GameServer()->GetPlayerChar(m_PuppyOwner)->m_Input.m_TargetY);
+		else
+			return;
 
-	if (m_Afk) {
+	}
+	else if (m_Afk) {
 		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Afk?3:0))
 			return;
 	} else if(m_Insta) {

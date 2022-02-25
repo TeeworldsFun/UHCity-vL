@@ -2560,18 +2560,21 @@ void CCharacter::DoZombieMovement()
 		}
 
 		//Do Aim
-		if(pCloseZomb != this)
-			DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), pCloseZomb->m_Pos, pCloseZomb->GetPlayer()->GetCID());//Only do aiming if it sees a player, (but i wanted it always...)
-		else
-			DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), vec2(0, 0), -1);//Only do aiming if it sees a player, (but i wanted it always...)
-		if(IsAlive() && pClosest && pClosest->IsAlive() && (pClosest->m_Pos.y > m_Pos.y || GameServer()->Collision()->CheckTiles(pClosest->m_Pos, 20)))
+		if (m_pPlayer->m_PuppyOwner != pClosest->GetPlayer()->GetCID())
 		{
-			if(m_Pos.x > pClosest->m_Pos.x)
-				m_Input.m_Direction = -1;
-			else if(m_Pos.x == pClosest->m_Pos.x)
-				m_Input.m_Direction = 0;//rare but could
+			if(pCloseZomb != this)
+				DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), pCloseZomb->m_Pos, pCloseZomb->GetPlayer()->GetCID());//Only do aiming if it sees a player, (but i wanted it always...)
 			else
-				m_Input.m_Direction = 1;
+				DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), vec2(0, 0), -1);//Only do aiming if it sees a player, (but i wanted it always...)
+			if(IsAlive() && pClosest && pClosest->IsAlive() && (pClosest->m_Pos.y > m_Pos.y || GameServer()->Collision()->CheckTiles(pClosest->m_Pos, 20)))
+			{
+				if(m_Pos.x > pClosest->m_Pos.x)
+					m_Input.m_Direction = -1;
+				else if(m_Pos.x == pClosest->m_Pos.x)
+					m_Input.m_Direction = 0;//rare but could
+				else
+					m_Input.m_Direction = 1;
+			}
 		}
 	}
 	else if(pCloseZomb != this)

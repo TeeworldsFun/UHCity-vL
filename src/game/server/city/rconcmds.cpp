@@ -4,6 +4,26 @@
 #include <game/version.h>
 #include <game/generated/nethash.cpp>
 
+
+void CGameContext::ConSpawnBot(IConsole::IResult *pResult, void *pUserData)
+{
+	int ClientID = pResult->GetInteger(0);
+	CGameContext *pSelf = (CGameContext *) pUserData;	
+	CCharacter *pChr = pSelf->GetPlayerChar(ClientID);
+
+	if (!pSelf->m_apPlayers[ClientID] || !pChr)
+		return;
+
+	for(int i = MAX_CLIENTS; i >= 0; i--)
+	{
+		if(pChr->GameServer()->m_apPlayers[i])
+			continue;
+
+		pChr->GameServer()->CreateNewDummy(i, -1, ClientID);
+		break;
+	}
+}
+
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

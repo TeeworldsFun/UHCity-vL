@@ -110,6 +110,10 @@ public:
 	} m_Latency;
 
 	// City
+
+	bool m_Puppy;
+	int m_PuppyOwner;
+
 	struct
 	{
 		// Main

@@ -209,6 +209,10 @@ public:
 	// Localization system
 	virtual const char* GetClientLanguage(int ClientID) = 0;
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
+
+// SQL
+public:
+	virtual void FirstInit(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface

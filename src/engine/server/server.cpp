@@ -28,8 +28,11 @@
 
 #include "register.h"
 #include "server.h"
+#include <engine/server/sql_job.h>
 
 #include <city/components/localization.h>
+
+#include <engine/server/sql_connector.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
@@ -191,6 +194,15 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 
 	m_RconClientID = -1;
 	m_RconAuthLevel = AUTHED_ADMIN;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		m_apSqlReadServers[i] = 0;
+		m_apSqlWriteServers[i] = 0;
+	}
+
+	CSqlConnector::SetReadServers(m_apSqlReadServers);
+	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
 
 	Init();
 }
@@ -1531,6 +1543,15 @@ int CServer::Run()
 
 	if(m_pCurrentMapData)
 		mem_free(m_pCurrentMapData);
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (m_apSqlReadServers[i])
+			delete m_apSqlReadServers[i];
+
+		if (m_apSqlWriteServers[i])
+			delete m_apSqlWriteServers[i];
+	}
 	return 0;
 }
 
@@ -1734,6 +1755,46 @@ void CServer::DemoRecorder_HandleAutoStart()
 	}
 }
 
+void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
+		return;
+
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "MySQL", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	//bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : false;
+
+	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (!apSqlServers[i])
+		{
+			//apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
+
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return;
+		}
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "MySQL", "failed to add new sqlserver: limit of sqlservers reached");
+
+	return;
+}
+
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
 	CServer* pServer = (CServer *)pUser;
@@ -1835,6 +1896,8 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("command_access", ConchainCommandUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+
+	Console()->Register("sql_add_server", "ssssssi?i", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver");
 }
 
 
@@ -2034,3 +2097,44 @@ void CServer::BotJoin(int BotID, int BotMode)
     str_copy(m_aClients[BotID].m_aName, pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
     str_copy(m_aClients[BotID].m_aClan, pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
 }
+
+class CSqlJob_Server_FirstInit : public CSqlJob
+{
+private:
+	CServer* m_pServer;
+	int m_ClientID;
+	CSqlString<64> m_sNick;
+	
+public:
+	CSqlJob_Server_FirstInit(CServer* pServer, int ClientID)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
+	}
+
+	virtual bool Job(CSqlServer* pSqlServer)
+	{
+		char aBuf[512];
+		try
+		{
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT Nick, Seccurity FROM %s_Users "
+				"WHERE Nick = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sNick.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("sql", "Can't check newplayer seccurity (MySQL Error: %s)", e.what());
+			return false;			
+		}
+		return true;
+	}
+};
+void CServer::FirstInit(int ClientID)
+{
+	CSqlJob* pJob = new CSqlJob_Server_FirstInit(this, ClientID);
+	pJob->Start();
+}	

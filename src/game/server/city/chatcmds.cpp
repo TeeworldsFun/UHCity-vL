@@ -89,8 +89,6 @@ void CGameContext::ConChatChangePw(IConsole::IResult *pResult, void *pUserData)
 
     pP->m_pAccount->NewPassword(aHash);
     pP->m_pAccount->Apply();
-
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Password changed"));
 }
 
 // functions

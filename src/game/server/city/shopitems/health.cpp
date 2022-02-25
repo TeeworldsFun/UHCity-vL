@@ -42,10 +42,12 @@ void CBuyHealth::Tick()
 		}
 
 		const char* pLanguage = pOwner->GetPlayer()->GetLanguage();
+		dynamic_string Bufferh;
 		dynamic_string Buffer;
 			
-		Server()->Localization()->Format_L(Buffer, pLanguage, _("Health"));
-		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_Health, g_Config.m_EuHealth, Click, 500);
+		Server()->Localization()->Format_L(Bufferh, pLanguage, _("Health"));
+		pOwner->Buy(Bufferh.buffer(), &pOwner->GetPlayer()->m_AccData.m_Health, g_Config.m_EuHealth, Click, 500);
+
 		Server()->Localization()->Format_L(Buffer, pLanguage, _("Armor"));
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_Armor, g_Config.m_EuArmor, Click1, 500);
 	}

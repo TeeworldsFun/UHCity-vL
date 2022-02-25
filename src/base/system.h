@@ -9,6 +9,13 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include <stddef.h>
+#include <stdlib.h>
+#include <time.h>
+
+#ifdef CONF_FAMILY_UNIX
+#include <sys/un.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +39,12 @@ extern "C" {
 void dbg_assert(int test, const char *msg);
 #define dbg_assert(test,msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+
+#ifdef __GNUC__
+#define GNUC_ATTRIBUTE(x) __attribute__(x)
+#else
+#define GNUC_ATTRIBUTE(x)
+#endif
 
 /*
 	Function: dbg_break
@@ -344,6 +357,15 @@ void thread_sleep(int milliseconds);
 void *thread_create(void (*threadfunc)(void *), void *user);
 
 /*
+	Function: thread_init
+		Creates a new thread.
+	Parameters:
+		threadfunc - Entry point for the new thread.
+		user - Pointer to pass to the thread.
+*/
+void *thread_init(void (*threadfunc)(void *), void *user);
+
+/*
 	Function: thread_wait
 		Waits for a thread to be done or destroyed.
 
@@ -386,6 +408,7 @@ void lock_destroy(LOCK lock);
 
 int lock_try(LOCK lock);
 void lock_wait(LOCK lock);
+void lock_unlock(LOCK lock);
 void lock_release(LOCK lock);
 
 /* Group: Timer */
@@ -956,6 +979,8 @@ const char *str_find(const char *haystack, const char *needle);
 */
 void str_hex(char *dst, int dst_size, const void *data, int data_size);
 
+int str_hex_decode(unsigned char *dst, int dst_size, const char *src);
+
 /*
 	Function: str_timestamp
 		Copies a time stamp in the format year-month-day_hour-minute-second to the string.
@@ -968,6 +993,13 @@ void str_hex(char *dst, int dst_size, const void *data, int data_size);
 		- Guarantees that buffer string will contain zero-termination.
 */
 void str_timestamp(char *buffer, int buffer_size);
+void str_timestamp_format(char *buffer, int buffer_size, const char *format);
+void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
+GNUC_ATTRIBUTE((format(strftime, 4, 0)));
+
+#define FORMAT_TIME "%H:%M:%S"
+#define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
+#define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
 
 /* Group: Filesystem */
 
@@ -1247,6 +1279,8 @@ int str_utf8_forward(const char *str, int cursor);
 		- This function will also move the pointer forward.
 */
 int str_utf8_decode(const char **ptr);
+
+int str_utf8_isstart(char c);
 
 /*
 	Function: str_utf8_encode

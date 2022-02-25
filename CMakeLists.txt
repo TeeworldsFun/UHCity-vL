@@ -262,6 +262,7 @@ find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
+find_package(MySQL)
 add_subdirectory(other/DPP)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
@@ -312,11 +313,14 @@ show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL" SDL)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
+show_dependency_status("MySQL" MYSQL)
 
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile Teeworlds")
 endif()
-
+if(NOT(MYSQL_FOUND))
+  message(SEND_ERROR "You must install MySQL to compile the ${PROJECT_NAME}")
+endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
   message(SEND_ERROR "You must install Freetype to compile the Teeworlds client")
 endif()
@@ -371,6 +375,7 @@ file(COPY data DESTINATION .)
 set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${SDL_COPY_FILES}
+  ${MYSQL_COPY_FILES}
 )
 
 set(COPY_FILES_SERVER
@@ -920,7 +925,11 @@ else()
 endif()
 
 # Libraries
-set(LIBS_SERVER ${LIBS} ${OPENSSL_LIBRARIES})
+set(LIBS_SERVER
+  ${LIBS}
+  ${OPENSSL_LIBRARIES}
+  ${MYSQL_LIBRARIES}
+)
 
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})

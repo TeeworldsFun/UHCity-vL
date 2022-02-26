@@ -967,7 +967,7 @@ void IGameController::CheckZombie()
 			int Random = RandZomb();
 			if(Random == -1)
 				break;
-			GameServer()->CreateNewDummy(i, Random);
+			// GameServer()->CreateNewDummy(i, Random);
 			m_Zombie[Random]--;
 		}
 	}

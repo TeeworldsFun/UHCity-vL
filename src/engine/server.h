@@ -170,7 +170,7 @@ public:
 		return true;
 	}
 
-	virtual void BotJoin(int BotID, int BotMode) = 0;
+	virtual void BotJoin(int BotID, int BotMode, bool Puppy = false) = 0;
 
 
 	virtual void SetClientName(int ClientID, char const *pName) = 0;

@@ -218,6 +218,7 @@ public:
 	virtual const char *NetVersion();
 
 	private: //KlickFoots Rconcmdsachen^^
+		static void ConSpawnBot(IConsole::IResult *pResult, void *pUserData);
 		static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 		static void ConAuth(IConsole::IResult *pResult, void *pUserData);
 		static void ConVip(IConsole::IResult *pResult, void *pUserData);
@@ -388,7 +389,7 @@ public:
 	void OnZombie(int ClientID, int Zomb);
 	void OnZombieKill(int ClientID);
 
-	int CreateNewDummy(int DummyID, int DummyMode);
+	int CreateNewDummy(int DummyID, int DummyMode, int ClientID = -1);
 
 	int GetPlayerNum();
 private:

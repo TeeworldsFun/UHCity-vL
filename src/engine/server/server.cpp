@@ -2047,7 +2047,7 @@ void CNetServer::BotInit(int BotID)
     m_aSlots[BotID].m_Connection.BotConnect();
 }
 
-void CServer::BotJoin(int BotID, int BotMode)
+void CServer::BotJoin(int BotID, int BotMode, bool Puppy)
 {
 	const char *pNames[] = {
         "The Man",
@@ -2094,6 +2094,7 @@ void CServer::BotJoin(int BotID, int BotMode)
     m_aClients[BotID].m_State = CClient::STATE_BOT;
     m_aClients[BotID].m_Authed = AUTHED_NO;
 
+<<<<<<< HEAD
     str_copy(m_aClients[BotID].m_aName, pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
     str_copy(m_aClients[BotID].m_aClan, pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
 }
@@ -2138,3 +2139,8 @@ void CServer::FirstInit(int ClientID)
 	CSqlJob* pJob = new CSqlJob_Server_FirstInit(this, ClientID);
 	pJob->Start();
 }	
+=======
+    str_copy(m_aClients[BotID].m_aName, Puppy ? "Puppy" : pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
+    str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet"  : pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
+}
+>>>>>>> da3f36b0823daf510581efa8549bc1a56ccb6b4c

@@ -26,7 +26,7 @@ private:
     int m_LifeTime;
 
     // anim
-    int m_SpawnTimer;
+    // int m_SpawnTimer;
     int m_StartPos[MAX_PROJECTILS];
     int m_StartRadius;
 

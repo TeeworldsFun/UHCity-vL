@@ -1349,7 +1349,7 @@ void CGameContext::ConChatFly(IConsole::IResult *pResult, void *pUserData)
     if (pP->m_Insta || pChr->m_GameZone || pP->m_onMonster)
         return;
 
-    if (!(pP->m_AccData.m_InfinityJumps == 2)) {
+    if (pP->m_AccData.m_InfinityJumps != 2) {
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Buy Fly first!"));
         return;
     }

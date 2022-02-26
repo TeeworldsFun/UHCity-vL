@@ -1488,8 +1488,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 }
 
 void CGameContext::DisableDmg(int Owner, int Target) {
-	char aBuf[128];
-	
+
 	if (!m_NoDmgIDs[Owner][Target]) {
 		m_NoDmgIDs[Owner][Target] = 1;
 
@@ -1501,8 +1500,7 @@ void CGameContext::DisableDmg(int Owner, int Target) {
 }
 
 void CGameContext::EnableDmg(int Owner, int Target) {
-	char aBuf[128];
-	
+
 	if (m_NoDmgIDs[Owner][Target]) {
 		m_NoDmgIDs[Owner][Target] = 0;
 
@@ -2261,7 +2259,7 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode, int ClientID)
 
 void CGameContext::OnZombieKill(int ClientID)
 {
-	for(int i = 0; i++; i < 10)
+	for(int i = 0;i < 10; i++)
 	{
 		CPickup *pPickup = new CPickup(&this->m_World, POWERUP_HEALTH, POWERUP_HEALTH);
 		pPickup->m_Pos = m_apPlayers[ClientID]->GetCharacter()->m_Pos;

@@ -352,7 +352,7 @@ public:
 	void AddToBountyList(int ID);
 	void RemoveFromBountyList(int ID);
 	const int* BountyList() { return m_BountyList; }
-	const int BountyList(int i) { return m_BountyList[i]; }
+	int BountyList(int i) { return m_BountyList[i]; }
 
 	bool ValidID(int ID) { return ID >= 0 && ID < MAX_CLIENTS; }
 	int GetWIDByStr(const char *weapon);

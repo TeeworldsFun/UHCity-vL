@@ -318,7 +318,7 @@ void CGameContext::ConSetLife(IConsole::IResult* pResult, void* pUserData)
 	int ID = pResult->GetVictim();
 	char aBuf[200];
 
-	if (Amount < 10 && Amount > 500)
+	if (Amount < 10 || Amount > 500)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Value must be between 10 and 500");
 		return;
@@ -352,7 +352,7 @@ void CGameContext::ConSetArmor(IConsole::IResult* pResult, void* pUserData)
 	int ID = pResult->GetVictim();
 	char aBuf[200];
 
-	if (Amount < 10 && Amount > 500)
+	if (Amount < 10 || Amount > 500)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "Value must be between 10 and 500");
 		return;

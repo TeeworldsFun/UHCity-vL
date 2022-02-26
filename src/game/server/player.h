@@ -125,22 +125,20 @@ public:
 		// basic
 		unsigned long long m_Money;
 		int m_Health;
-		int m_Armor;	
+		int m_Armor;
 		int m_Kills;
 		int m_HouseID;
 
 		// levels
 		unsigned int m_Level;
 		unsigned long long int m_ExpPoints;
-		unsigned int m_LvlWeapon[5];
-		unsigned int m_ExpWeapon[5];
 
 		// Rank
-		int m_Donor;
-		int m_VIP;
+		bool m_Donor;
+		bool m_VIP;
 
 		// Event
-		long long m_Bounty;
+		long long int m_Bounty;
 
 		// Punishments
 		int m_Arrested;
@@ -155,6 +153,9 @@ public:
 		int m_Portal;
 
 		// Weapons
+		unsigned int m_LvlWeapon[5];
+		unsigned int m_ExpWeapon[5];
+
 		int m_GrenadeSpread;
 		int m_GrenadeBounce;
 		int m_GrenadeMine;

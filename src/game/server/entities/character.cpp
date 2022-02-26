@@ -282,7 +282,7 @@ void CCharacter::Move(int dir)
 	m_Core.m_Pos = movePos;
 }
 
-void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, int Click, int Max)
+void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, int Click, int Max) //Regular
 {
 	char aBuf[128];
 	char numBuf[2][16];
@@ -338,6 +338,48 @@ void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, i
 		"cost", numBuf[0], 
 		"money", numBuf[1], NULL);
 		SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
+	}
+}
+
+void CCharacter::Buy(const char *Name, bool *Upgrade, long long unsigned Price, int Click)//Things that max count is 1
+{
+	char aBuf[128];
+	char numBuf[2][16];
+	const char* pLanguage = GetPlayer()->GetLanguage();
+	dynamic_string Buffer;
+	if(*Upgrade) {
+		Server()->Localization()->Format_L(Buffer, pLanguage, _("You already have '{str:Name}'"), "Name", Name, NULL);
+		SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
+		return;
+	}
+	if(Click == 1)
+	{
+
+			if(m_pPlayer->m_AccData.m_Money >= Price)
+			{
+				if(Server()->Tick() - m_BuyTick > 50)
+				{
+					*Upgrade = true;
+					m_pPlayer->m_AccData.m_Money -= Price;
+					str_format(aBuf, sizeof(aBuf), "%s (%d/1)", Name, *Upgrade);
+
+					if(m_pPlayer->m_AccData.m_UserID)
+						m_pPlayer->m_pAccount->Apply();
+
+					m_BuyTick = Server()->Tick();
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
+					GameServer()->FormatInt(m_pPlayer->m_AccData.m_Money, numBuf[0]);
+					Server()->Localization()->Format_L(Buffer, pLanguage, _("Money: {str:m}$"), "m", numBuf[0], NULL);
+					SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
+				}
+			}
+			else
+			{
+				GameServer()->FormatInt(Price, numBuf[0]);
+				GameServer()->FormatInt(m_pPlayer->m_AccData.m_Money, numBuf[1]);
+				Server()->Localization()->Format_L(Buffer, pLanguage, _("Not enough money\n{str:Name}: {str:nb0}$\nMoney: {str:nb1}$"), "Name", Name, "nb0", numBuf[0], "nb1", numBuf[1], NULL);
+				SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
+			}
 	}
 }
 
@@ -2615,7 +2657,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 				m_Core.m_Pos = VictimPos + vec2(0, 32);
 			else
 				m_Core.m_Pos = VictimPos - vec2(0, 32);
-			m_Core.m_Vel.y =- 0.1;
+			m_Core.m_Vel.y -= 0.1;
 			m_Pos = m_Core.m_Pos;
 		}
 	}

@@ -426,7 +426,7 @@ void CAccount::Register(char *Username, char *Password, char *TruePassword)
 	writer.Key("authlvl");
 	writer.Int(0);
 	writer.Key("vip");
-	writer.Int(m_pPlayer->m_AccData.m_VIP);
+	writer.Int((int)m_pPlayer->m_AccData.m_VIP);
 	writer.EndObject();
 
 	writer.Key("donor");

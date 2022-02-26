@@ -1778,7 +1778,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		if (!apSqlServers[i])
 		{
 			//apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), "tw", pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
@@ -2141,22 +2141,15 @@ private:
 	CServer* m_pServer;
 	int m_ClientID;
 	CSqlString<64> m_sName;
-	CSqlString<64> m_sNick;
 	CSqlString<64> m_sPasswordHash;
-	CSqlString<64> m_sEmail;
 	
 public:
-	CSqlJob_Server_Register(CServer* pServer, int ClientID, const char* pName, const char* pPasswordHash, const char* pEmail)
+	CSqlJob_Server_Register(CServer* pServer, int ClientID, const char* pName, const char* pPasswordHash)
 	{
 		m_pServer = pServer;
 		m_ClientID = ClientID;
 		m_sName = CSqlString<64>(pName);
-		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
 		m_sPasswordHash = CSqlString<64>(pPasswordHash);
-		if(pEmail)
-			m_sEmail = CSqlString<64>(pEmail);
-		else
-			m_sEmail = CSqlString<64>("");
 	}
 
 	virtual bool Job(CSqlServer* pSqlServer)
@@ -2168,15 +2161,15 @@ public:
 		{
 			//检查数据库中的名称或昵称
 			str_format(aBuf, sizeof(aBuf), 
-				"SELECT UserId FROM %s_Users WHERE Username = '%s' OR Nick = '%s';"
+				"SELECT UserID FROM %s_Accounts WHERE Username = '%s';"
 				, pSqlServer->GetPrefix()
-				, m_sName.ClrStr(), m_sNick.ClrStr());
+				, m_sName.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
 
 			if(pSqlServer->GetResults()->next())
 			{
-				dbg_msg("sql", "用户名/昵称 %s 已被占用",m_sNick.ClrStr());
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in used"));
+				dbg_msg("sql", "用户名/昵称 %s 已被占用",m_sName.ClrStr());
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in use"));
 				return true;
 			}
 		}
@@ -2193,10 +2186,10 @@ public:
 		{	
 			str_format(aBuf, sizeof(aBuf), 
 				"INSERT INTO %s_Accounts "
-				"(Username, Nickname, PasswordHash, RconPassword, Money, Health, Armor, Kills, HouseID, Level, ExpPoints, Donor, VIP, Bounty, Arrested)"
-				"VALUES ('%s', '%s', '%s', '0', '0', '10', '10', '0', '0', '1', '0', '0',  '0', '0', '0')"
+				"(Username, PasswordHash)"
+				"VALUES ('%s', '%s')"
 				, pSqlServer->GetPrefix()
-				, m_sName.ClrStr(), m_sNick.ClrStr(), m_sPasswordHash.ClrStr());
+				, m_sName.ClrStr(), m_sPasswordHash.ClrStr());
 		}
 		catch (sql::SQLException &e)
 		{
@@ -2210,18 +2203,18 @@ public:
 		try
 		{	
 			str_format(aBuf, sizeof(aBuf), 
-				"SELECT UserId FROM %s_Users WHERE Username = '%s' AND PasswordHash = '%s';"
+				"SELECT UserID FROM %s_Accounts WHERE Username = '%s' AND PasswordHash = '%s';"
 				, pSqlServer->GetPrefix()
 				, m_sName.ClrStr(), m_sPasswordHash.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
 
 			if(pSqlServer->GetResults()->next())
 			{
-				int UsedID = (int)pSqlServer->GetResults()->getInt("UserId");
+				int UserID = (int)pSqlServer->GetResults()->getInt("UserID");
 				str_format(aBuf, sizeof(aBuf), 
-					"INSERT INTO %s_uClass (UserID, Username) VALUES ('%d', '%s');"
-					, pSqlServer->GetPrefix()
-					, UsedID, m_sName.ClrStr());
+					"INSERT INTO %s_Weapons (UserID, Username) VALUES ('%d', '%s');",
+					pSqlServer->GetPrefix(),
+					UserID, m_sName.ClrStr());
 				pSqlServer->executeSql(aBuf);
 
 				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));

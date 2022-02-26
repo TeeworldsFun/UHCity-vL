@@ -195,7 +195,7 @@ char *CGameEvent::GetEvent(int Type)
 // Events
 
 void CGameEvent::Bounty() {
-    char aBuf[128], numBuf[16];
+    char numBuf[16];
     int Amount;
 
     for (int i = 0; i < MAX_PLAYERS; i++) {

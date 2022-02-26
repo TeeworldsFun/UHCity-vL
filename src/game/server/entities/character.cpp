@@ -1497,7 +1497,6 @@ void CCharacter::Booster()
 						m_pPlayer->m_AccData.m_Level++;
 						m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
 
-						char aBuf[256];
 						GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 					}
 				}
@@ -1664,7 +1663,7 @@ void CCharacter::HandleCity()
 	}
 
 	if (GameServer()->Collision()->IsTile(m_Pos, TILE_MONEYCOLLECTOR)) {
-		char aBuf[256], numBuf[2][32];
+		char numBuf[2][32];
 		GameServer()->FormatInt(GameServer()->MoneyCollector()->m_Price, numBuf[0]);
 		GameServer()->FormatInt(GameServer()->MoneyCollector()->m_Money, numBuf[1]);
 		GameServer()->SendBroadcast_Localization(m_pPlayer->GetCID(), BROADCAST_PRIORITY_INTERFACE, BROADCAST_DURATION_REALTIME, _("~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp"), 
@@ -1881,7 +1880,6 @@ void CCharacter::HandleCity()
 				m_pPlayer->m_AccData.m_Level++;
 				m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
 
-				char aBuf[256];
 				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 			}
 		}
@@ -2454,7 +2452,7 @@ void CCharacter::CheckLevelUp(int ClientID)
 		m_pPlayer->m_AccData.m_ExpPoints = 0;
 		m_pPlayer->m_AccData.m_Level++;
 		m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
-		char aBuf[256];
+		
 		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 	}
 

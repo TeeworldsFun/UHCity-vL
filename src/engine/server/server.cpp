@@ -2123,7 +2123,7 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
-			dbg_msg("sql", "Can't check newplayer seccurity (MySQL Error: %s)", e.what());
+			dbg_msg("sql", "Can't check newplayer security (MySQL Error: %s)", e.what());
 			return false;			
 		}
 		return true;

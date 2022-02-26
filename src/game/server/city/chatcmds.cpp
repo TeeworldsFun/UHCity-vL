@@ -316,7 +316,6 @@ void CGameContext::ConChatJailrifle(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
-    char aBuf[128];
 
     if (!pChr)
         return;
@@ -350,7 +349,6 @@ void CGameContext::ConChatInstagib(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
-    char aBuf[128];
 
     if (!g_Config.m_EnableInstagib) {
         pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Instagib is not enabled"));
@@ -474,7 +472,6 @@ void CGameContext::ConChatSetPM(IConsole::IResult *pResult, void *pUserData)
 
     const char* Victim = pResult->GetString(0);
     int ID = pSelf->Server()->ClientIdByName(Victim);
-    char aBuf[256];
 
     if (ID == -1) {
         pSelf->SendChatTarget_Localization(pResult->GetClientID(), CHATCATEGORY_INFO, _("No such user"));
@@ -1345,7 +1342,6 @@ void CGameContext::ConChatFly(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
-    char aBuf[128];
 
     if (!pChr)
         return;
@@ -1367,7 +1363,6 @@ void CGameContext::ConChatHealHook(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
-    char aBuf[128];
 
     if (!pChr)
         return;
@@ -1389,7 +1384,6 @@ void CGameContext::ConChatBoostHook(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *) pUserData;
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
-    char aBuf[128];
 
     if (!pChr)
         return;

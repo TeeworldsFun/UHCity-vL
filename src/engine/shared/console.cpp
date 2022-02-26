@@ -14,14 +14,14 @@
 
 const char *CConsole::CResult::GetString(unsigned Index)
 {
-	if (Index < 0 || Index >= m_NumArgs)
+	if (Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
 int CConsole::CResult::GetInteger(unsigned Index)
 {
-	if (Index < 0 || Index >= m_NumArgs)
+	if (Index >= m_NumArgs)
 		return 0;
 
 	return str_toint(m_apArgs[Index]);
@@ -29,7 +29,7 @@ int CConsole::CResult::GetInteger(unsigned Index)
 
 long long CConsole::CResult::GetLongLong(unsigned Index)
 {
-	if (Index < 0 || Index >= m_NumArgs)
+	if (Index >= m_NumArgs)
 		return 0;
 
 	return str_toll(m_apArgs[Index]);
@@ -37,7 +37,7 @@ long long CConsole::CResult::GetLongLong(unsigned Index)
 
 float CConsole::CResult::GetFloat(unsigned Index)
 {
-	if (Index < 0 || Index >= m_NumArgs)
+	if (Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
 }

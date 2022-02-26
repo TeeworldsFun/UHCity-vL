@@ -180,13 +180,6 @@ public:
 	void AddBroadcast(int ClientID, const char* pText, int Priority, int LifeSpan);
 	void SetClientLanguage(int ClientID, const char *pLanguage);
 
-	char *ITC(int I)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "%d", I);
-		return aBuf;
-	}
-
 	//
 	void CheckPureTuning();
 	void SendTuningParams(int ClientID);

@@ -805,7 +805,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
-	Server()->FirstInit(ClientID);
+	//Server()->FirstInit(ClientID);
 
 	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Welcome on UH|City"));
 	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Made by NoHack2Win & Urinstone"));
@@ -866,7 +866,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	m_VoteUpdate = true;
 
 	// update spectator modes
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < MAX_PLAYERS; ++i)
 	{
 		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
 			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
@@ -2177,11 +2177,14 @@ void CGameContext::OnShutdown()
 
 void CGameContext::OnSnap(int ClientID)
 {
+	if(ClientID > MAX_PLAYERS)
+		return;
+	
 	m_World.Snap(ClientID);
 	m_pController->Snap(ClientID);
 	m_Events.Snap(ClientID);
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_PLAYERS; i++)
 	{
 		if(m_apPlayers[i])
 			m_apPlayers[i]->Snap(ClientID);

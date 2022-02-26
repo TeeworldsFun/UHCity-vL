@@ -334,7 +334,7 @@ public:
 				int m_TimedPriority;
 				char m_TimedMessage[1024];
 		};
-		CBroadcastState m_BroadcastStates[MAX_CLIENTS];
+		CBroadcastState m_BroadcastStates[MAX_PLAYERS];
 
 	public: //Ende :D
 

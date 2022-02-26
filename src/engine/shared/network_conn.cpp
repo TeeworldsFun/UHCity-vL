@@ -195,7 +195,7 @@ void CNetConnection::Disconnect(const char *pReason)
 
 void CNetConnection::BotConnect()
 {
-    m_State = NET_CONNSTATE_BOT;
+    m_State = NET_CONNSTATE_OFFLINE;
 }
 
 

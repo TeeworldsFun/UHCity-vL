@@ -535,10 +535,6 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 	if(Flags&MSGFLAG_FLUSH)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
-	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
-		m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
-
 	if(!(Flags&MSGFLAG_NOSEND))
 	{
 		if(ClientID == -1)
@@ -1782,7 +1778,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 		if (!apSqlServers[i])
 		{
 			//apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
-			apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), "tw", pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
@@ -2091,12 +2087,11 @@ void CServer::BotJoin(int BotID, int BotMode, bool Puppy)
     };
 
     m_NetServer.BotInit(BotID);
-    m_aClients[BotID].m_State = CClient::STATE_BOT;
+    m_aClients[BotID].m_State = CClient::STATE_INGAME;
     m_aClients[BotID].m_Authed = AUTHED_NO;
 
-<<<<<<< HEAD
-    str_copy(m_aClients[BotID].m_aName, pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
-    str_copy(m_aClients[BotID].m_aClan, pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
+    str_copy(m_aClients[BotID].m_aName, Puppy ? "Puppy" : pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
+    str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet"  : pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
 }
 
 class CSqlJob_Server_FirstInit : public CSqlJob
@@ -2139,8 +2134,112 @@ void CServer::FirstInit(int ClientID)
 	CSqlJob* pJob = new CSqlJob_Server_FirstInit(this, ClientID);
 	pJob->Start();
 }	
-=======
-    str_copy(m_aClients[BotID].m_aName, Puppy ? "Puppy" : pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
-    str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet"  : pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
-}
->>>>>>> da3f36b0823daf510581efa8549bc1a56ccb6b4c
+
+class CSqlJob_Server_Register : public CSqlJob
+{
+private:
+	CServer* m_pServer;
+	int m_ClientID;
+	CSqlString<64> m_sName;
+	CSqlString<64> m_sNick;
+	CSqlString<64> m_sPasswordHash;
+	CSqlString<64> m_sEmail;
+	
+public:
+	CSqlJob_Server_Register(CServer* pServer, int ClientID, const char* pName, const char* pPasswordHash, const char* pEmail)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+		m_sName = CSqlString<64>(pName);
+		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
+		m_sPasswordHash = CSqlString<64>(pPasswordHash);
+		if(pEmail)
+			m_sEmail = CSqlString<64>(pEmail);
+		else
+			m_sEmail = CSqlString<64>("");
+	}
+
+	virtual bool Job(CSqlServer* pSqlServer)
+	{
+
+		char aBuf[512];
+
+		try
+		{
+			//检查数据库中的名称或昵称
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' OR Nick = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				dbg_msg("sql", "用户名/昵称 %s 已被占用",m_sNick.ClrStr());
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in used"));
+				return true;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		//Создаем сам аккаунт
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"INSERT INTO %s_Accounts "
+				"(Username, Nickname, PasswordHash, RconPassword, Money, Health, Armor, Kills, HouseID, Level, ExpPoints, Donor, VIP, Bounty, Arrested)"
+				"VALUES ('%s', '%s', '%s', '0', '0', '10', '10', '0', '0', '1', '0', '0',  '0', '0', '0')"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr(), m_sPasswordHash.ClrStr());
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		// Получаем инфу пользователя
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' AND PasswordHash = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sPasswordHash.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				int UsedID = (int)pSqlServer->GetResults()->getInt("UserId");
+				str_format(aBuf, sizeof(aBuf), 
+					"INSERT INTO %s_uClass (UserID, Username) VALUES ('%d', '%s');"
+					, pSqlServer->GetPrefix()
+					, UsedID, m_sName.ClrStr());
+				pSqlServer->executeSql(aBuf);
+
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
+				return true;
+			}
+			else
+			{
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+				return false;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		return true;
+	}
+};

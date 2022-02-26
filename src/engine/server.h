@@ -68,26 +68,22 @@ public:
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
-		int Result = 0;
-		T Tmp;
+		int result = 0;
+		T tmp;
 		if (ClientID == -1)
 		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if (ClientIngame(i))
+			for(int i = 0; i < MAX_PLAYERS; i++)
+				if(ClientIngame(i))
 				{
-					mem_copy(&Tmp, pMsg, sizeof(T));
-					Result = SendPackMsgTranslate(&Tmp, Flags, i);
+					mem_copy(&tmp, pMsg, sizeof(T));
+					result = SendPackMsgTranslate(&tmp, Flags, i);
 				}
-			}
-		}
-		else
+		} else 
 		{
-			mem_copy(&Tmp, pMsg, sizeof(T));
-			Result = SendPackMsgTranslate(&Tmp, Flags, ClientID);
+			mem_copy(&tmp, pMsg, sizeof(T));
+			result = SendPackMsgTranslate(&tmp, Flags, ClientID);
 		}
-
-		return Result;
+		return result;
 	}
 
 	template<class T>

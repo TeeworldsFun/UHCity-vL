@@ -27,7 +27,7 @@ CREATE TABLE `tw_Accounts` (
   `Username` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `PasswordHash` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `Rcon` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `Level` int(11) NOT NULL DEFAULT 1,
+  `Level` int(11) UNSIGNED NOT NULL DEFAULT 1,
   `ExpPoints` bigint(16) NOT NULL DEFAULT 0,
   `Money` bigint(16) NOT NULL DEFAULT 0,
   `Health` int(11) NOT NULL DEFAULT 10,
@@ -37,7 +37,7 @@ CREATE TABLE `tw_Accounts` (
   `VIP` boolean NOT NULL DEFAULT FALSE,
   `Donor` boolean NOT NULL DEFAULT FALSE,
   `Bounty` bigint(16) NOT NULL DEFAULT 0,
-  `Arrest` int(11) NOT NULL DEFAULT 0,
+  `Arrested` int(11) NOT NULL DEFAULT 0,
   `CreateDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`UserID`) USING BTREE,
    KEY Username (`Username`) USING BTREE

@@ -336,9 +336,7 @@ public:
 	virtual const char *GetClientLanguage(int ClientID);
 	virtual void SetClientLanguage(int ClientID, const char *pLanguage);
 
-	// SQL
-public:
-	virtual void FirstInit(int ClientID);
+	// SQL integrations
 };
 
 #endif

@@ -170,26 +170,28 @@ void CGameEvent::GetEventStr(int ID, char *Out, int Size) {
 
 char *CGameEvent::GetEvent(int Type)
 {
-    char aBuf[256];
+    std::string aBuf;
+    //char aBuf[256];
+    aBuf.clear();
     switch (Type)
     {
     case EVENT_BOUNTY:
-        str_format(aBuf, sizeof(aBuf), "Bounty");
+        aBuf.append("Bounty");
         break;
     case EVENT_MONEYEXP:
-        str_format(aBuf, sizeof(aBuf), "Money&Exp");
+        aBuf.append("Money&Exp");
         break;
     case EVENT_RISINGMC:
-        str_format(aBuf, sizeof(aBuf), "RisngMC");
+        aBuf.append("RisngMC");
         break;
     case EVENT_MONSTER:
-        str_format(aBuf, sizeof(aBuf), "Zomb");
+        aBuf.append("Zomb");
         break;
     default:
-        str_format(aBuf, sizeof(aBuf), "Unknown");
+        aBuf.append("Unknown");
         break;
     }
-    return aBuf;
+    return aBuf.data();
 }
 
 // Events

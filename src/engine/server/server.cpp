@@ -2292,6 +2292,54 @@ public:
 
 			return false;
 		}
+		try
+		{
+			str_format(aBuf, sizeof(aBuf),
+					   "SELECT * FROM %s_Weapons WHERE UserID = '%s';", pSqlServer->GetPrefix(), m_pServer);
+			pSqlServer->executeSqlQuery(aBuf);
+			if (pSqlServer->GetResults()->next())
+			{
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeSpread = pSqlServer->GetResults()->getInt("GrenadeSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeBounce = pSqlServer->GetResults()->getInt("GrenadeBounce");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeMine = pSqlServer->GetResults()->getInt("GrenadeMine");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunSpread = pSqlServer->GetResults()->getInt("ShotgunSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunExplode = pSqlServer->GetResults()->getInt("ShotgunExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunStars = pSqlServer->GetResults()->getInt("ShotgunStars");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSpread = pSqlServer->GetResults()->getInt("RifleSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSwap = pSqlServer->GetResults()->getInt("RifleSwap");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RiflePlasma = pSqlServer->GetResults()->getInt("RiflePlasma");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunSpread = pSqlServer->GetResults()->getInt("GunSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunExplode = pSqlServer->GetResults()->getInt("GunExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunFreeze = pSqlServer->GetResults()->getInt("GunFreeze");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerWalls = pSqlServer->GetResults()->getInt("HammerWalls");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerShot = pSqlServer->GetResults()->getInt("HammerShot");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerKill = pSqlServer->GetResults()->getInt("HammerKill");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerExplode = pSqlServer->GetResults()->getInt("HammerExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaPermanent = pSqlServer->GetResults()->getInt("NinjaPermanent");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaStart = pSqlServer->GetResults()->getInt("NinjaStart");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaSwitch = pSqlServer->GetResults()->getInt("NinjaSwitch");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaFly = pSqlServer->GetResults()->getInt("NinjaFly");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaBomber = pSqlServer->GetResults()->getInt("NinjaBomber");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_EndlessHook = pSqlServer->GetResults()->getInt("EndlessHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealHook = pSqlServer->GetResults()->getInt("HealHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_BoostHook = pSqlServer->GetResults()->getInt("BoostHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PushAura = pSqlServer->GetResults()->getInt("PushAura");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura = pSqlServer->GetResults()->getInt("PullAura");
+			}
+			else
+			{
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+				return false;
+			}
+		}
+		catch(const std::exception& e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't login (MySQL Error: %s)", e.what());
+
+			return false;
+		}
+		
 		return true;
 	}
 };

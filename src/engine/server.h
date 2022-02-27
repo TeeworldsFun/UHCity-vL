@@ -10,6 +10,15 @@
 
 enum
 {
+	LEVEL,
+	EXP,
+	MONEY,
+	DONATE,
+	DGOLD,
+};
+
+enum
+{
 	CHATCATEGORY_DEFAULT=0,
 	CHATCATEGORY_INFO,
 	CHATCATEGORY_JOIN,
@@ -207,6 +216,8 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 
 	// SQL integrations
+	virtual void Register(int ClientID, const char* pUsername, const char* pPassword) = 0;
+	virtual void Login(int ClientID, const char* pUsername, const char* pPassword) = 0;
 };
 
 class IGameServer : public IInterface

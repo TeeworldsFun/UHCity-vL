@@ -9,6 +9,8 @@ CGameContext *CGS;
 
 CDiscordBot::CDiscordBot(CGameContext *GameServer)
 {
+    if(!g_Config.m_SvDiscordBot)
+        return;
     try
     {
         CGS = GameServer;
@@ -40,6 +42,8 @@ CDiscordBot::CDiscordBot(CGameContext *GameServer)
 
 void CDiscordBot::LogChat(int Team, std::string Nickname, std::string Message)
 {
+    if(!g_Config.m_SvDiscordBot)
+        return;
     dpp::embed* embed;
     if(Team == -1)
     {
@@ -57,6 +61,8 @@ void CDiscordBot::LogChat(int Team, std::string Nickname, std::string Message)
 
 void CDiscordBot::LogEnter(std::string Nickname)
 {
+    if(!g_Config.m_SvDiscordBot)
+        return;
     dpp::embed embed = dpp::embed().
         set_color(0x00ff11).
         set_description("**"+Nickname + "** has entered the game.");
@@ -66,6 +72,8 @@ void CDiscordBot::LogEnter(std::string Nickname)
 
 void CDiscordBot::LogExit(std::string Nickname)
 { 
+    if(!g_Config.m_SvDiscordBot)
+        return;
     dpp::embed embed = dpp::embed().
         set_color(0xff002e).
         set_description("**"+Nickname + "** has left the game.");
@@ -75,6 +83,8 @@ void CDiscordBot::LogExit(std::string Nickname)
 
 void CDiscordBot::SendChatTarget_Discord(std::string Text, std::string Desp)
 {
+    if(!g_Config.m_SvDiscordBot)
+        return;
     if(CGS->GetPlayerNum() <= 0)
         return;
 

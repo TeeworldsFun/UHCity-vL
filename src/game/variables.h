@@ -157,6 +157,7 @@ MACRO_CONFIG_INT(PlasmaDmg, plasma_dmg, 20, 0, 10000000, CFGFLAG_SERVER, "")
 /* # Discord # */
 MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's token.")
 MACRO_CONFIG_STR(SvDiscordChannel, sv_discord_channel, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed channel's ID.")
+MACRO_CONFIG_INT(SvDiscordBot, sv_discord_bot, 1, 0, 1 , CFGFLAG_SAVE|CFGFLAG_SERVER, "")
 /* # Discord # */
 
 // debug

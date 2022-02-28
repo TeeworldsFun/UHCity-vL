@@ -7,6 +7,7 @@
 #include "engine/server/sql_connector.h"
 #include "engine/server/sql_server.h"
 
+
 class CSnapIDPool
 {
 	enum
@@ -109,83 +110,8 @@ public:
 		int m_Authed;
 		int m_AuthTries;
 		int m_AccID;
-
-		struct
-		{
-			// Main
-			int m_UserID;
-			char m_Username[32];
-			char m_Password[32];
-			char m_RconPassword[32];
-
-			// basic
-			unsigned long long m_Money;
-			int m_Health;
-			int m_Armor;
-			int m_Kills;
-			int m_HouseID;
-
-			// levels
-			unsigned int m_Level;
-			unsigned long long int m_ExpPoints;
-
-			// Rank
-			bool m_Donor;
-			bool m_VIP;
-
-			// Event
-			long long int m_Bounty;
-
-			// Punishments
-			int m_Arrested;
-
-			// Player
-			int m_AllWeapons;
-			int m_HealthRegen;
-			int m_InfinityAmmo;
-			int m_InfinityJumps;
-			int m_FastReload;
-			int m_NoSelfDMG;
-			int m_Portal;
-
-			// Weapons
-			unsigned int m_LvlWeapon[5];
-			unsigned int m_ExpWeapon[5];
-
-			int m_GrenadeSpread;
-			int m_GrenadeBounce;
-			int m_GrenadeMine;
-
-			int m_ShotgunSpread;
-			int m_ShotgunExplode;
-			int m_ShotgunStars;
-
-			int m_RifleSpread;
-			int m_RifleSwap;
-			int m_RiflePlasma;
-
-			int m_GunSpread;
-			int m_GunExplode;
-			int m_GunFreeze;
-
-			int m_HammerWalls;
-			int m_HammerShot;
-			int m_HammerKill;
-			int m_HammerExplode;
-
-			int m_NinjaPermanent;
-			int m_NinjaStart;
-			int m_NinjaSwitch;
-			int m_NinjaFly;
-			int m_NinjaBomber;
-
-			int m_EndlessHook;
-			int m_HealHook;
-			int m_BoostHook;
-
-			int m_PushAura;
-			int m_PullAura;
-		} m_AccData;
+		
+		_m_AccData m_AccData;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -340,9 +266,8 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char *pLanguage);
 
 	// SQL integrations
-	template<typename T>
-	T GetData_Server(int ClientID, int Type);
-	virtual void UpdateData(int ClientID, int Name, int Value);
+	virtual _m_AccData GetData_Server(int ClientID);
+	virtual void UpdateData(int ClientID);
 };
 
 #endif

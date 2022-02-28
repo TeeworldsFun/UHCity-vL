@@ -818,8 +818,7 @@ void CGameContext::OnClientEnter(int ClientID)
 }
 void CGameContext::GetData_Client(int ClientID)
 {
-
-	
+	m_apPlayers[ClientID]->m_AccData = Server()->GetData_Server(ClientID);
 }
 bool CGameContext::Apply(int ClientID)
 {

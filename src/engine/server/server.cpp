@@ -2492,6 +2492,7 @@ public:
 	}
 };
 
+/*
 template<typename T>
 T CServer::GetData_Server(int ClientID, int Type)
 {
@@ -2561,9 +2562,13 @@ T CServer::GetData_Server(int ClientID, int Type)
 		break;
 	}
 }
+*/
+_m_AccData CServer::GetData_Server(int ClientID)
+{
+	return m_aClients[ClientID].m_AccData;
+}
 
-
-void CServer::UpdateData(int ClientID,int Name, int Value)
+void CServer::UpdateData(int ClientID)
 {
 	return;
 }

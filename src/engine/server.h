@@ -16,6 +16,145 @@ enum
 	CHATCATEGORY_GOOD,
 };
 
+enum
+{
+		e_UserID,
+		e_Username,
+		e_Password,
+		e_RconPassword,
+
+		e_Money,
+		e_Health,
+		e_Armor,
+		e_Kills,
+		e_HouseID,
+
+		e_Level,
+		e_ExpPoints,
+
+		e_Donor,
+		e_VIP,
+
+		e_Bounty,
+
+		e_Arrested,
+
+		e_AllWeapons,
+		e_HealthRegen,
+		e_InfinityAmmo,
+		e_InfinityJumps,
+		e_FastReload,
+		e_NoSelfDMG,
+		e_Portal,
+
+		e_HammerLvl,
+        e_GunLvl,
+        e_ShotgunLvl,
+        e_GrenadeLvl,
+        e_RifleLvl,
+
+        e_HammerExp,
+        e_GunExp,
+        e_ShotgunExp,
+        e_GrenadeExp,
+        e_RifleExp,
+
+
+		e_GrenadeSpread,
+		e_GrenadeBounce,
+		e_GrenadeMine,
+
+		e_ShotgunSpread,
+		e_ShotgunExplode,
+		e_ShotgunStars,
+
+		e_RifleSpread,
+		e_RifleSwap,
+		e_RiflePlasma,
+
+		e_GunSpread,
+		e_GunExplode,
+		e_GunFreeze,
+
+		e_HammerWalls,
+		e_HammerShot,
+		e_HammerKill,
+		e_HammerExplode,
+
+		e_NinjaPermanent,
+		e_NinjaStart,
+		e_NinjaSwitch,
+		e_NinjaFly,
+		e_NinjaBomber,
+
+		e_EndlessHook,
+		e_HealHook,
+		e_BoostHook,
+
+		e_PushAura,
+		e_PullAura,
+		e_ValueCount
+};
+const char VarName[58][32] =
+	{
+		"UserID",
+		"Username",
+		"Password",
+		"RconPassword",
+		"Money",
+		"Health",
+		"Armor",
+		"Kills",
+		"HouseID",
+		"Level",
+		"ExpPoints",
+		"Donor",
+		"VIP",
+		"Bounty",
+		"Arrested",
+		"AllWeapons",
+		"HealthRegen",
+		"InfinityAmmo",
+		"InfinityJumps",
+		"FastReload",
+		"NoSelfDMG",
+		"Portal",
+		"HammerLvl",
+		"GunLvl",
+		"ShotgunLvl",
+		"GrenadeLvl",
+		"RifleLvl",
+		"HammerExp",
+		"GunExp",
+		"ShotgunExp",
+		"GrenadeExp",
+		"RifleExp",
+		"GrenadeSpread",
+		"GrenadeBounce",
+		"GrenadeMine",
+		"ShotgunSpread",
+		"ShotgunExplode",
+		"ShotgunStars",
+		"RifleSpread",
+		"RifleSwap",
+		"RiflePlasma",
+		"GunSpread",
+		"GunExplode",
+		"GunFreeze",
+		"HammerWalls",
+		"HammerShot",
+		"HammerKill",
+		"HammerExplode",
+		"NinjaPermanent",
+		"NinjaStart",
+		"NinjaSwitch",
+		"NinjaFly",
+		"NinjaBomber",
+		"EndlessHook",
+		"HealHook",
+		"BoostHook",
+		"PushAura",
+		"PullAura"};
 class IServer : public IInterface
 {
 	MACRO_INTERFACE("server", 0)
@@ -207,6 +346,10 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 
 	// SQL integrations
+	template<typename T>
+	T GetData_Server(int ClientID, int Type);
+	// #define GetData(ClientID, Name) (m_aClients[ClientID].m_AccData.m_##Name)
+	virtual void UpdateData(int ClientID, int Name, int Value) = 0;
 };
 
 class IGameServer : public IInterface

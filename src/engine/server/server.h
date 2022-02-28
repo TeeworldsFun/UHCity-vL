@@ -337,6 +337,9 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char *pLanguage);
 
 	// SQL integrations
+	template<typename T>
+	T GetData_Server(int ClientID, int Type);
+	virtual void UpdateData(int ClientID, int Name, int Value);
 };
 
 #endif

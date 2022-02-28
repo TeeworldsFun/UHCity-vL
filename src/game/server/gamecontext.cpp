@@ -816,7 +816,17 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_VoteUpdate = true;
 
 }
+void CGameContext::GetData_Client(int ClientID)
+{
 
+	
+}
+bool CGameContext::Apply(int ClientID)
+{
+	if(!m_apPlayers[ClientID]->m_AccData.m_UserID) return false;
+	;
+	return true;
+}
 void CGameContext::OnClientConnected(int ClientID)
 {
 	// Check which team the player should be on

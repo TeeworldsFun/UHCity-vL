@@ -2483,3 +2483,79 @@ public:
 		return true;
 	}
 };
+
+template<typename T>
+T CServer::GetData_Server(int ClientID, int Type)
+{
+	if(!m_aClients[ClientID].m_AccData.m_UserID) return NULL;
+	switch (Type)
+	{
+	case e_UserID: return m_aClients[ClientID].m_AccData.m_UserID; break;
+	case e_Username: return m_aClients[ClientID].m_AccData.m_Username; break;
+	case e_Password: return m_aClients[ClientID].m_AccData.m_Password; break;
+	case e_RconPassword: return m_aClients[ClientID].m_AccData.m_RconPassword; break;
+	case e_Money: return m_aClients[ClientID].m_AccData.m_Money; break;
+	case e_Health: return m_aClients[ClientID].m_AccData.m_Health; break;
+	case e_Armor: return m_aClients[ClientID].m_AccData.m_Armor; break;
+	case e_Kills: return m_aClients[ClientID].m_AccData.m_Kills; break;
+	case e_HouseID: return m_aClients[ClientID].m_AccData.m_HouseID; break;
+	case e_Level: return m_aClients[ClientID].m_AccData.m_Level; break;
+	case e_ExpPoints: return m_aClients[ClientID].m_AccData.m_ExpPoints; break;
+	case e_Donor: return m_aClients[ClientID].m_AccData.m_Donor; break;
+	case e_VIP: return m_aClients[ClientID].m_AccData.m_VIP; break;
+	case e_Bounty: return m_aClients[ClientID].m_AccData.m_Bounty; break;
+	case e_Arrested: return m_aClients[ClientID].m_AccData.m_Arrested; break;
+	case e_AllWeapons: return m_aClients[ClientID].m_AccData.m_AllWeapons; break;
+	case e_HealthRegen: return m_aClients[ClientID].m_AccData.m_HealthRegen; break;
+	case e_InfinityAmmo: return m_aClients[ClientID].m_AccData.m_InfinityAmmo; break;
+	case e_InfinityJumps: return m_aClients[ClientID].m_AccData.m_InfinityJumps; break;
+	case e_FastReload: return m_aClients[ClientID].m_AccData.m_FastReload; break;
+	case e_NoSelfDMG: return m_aClients[ClientID].m_AccData.m_NoSelfDMG; break;
+	case e_Portal: return m_aClients[ClientID].m_AccData.m_Portal; break;
+	case e_HammerLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[0]; break;
+	case e_GunLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[1]; break;
+	case e_ShotgunLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[2]; break;
+	case e_GrenadeLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[3]; break;
+	case e_RifleLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[4]; break;
+	case e_HammerExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[0]; break;
+	case e_GunExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[1]; break;
+	case e_ShotgunExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[2]; break;
+	case e_GrenadeExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[3]; break;
+	case e_RifleExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[4]; break;
+	case e_GrenadeSpread: return m_aClients[ClientID].m_AccData.m_GrenadeSpread; break;
+	case e_GrenadeBounce: return m_aClients[ClientID].m_AccData.m_GrenadeBounce; break;
+	case e_GrenadeMine: return m_aClients[ClientID].m_AccData.m_GrenadeMine; break;
+	case e_ShotgunSpread: return m_aClients[ClientID].m_AccData.m_ShotgunSpread; break;
+	case e_ShotgunExplode: return m_aClients[ClientID].m_AccData.m_ShotgunExplode; break;
+	case e_ShotgunStars: return m_aClients[ClientID].m_AccData.m_ShotgunStars; break;
+	case e_RifleSpread: return m_aClients[ClientID].m_AccData.m_RifleSpread; break;
+	case e_RifleSwap: return m_aClients[ClientID].m_AccData.m_RifleSwap; break;
+	case e_RiflePlasma: return m_aClients[ClientID].m_AccData.m_RiflePlasma; break;
+	case e_GunSpread: return m_aClients[ClientID].m_AccData.m_GunSpread; break;
+	case e_GunExplode: return m_aClients[ClientID].m_AccData.m_GunExplode; break;
+	case e_GunFreeze: return m_aClients[ClientID].m_AccData.m_GunFreeze; break;
+	case e_HammerWalls: return m_aClients[ClientID].m_AccData.m_HammerWalls; break;
+	case e_HammerShot: return m_aClients[ClientID].m_AccData.m_HammerShot; break;
+	case e_HammerKill: return m_aClients[ClientID].m_AccData.m_HammerKill; break;
+	case e_HammerExplode: return m_aClients[ClientID].m_AccData.m_HammerExplode; break;
+	case e_NinjaPermanent: return m_aClients[ClientID].m_AccData.m_NinjaPermanent; break;
+	case e_NinjaStart: return m_aClients[ClientID].m_AccData.m_NinjaStart; break;
+	case e_NinjaSwitch: return m_aClients[ClientID].m_AccData.m_NinjaSwitch; break;
+	case e_NinjaFly: return m_aClients[ClientID].m_AccData.m_NinjaFly; break;
+	case e_NinjaBomber: return m_aClients[ClientID].m_AccData.m_NinjaBomber; break;
+	case e_EndlessHook: return m_aClients[ClientID].m_AccData.m_EndlessHook; break;
+	case e_HealHook: return m_aClients[ClientID].m_AccData.m_HealHook; break;
+	case e_BoostHook: return m_aClients[ClientID].m_AccData.m_BoostHook; break;
+	case e_PushAura: return m_aClients[ClientID].m_AccData.m_PushAura; break;
+	case e_PullAura: return m_aClients[ClientID].m_AccData.m_PullAura; break;
+	
+	default: return 0;
+		break;
+	}
+}
+
+
+void CServer::UpdateData(int ClientID,int Name, int Value)
+{
+	return;
+}

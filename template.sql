@@ -55,13 +55,13 @@ CREATE TABLE `tw_Accounts` (
 -- UNLOCK TABLES;
 
 --
--- Table structure for table `tw_Weapons`
+-- Table structure for table `tw_Items`
 --
 
-DROP TABLE IF EXISTS `tw_Weapons`;
+DROP TABLE IF EXISTS `tw_Items`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tw_Weapons` (
+CREATE TABLE `tw_Items` (
   `UserID` int(11) UNSIGNED NOT NULL,
   `Username` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `HammerLvl` int(11) UNSIGNED NOT NULL DEFAULT '0',
@@ -88,7 +88,7 @@ CREATE TABLE `tw_Weapons` (
 	`ShotgunExplode` int(11) UNSIGNED NOT NULL DEFAULT '0',
 	`ShotgunStars` int(11) UNSIGNED NOT NULL DEFAULT '0',
 	`RifleSpread` int(11) UNSIGNED NOT NULL DEFAULT '0',
-	`RifleSwap;` int(11) UNSIGNED NOT NULL DEFAULT '0',
+	`RifleSwap` int(11) UNSIGNED NOT NULL DEFAULT '0',
 	`RiflePlasma` int(11) UNSIGNED NOT NULL DEFAULT '0',
 	`GunSpread` int(11) UNSIGNED NOT NULL DEFAULT '0',
 	`GunExplode` int(11) UNSIGNED NOT NULL DEFAULT '0',
@@ -113,13 +113,13 @@ CREATE TABLE `tw_Weapons` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `tw_Weapons`
+-- Dumping data for table `tw_Items`
 --
 
--- LOCK TABLES `tw_Weapons` WRITE;
-/*!40000 ALTER TABLE `tw_Weapons` DISABLE KEYS */;
--- INSERT INTO `tw_Weapons` VALUES (1,1,1,1,10);
-/*!40000 ALTER TABLE `tw_Weapons` ENABLE KEYS */;
+-- LOCK TABLES `tw_Items` WRITE;
+/*!40000 ALTER TABLE `tw_Items` DISABLE KEYS */;
+-- INSERT INTO `tw_Items` VALUES (1,1,1,1,10);
+/*!40000 ALTER TABLE `tw_Items` ENABLE KEYS */;
 -- UNLOCK TABLES;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

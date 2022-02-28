@@ -198,6 +198,9 @@ public:
 		char m_aLanguage[16]; // NICE
 	};
 
+	virtual void Register(int ClientID, const char* pUsername, const char* pPassword);
+	virtual void Login(int ClientID, const char* pUsername, const char* pPassword);
+
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
 

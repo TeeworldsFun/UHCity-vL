@@ -3,6 +3,7 @@
 
 #include <base/math.h>
 #include <base/system.h>
+#include <base/tl/array.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
@@ -23,6 +24,12 @@
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/snapshot.h>
+
+#include <cstring>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 #include <mastersrv/mastersrv.h>
 
@@ -2198,7 +2205,7 @@ public:
 			if (pSqlServer->GetResults()->next())
 			{
 				dbg_msg("sql", "用户名/昵称 %s 已被占用", m_sName.ClrStr());
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in use"));
+				//GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in use"));
 				return true;
 			}
 		}
@@ -2239,7 +2246,7 @@ public:
 			{
 				int UserID = (int)pSqlServer->GetResults()->getUInt("UserID");
 				str_format(aBuf, sizeof(aBuf),
-						   "INSERT INTO %s_Weapons (UserID, Username) VALUES ('%d', '%s');",
+						   "INSERT INTO %s_Items (UserID, Username) VALUES ('%d', '%s');",
 						   pSqlServer->GetPrefix(),
 						   UserID, m_sName.ClrStr());
 				pSqlServer->executeSql(aBuf);
@@ -2325,7 +2332,7 @@ public:
 		try
 		{
 			str_format(aBuf, sizeof(aBuf),
-					   "SELECT * FROM %s_Weapons WHERE UserID = '%d';",
+					   "SELECT * FROM %s_Items WHERE UserID = '%d';",
 					    pSqlServer->GetPrefix(), m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
 			pSqlServer->executeSqlQuery(aBuf);
 			if (pSqlServer->GetResults()->next())
@@ -2373,6 +2380,7 @@ public:
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_BoostHook = pSqlServer->GetResults()->getUInt("BoostHook");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_PushAura = pSqlServer->GetResults()->getUInt("PushAura");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura = pSqlServer->GetResults()->getUInt("PullAura");
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Login"));
 			}
 			else
 			{
@@ -2459,7 +2467,7 @@ public:
 			{
 				int UserID = (int)pSqlServer->GetResults()->getUInt("UserID");
 				str_format(aBuf, sizeof(aBuf), 
-					"INSERT INTO %s_Weapons (UserID, Username) VALUES ('%d', '%s');",
+					"INSERT INTO %s_Items (UserID, Username) VALUES ('%d', '%s');",
 					pSqlServer->GetPrefix(),
 					UserID);
 				pSqlServer->executeSql(aBuf);
@@ -2558,4 +2566,16 @@ T CServer::GetData_Server(int ClientID, int Type)
 void CServer::UpdateData(int ClientID,int Name, int Value)
 {
 	return;
+}
+
+inline void CServer::Register(int ClientID, const char* pUsername, const char* pPassword)
+{	
+	CSqlJob* pJob = new CSqlJob_Server_Register(this, ClientID, pUsername, pPassword);
+	pJob->Start();
+}
+
+void CServer::Login(int ClientID, const char* pUsername, const char* pPassword)
+{
+	CSqlJob* pJob = new CSqlJob_Server_Login(this, ClientID, pUsername, pPassword);
+	pJob->Start();
 }

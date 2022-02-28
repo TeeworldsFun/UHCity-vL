@@ -10,6 +10,15 @@
 
 enum
 {
+	LEVEL,
+	EXP,
+	MONEY,
+	DONATE,
+	DGOLD,
+};
+
+enum
+{
 	CHATCATEGORY_DEFAULT=0,
 	CHATCATEGORY_INFO,
 	CHATCATEGORY_JOIN,
@@ -350,6 +359,8 @@ public:
 	T GetData_Server(int ClientID, int Type);
 	// #define GetData(ClientID, Name) (m_aClients[ClientID].m_AccData.m_##Name)
 	virtual void UpdateData(int ClientID, int Name, int Value) = 0;
+	virtual void Register(int ClientID, const char* pUsername, const char* pPassword) = 0;
+	virtual void Login(int ClientID, const char* pUsername, const char* pPassword) = 0;
 };
 
 class IGameServer : public IInterface

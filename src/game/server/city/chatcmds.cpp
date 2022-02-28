@@ -21,7 +21,7 @@ void CGameContext::ConChatLogin(IConsole::IResult *pResult, void *pUserData)
     char aHash[64]; //Result
 	mem_zero(aHash, sizeof(aHash));
 	Crypt(Password, (const unsigned char*) "d9", 1, 14, aHash);
-	
+
     pSelf->m_apPlayers[pResult->GetClientID()]->m_pAccount->Login(Username, aHash);
 }
 

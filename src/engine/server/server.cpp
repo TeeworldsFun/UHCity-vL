@@ -2205,25 +2205,24 @@ public:
 
 			if (pSqlServer->GetResults()->next())
 			{
-				dbg_msg("sql", "用户名/昵称 %s 已被占用", m_sName.ClrStr());
-				//GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in use"));
+				//dbg_msg("sql", "Nick %s is already registered", m_sName.ClrStr());
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username is already in use"));
 				return true;
 			}
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"), NULL);
 			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
 
 			return false;
 		}
 
-		//Создаем сам аккаунт
 		try
 		{
 			str_format(aBuf, sizeof(aBuf),
 					   "INSERT INTO %s_Accounts "
-					   "(Username, PasswordHash)"
+					   "(Username, PasswordHash) "
 					   "VALUES ('%s', '%s')",
 					   pSqlServer->GetPrefix(), m_sName.ClrStr(), m_sPasswordHash.ClrStr());
 			pSqlServer->executeSql(aBuf);
@@ -2313,13 +2312,13 @@ public:
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Kills = pSqlServer->GetResults()->getUInt("Kills");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_HouseID = pSqlServer->GetResults()->getUInt("HouseID");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Arrested = pSqlServer->GetResults()->getUInt("Arrested");
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP = pSqlServer->GetResults()->getBoolean("VIP");
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor = pSqlServer->GetResults()->getBoolean("Donor");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP = pSqlServer->GetResults()->getInt("VIP");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor = pSqlServer->GetResults()->getInt("Donor");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Bounty = pSqlServer->GetResults()->getUInt("Bounty");
 			}
 			else
 			{
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Username or password incorrect"));
 				return false;
 			}
 		}
@@ -2402,14 +2401,14 @@ public:
 };
 //todo
 
-class CSqlJob_Server_Update : public CSqlJob
+class CSqlJob_Server_UpdateData : public CSqlJob
 {
 private:
 	CServer *m_pServer;
 	int m_ClientID;
 
 public:
-	CSqlJob_Server_Update(CServer *pServer, int ClientID)
+	CSqlJob_Server_UpdateData(CServer *pServer, int ClientID)
 	{
 		m_pServer = pServer;
 		m_ClientID = ClientID;
@@ -2426,7 +2425,7 @@ public:
 		{
 			//检查数据库中的名称或昵称
 			str_format(aBuf, sizeof(aBuf),
-					   "UPDATE %s_Accounts SET"
+					   "UPDATE %s_Accounts SET "
 					   "Username = '%s',"
 					   "Password = '%s',"
 					   "RconPassword = '%s',"
@@ -2440,6 +2439,43 @@ public:
 					   "Donor = '%d',"
 					   "VIP = '%d',"
 					   "Bounty = '%d',"
+					   "Arrested = '%d' "
+					   "WHERE UserID = '%d';",
+				pSqlServer->GetPrefix(),
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Username,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Password,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Health,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Armor,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Kills,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HouseID,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Level,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpPoints,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Bounty,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Arrested,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
+			pSqlServer->executeSql(aBuf);
+
+			#ifdef CONF_DEBUG
+			dbg_msg("sqlupdate", "%s", aBuf);
+			#endif
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
+			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
+
+			return false;
+		}
+		
+		try
+		{
+			//检查数据库中的名称或昵称
+			str_format(aBuf, sizeof(aBuf),
+					   "UPDATE %s_Items SET"
 					   "Arrested = '%d',"
 					   "AllWeapons = '%d',"
 					   "HealthRegen = '%d',"
@@ -2483,23 +2519,9 @@ public:
 					   "HealHook = '%d',"
 					   "BoostHook = '%d',"
 					   "PushAura = '%d',"
-					   "PullAura = '%d'"
+					   "PullAura = '%d' "
 					   "WHERE UserID = '%d';",
 				pSqlServer->GetPrefix(),
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Username,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Password,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Health,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Armor,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Kills,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_HouseID,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Level,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpPoints,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Bounty,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Arrested,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_AllWeapons,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealthRegen,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_InfinityAmmo,
@@ -2547,23 +2569,22 @@ public:
 			pSqlServer->executeSql(aBuf);
 			
 			#ifdef CONF_DEBUG
-			dbg_msg("sqlupdate", "%s", aBuf);
+			dbg_msg("sql", "%s", aBuf);
 			#endif
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
-			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
+			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
 
 			return false;
 		}
-
 		return true;
 	}
 };
 inline void CServer::UpdateData_Server(int ClientID)
 {
-	CSqlJob *pJob = new CSqlJob_Server_Update(this, ClientID);
+	CSqlJob *pJob = new CSqlJob_Server_UpdateData(this, ClientID);
 	pJob->Start();
 }
 _m_AccData CServer::GetData_Server(int ClientID)
@@ -2574,6 +2595,7 @@ _m_AccData CServer::GetData_Server(int ClientID)
 void CServer::UpdateData(int ClientID, _m_AccData AccData)
 {
 	m_aClients[ClientID].m_AccData = AccData;
+	UpdateData_Server(ClientID);
 	return;
 }
 

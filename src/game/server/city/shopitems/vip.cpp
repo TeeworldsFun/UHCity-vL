@@ -38,7 +38,7 @@ void CVip::Tick()
 		dynamic_string Buffer;
 		Server()->Localization()->Format_L(Buffer, pLanguage, _("VIP"));
 		
-		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_VIP, g_Config.m_EuVIP, Click);
+		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_VIP, g_Config.m_EuVIP, Click, 1);
 	}
 }
 

@@ -63,9 +63,10 @@ void CAccount::Login(char *Username, char *Password)
 void CAccount::Register(char *Username, char *Password, char *TruePassword)
 {
 	char aBuf[256];
+	if(m_pPlayer->m_AccData.m_UserID) return GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
+
 	GameServer()->Server()->Register(m_pPlayer->GetCID(), Username, Password);	
 	dbg_msg("account", "Registration succesful ('%s')", Username);
-	str_format(aBuf, sizeof(aBuf), "Registration succesful - ('/login %s %s'): ", Username, TruePassword);
 	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Registration succesful - ('/login {str:Username} {str:Password}')"), "Username", Username, "Password", TruePassword, NULL);
 	Login(Username, Password);
 }

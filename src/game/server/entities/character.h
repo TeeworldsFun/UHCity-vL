@@ -82,7 +82,6 @@ public:
 	void Tele();
 	void Move(int dir);
 	void Buy(const char *Name, int *Upgrade, long long unsigned Price, int Click, int Max);
-	void Buy(const char *Name, bool *Upgrade, long long unsigned Price, int Click);
 	int SetActiveUpgrade(int weapon, int upgrade);
 	int MouseEvent(vec2 Pos);
 	int NewPlasma();

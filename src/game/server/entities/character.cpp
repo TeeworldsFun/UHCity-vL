@@ -341,48 +341,6 @@ void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, i
 	}
 }
 
-void CCharacter::Buy(const char *Name, bool *Upgrade, long long unsigned Price, int Click)//Things that max count is 1
-{
-	char aBuf[128];
-	char numBuf[2][16];
-	const char* pLanguage = GetPlayer()->GetLanguage();
-	dynamic_string Buffer;
-	if(*Upgrade) {
-		Server()->Localization()->Format_L(Buffer, pLanguage, _("You already have '{str:Name}'"), "Name", Name, NULL);
-		SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
-		return;
-	}
-	if(Click == 1)
-	{
-
-			if(m_pPlayer->m_AccData.m_Money >= Price)
-			{
-				if(Server()->Tick() - m_BuyTick > 50)
-				{
-					*Upgrade = true;
-					m_pPlayer->m_AccData.m_Money -= Price;
-					str_format(aBuf, sizeof(aBuf), "%s (%d/1)", Name, *Upgrade);
-
-					if(m_pPlayer->m_AccData.m_UserID)
-						m_pPlayer->m_pAccount->Apply();
-
-					m_BuyTick = Server()->Tick();
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
-					GameServer()->FormatInt(m_pPlayer->m_AccData.m_Money, numBuf[0]);
-					Server()->Localization()->Format_L(Buffer, pLanguage, _("Money: {str:m}$"), "m", numBuf[0], NULL);
-					SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
-				}
-			}
-			else
-			{
-				GameServer()->FormatInt(Price, numBuf[0]);
-				GameServer()->FormatInt(m_pPlayer->m_AccData.m_Money, numBuf[1]);
-				Server()->Localization()->Format_L(Buffer, pLanguage, _("Not enough money\n{str:Name}: {str:nb0}$\nMoney: {str:nb1}$"), "Name", Name, "nb0", numBuf[0], "nb1", numBuf[1], NULL);
-				SendBroadcast(Buffer.buffer(), m_pPlayer->GetCID());
-			}
-	}
-}
-
 int CCharacter::ActiveWeapon()
 {
 	return m_ActiveWeapon;

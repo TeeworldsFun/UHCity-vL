@@ -125,8 +125,8 @@ struct _m_AccData
 	unsigned long long m_ExpPoints;
 
 	// Rank
-	bool m_Donor;
-	bool m_VIP;
+	int m_Donor;
+	int m_VIP;
 
 	// Event
 	long long int m_Bounty;

@@ -34,8 +34,8 @@ CREATE TABLE `tw_Accounts` (
   `Armor` int(11) UNSIGNED NOT NULL DEFAULT 10,
   `Kills` int(11) UNSIGNED NOT NULL DEFAULT 0,
   `HouseID` int(11) UNSIGNED NOT NULL DEFAULT 0,
-  `VIP` boolean NOT NULL DEFAULT FALSE,
-  `Donor` boolean NOT NULL DEFAULT FALSE,
+  `VIP` tinyint NOT NULL DEFAULT 0,
+  `Donor` tinyint NOT NULL DEFAULT 0,
   `Bounty` bigint(16) UNSIGNED NOT NULL DEFAULT 0,
   `Arrested` int(11) UNSIGNED NOT NULL DEFAULT 0,
   `CreateDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -48,11 +48,11 @@ CREATE TABLE `tw_Accounts` (
 -- Dumping data for table `tw_Accounts`
 --
 
--- LOCK TABLES `tw_Accounts` WRITE;
+LOCK TABLES `tw_Accounts` WRITE;
 /*!40000 ALTER TABLE `tw_Accounts` DISABLE KEYS */;
--- INSERT INTO `tw_Accounts` VALUES (1,'Star','天上的星星',1,'Nope',4,2595550,20,5001,16164,53,131,0,0,'2021-08-04 14:00:00');
+INSERT INTO `tw_Accounts` (UserID, Username, PasswordHash) VALUES ('1', 'StarOnTheSky','7b8df4c72fbad8bbe920f11ba644a40c');
 /*!40000 ALTER TABLE `tw_Accounts` ENABLE KEYS */;
--- UNLOCK TABLES;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `tw_Items`
@@ -116,11 +116,11 @@ CREATE TABLE `tw_Items` (
 -- Dumping data for table `tw_Items`
 --
 
--- LOCK TABLES `tw_Items` WRITE;
+LOCK TABLES `tw_Items` WRITE;
 /*!40000 ALTER TABLE `tw_Items` DISABLE KEYS */;
--- INSERT INTO `tw_Items` VALUES (1,1,1,1,10);
+INSERT INTO `tw_Items` (UserID, Username) VALUES ('1', 'StarOnTheSky');
 /*!40000 ALTER TABLE `tw_Items` ENABLE KEYS */;
--- UNLOCK TABLES;
+UNLOCK TABLES;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

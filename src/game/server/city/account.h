@@ -12,6 +12,7 @@ public:
 	CAccount(CPlayer *pPlayer, CGameContext *pGameServer);
 
 	void Login(char *Username, char *Password);
+	void FileLogin(char *Username, char *Password);
 	bool OldLogin(char *Username, char *Password);
 	void Register(char *Username, char *Password, char *TruePassword);
 	void Apply();

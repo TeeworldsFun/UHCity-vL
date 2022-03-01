@@ -111,15 +111,19 @@
         },
         {
             "key": "Instagib is not enabled",
-            "value": "激光瞬杀未被开启"
+            "value": "激光瞬杀游戏已被禁止"
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
-            "value": "玩家{str:PName} 加入/离开 了激光瞬杀"
+            "key": "{str:PName} joined Instagib",
+            "value": "玩家'{str:PName}'加入了激光瞬杀"
         },
         {
-            "key": "Monster is not enabled",
-            "value": "怪物未被开启"
+            "key": "{str:PName} left Instagib",
+            "value": "玩家'{str:PName}'离开了激光瞬杀"
+        },
+        {
+            "key": "Zomb is not enabled",
+            "value": "僵尸末日游戏已被禁止"
         },
         {
             "key": "usage: /transfer <amount>",
@@ -446,7 +450,7 @@
             "value": "如果你有疑问你可以询问制作团队成员"
         },
         {
-            "key": "Join our discord to contact us https://discord.gg/Rstb8ge",
+            "key": "Join our discord to contact us https://discord.gg/PhgUmS2qey",
             "value": "加入我们的QQ群来联系我们: 834323539"
         },
         {
@@ -462,7 +466,7 @@
             "value": "加入我们的QQ群来获取最新的更新：834323539"
         },
         {
-            "key": "If you forget your password or wish to donate, please ONLY contact UrinStone#8404 on Discord.",
+            "key": "If you forget your password or wish to donate, please ONLY contact TeeFlowerFell-Sans#9358 on Discord.",
             "value": "如果你忘记了密码或者想要充值，那么请加QQ好友1421709710，其他人无效"
         },
         {
@@ -514,7 +518,7 @@
             "value": "Donor 价格10元"
         },
         {
-            "key": "Contact UrinStone#8404 at discord",
+            "key": "Contact TeeFlowerFell-Sans#9358 at discord",
             "value": "加QQ1421709710购买Donor"
         },
         {
@@ -638,6 +642,10 @@
             "value": "/hammerkill -- 你的目标不可能在HK的攻击下活下去"
         },
         {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": "/hammerexplode -- Explosion power!"
+        },
+        {
             "key": "/plasma -- Beat them with your Plasma",
             "value": "/plasma -- 你的等离子体将跟踪敌人直到你死"
         },
@@ -752,6 +760,14 @@
         {
             "key": "{str:hk} Hammerkill",
             "value": "血の诅咒的状态发生了转变"
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
         },
         {
             "key": "Buy Gunfreeze first!",
@@ -1074,7 +1090,7 @@
             "value": "欢迎来到商店！"
         },
         {
-            "key": "Type /shop for more informations",
+            "key": "Or use /shop to quick Switch Shop menu",
             "value": "输入/shop获取更多帮助"
         },
         {
@@ -1094,8 +1110,8 @@
             "value": "我们需要死去的Tee"
         },
         {
-            "key": "Duration: {int:s}",
-            "value": "有效期：{int:s}"
+            "key": "Duration: {sec:s}",
+            "value": "有效期：{sec:s}"
         },
         {
             "key": "The Moneycollectors pot will rise",
@@ -1134,7 +1150,7 @@
             "value": "成功创建账号备份"
         },
         {
-            "key": "Visit our Discord server https://discord.gg/Rstb8ge",
+            "key": "Visit our Discord server https://discord.gg/PhgUmS2qey",
             "value": "请加入我们的QQ群：834323539"
         },
         {
@@ -1142,7 +1158,7 @@
             "value": "玩家{str:PN}入住了{int:Number}号房间！恭喜！"
         },
         {
-            "key": "",
+            "key": "Use F3 and F4 to switch the shop menu",
             "value": ""
         },
         {

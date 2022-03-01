@@ -11,10 +11,13 @@ public:
 	virtual void Reset();
 	virtual void Tick();
 
+	int m_VictimTick;
+	int m_HammerCount;
+
 private:
 	int m_Owner;
 	int m_Victim;
-	int m_VictimTick;
+	int m_Power;
 };
 
 #endif

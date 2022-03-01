@@ -32,26 +32,26 @@ void CCarousel::SetSize()
 
 	for(int i = 0; i < 4; i++)
 	{
-		const int STEPS = 32;
+		int STEPS = 32;
 		int X, Y;
 
 		switch(i)
 		{
 		case 0:
-			X = -STEPS;
+			X = -(STEPS += rand()%10);
 			Y = 0;
 			break;
 		case 1:
 			X = 0;
-			Y = -STEPS;
+			Y = -(STEPS += rand()%10);
 			break;
 		case 2:
-			X = STEPS;
+			X = (STEPS += rand()%10);
 			Y = 0;
 			break;
 		case 3:
 			X = 0;
-			Y = STEPS;
+			Y = (STEPS += rand()%10);
 			break;
 		}
 

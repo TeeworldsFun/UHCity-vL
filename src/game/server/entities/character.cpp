@@ -9,7 +9,6 @@
 #include "laser.h"
 #include "projectile.h"
 #include "game/server/city/items/plasma.h"
-#include "game/server/city/items/hammerkill.h"
 #include "game/server/city/wall.h"
 #include "game/server/city/gui.h"
 #include "game/server/city/items/crown.h"
@@ -119,7 +118,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if (GetPlayer()->m_AccData.m_EndlessHook)
 		m_Core.m_EndlessHook = true;
 
-	m_SpawnProtection = Server()->Tick();
+	if(!m_pPlayer->GetZomb()) m_SpawnProtection = Server()->Tick(); else m_SpawnProtection = 0;
 
 	new CGui(GameWorld(), m_pPlayer->GetCID());
 	new CCrown(GameWorld(), m_pPlayer->GetCID());
@@ -173,40 +172,43 @@ bool CCharacter::IsGrounded()
 void CCharacter::Tele()
 {
 	vec2 TelePos = m_Pos + vec2(m_Input.m_TargetX,m_Input.m_TargetY);
-
-	if (!GameServer()->Collision()->IsTile(TelePos, TILE_SOLID) || m_pPlayer->m_God)
+	
+	if (!Server()->IsAdmin(m_pPlayer->GetCID()))
 	{
-		float Dist = distance(TelePos, m_Pos);
-
-		if (Dist > 500) {
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Out of Range"));
-			return;
-		}
-
-		for (int i = 1; i < Dist; i += 32)
+		if (!GameServer()->Collision()->IsTile(TelePos, TILE_SOLID) || m_pPlayer->m_God)
 		{
-			vec2 TestPos = m_Pos + normalize(TelePos - m_Pos) * i;
-			if (!m_pPlayer->m_God)
+			float Dist = distance(TelePos, m_Pos);
+
+			if (Dist > 500) {
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Out of Range"));
+				return;
+			}
+
+			for (int i = 1; i < Dist; i += 32)
 			{
-				if (GameServer()->Collision()->IsTile(TestPos, TILE_ANTI_TELE)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_POLICE)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_ADMIN)
-					|| GameServer()->Collision()->IsTile(TestPos, TILE_DONOR))
+				vec2 TestPos = m_Pos + normalize(TelePos - m_Pos) * i;
+				if (!m_pPlayer->m_God)
 				{
-					GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't teleport there."));
-					return;
+					if (GameServer()->Collision()->IsTile(TestPos, TILE_ANTI_TELE)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_POLICE)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_ADMIN)
+						|| GameServer()->Collision()->IsTile(TestPos, TILE_DONOR))
+					{
+						GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't teleport there."));
+						return;
+					}
 				}
 			}
-		}
 
-		if (Protected())
-		{
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't tele while being protected"));
-			return;
+			if (Protected())
+			{
+				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You can't tele while being protected"));
+				return;
+			}
 		}
+		else
+			return;
 	}
-	else
-		return;
 
 	m_Core.m_Pos = TelePos;
 	CNetEvent_Spawn* pEvent = (CNetEvent_Spawn*)GameServer()->m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
@@ -465,7 +467,7 @@ void CCharacter::HandleNinja()
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
 
-				aEnts[i]->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
+				aEnts[i]->TakeDamage(vec2(0, -10.0f), g_Config.m_NinjaDmg, m_pPlayer->GetCID(), WEAPON_NINJA);
 			}
 		}
 
@@ -530,7 +532,31 @@ void CCharacter::HandleWeaponSwitch()
 void CCharacter::SwitchShop(int Value) {
 	if(GameServer()->Collision()->TileShop(m_Pos))
 	{
-		m_ShopPage += Value * 6;
+		m_Shop += Value;
+
+		if (m_Shop < ITEM_HAMMER)
+			m_Shop = ITEM_JUMP;
+		else if (m_Shop > ITEM_JUMP)
+			m_Shop = ITEM_HAMMER;
+		else if (m_Shop == ITEM_HAMMER)
+        	m_ShopGroup = ITEM_HAMMER;
+		else if (m_Shop == ITEM_GUN)
+        	m_ShopGroup = ITEM_GUN;
+	    else if (m_Shop == ITEM_SHOTGUN)
+    	    m_ShopGroup = ITEM_SHOTGUN;
+    	else if (m_Shop == ITEM_GRENADE)
+        	m_ShopGroup = ITEM_GRENADE;
+	    else if (m_Shop == ITEM_RIFLE)
+	        m_ShopGroup = ITEM_RIFLE;
+    	else if (m_Shop == ITEM_NINJA)
+        	m_ShopGroup = ITEM_NINJA;
+	    else if (m_Shop == ITEM_GENERAL)
+			m_ShopGroup = ITEM_GENERAL;
+		else if (m_Shop == ITEM_HOOK)
+        	m_ShopGroup = ITEM_HOOK;
+		else if (m_Shop == ITEM_JUMP)
+        	m_ShopGroup = ITEM_JUMP;
+
 		return;
 	}
 }
@@ -622,12 +648,22 @@ void CCharacter::FireWeapon()
 				else
 					Dir = vec2(0.f, -1.f);
 
-				if (m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == 3 && !GameServer()->HasDmgDisabled(m_pPlayer->GetCID(), pTarget->m_pPlayer->GetCID())) {
-					new CHammerKill(GameWorld(), m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
-					pTarget->m_IsHammerKilled = true;
+				if (m_IsHammerKilled && m_HammerKill)
+				{
+					m_HammerKill->m_HammerCount += 1;
+					m_HammerKill->m_VictimTick += 100;
+
+				} else if (m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == 3 && !GameServer()->HasDmgDisabled(m_pPlayer->GetCID(), pTarget->m_pPlayer->GetCID())) {
+					if (!pTarget->m_IsHammerKilled && !(pTarget->m_SpawnProtection && pTarget->Protected()))
+					{
+						pTarget->m_HammerKill = new CHammerKill(GameWorld(), m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
+						pTarget->m_IsHammerKilled = true;
+					}
+					else if (pTarget->m_IsHammerKilled)
+						pTarget->m_HammerKill->m_VictimTick -= 60;
 				}
 
-				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+				pTarget->TakeDamage(vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f, g_Config.m_HammerDmg,
 					m_pPlayer->GetCID(), m_ActiveWeapon);
 				Hits++;
 
@@ -666,12 +702,12 @@ void CCharacter::FireWeapon()
 					m_HammerPos2 = vec2(0, 0);
 				}
 			}
-			else if (m_pPlayer->m_AccData.m_HammerShot && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERSHOT && !m_GameZone)
+			else if (m_pPlayer->m_AccData.m_HammerShot && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERSHOT && !m_GameZone && !m_pPlayer->m_onMonster)
 			{
 				NewPlasma();
 				m_ReloadTimer = Server()->TickSpeed() / 3;
 			}
-			else if (m_pPlayer->m_AccData.m_HammerKill && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERKILL && !m_GameZone)
+			else if (m_pPlayer->m_AccData.m_HammerKill && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMERKILL && !m_GameZone && !m_pPlayer->m_onMonster)
 			{
 				m_ReloadTimer = Server()->TickSpeed() / 3;
 			} else if (m_pPlayer->m_AccData.m_Portal && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_PORTAL && !m_GameZone)
@@ -690,6 +726,8 @@ void CCharacter::FireWeapon()
 
 					GameServer()->m_aPortals[m_pPlayer->GetCID()]->Reset();
 				}
+			} else if (m_pPlayer->m_AccData.m_HammerExplode && m_pPlayer->m_AciveUpgrade[m_ActiveWeapon] == UPGRADE_HAMMEREXPLODE && !m_GameZone) {
+				GameServer()->CreateExplosion(m_Pos + vec2(m_Input.m_TargetX,m_Input.m_TargetY), m_pPlayer->GetCID(), WEAPON_HAMMER, false);
 			}
 		} break;
 
@@ -704,7 +742,7 @@ void CCharacter::FireWeapon()
 				ProjStartPos,
 				Direction,
 				(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-				1, m_GameZone?0:m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
+				g_Config.m_GunDmg, m_GameZone?0:m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
@@ -719,6 +757,9 @@ void CCharacter::FireWeapon()
 			else
 			{
 				int ShotSpread = m_pPlayer->m_AccData.m_GunSpread;
+
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 1;
 
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
@@ -742,7 +783,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-						1, m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
+						g_Config.m_GunDmg, m_pPlayer->m_AccData.m_GunExplode, 0, -1, WEAPON_GUN);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -763,6 +804,9 @@ void CCharacter::FireWeapon()
 			if(!m_GameZone)
 			{
 				int ShotSpread = 2+m_pPlayer->m_AccData.m_ShotgunSpread;
+
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 2;
 
 				if(m_GameZone)
 					ShotSpread = 2;
@@ -789,7 +833,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
-						1, m_GameZone?0:m_pPlayer->m_AccData.m_ShotgunExplode, 0, -1, WEAPON_SHOTGUN);
+						g_Config.m_ShotgunDmg, m_GameZone?0:m_pPlayer->m_AccData.m_ShotgunExplode, 0, -1, WEAPON_SHOTGUN);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -833,6 +877,9 @@ void CCharacter::FireWeapon()
 			{
 				int ShotSpread = m_pPlayer->m_AccData.m_GrenadeSpread;
 
+				if(m_pPlayer->m_onMonster)
+					ShotSpread = 1;
+
 				//CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
 				Msg.AddInt(ShotSpread*2+1);
 
@@ -855,7 +902,7 @@ void CCharacter::FireWeapon()
 						ProjStartPos,
 						vec2(cosf(a), sinf(a))*Speed,
 						(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime),
-						1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
+						g_Config.m_GrenadeDmg, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
 
 					// pack the Projectile and send it to the client DirectlyPikotee
 					CNetObj_Projectile p;
@@ -893,6 +940,8 @@ void CCharacter::FireWeapon()
 				else if(m_pPlayer->m_AccData.m_RifleSpread && !m_pPlayer->m_AciveUpgrade[m_ActiveWeapon])
 				{
 					int ShotSpread = m_pPlayer->m_AccData.m_RifleSpread;
+					if(m_pPlayer->m_onMonster)
+						ShotSpread = 1;
 					float Spreading[18*2+1];
 
 					for(int i = 0; i < 18*2+1; i++)
@@ -936,7 +985,7 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
-	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone) // -1 == unlimited
+	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone && !m_pPlayer->m_Zomb) // -1 == unlimited
 		m_aWeapons[m_ActiveWeapon].m_Ammo--;
 
 	if(!m_ReloadTimer)
@@ -1029,7 +1078,7 @@ void CCharacter::HandleWeapons()
 
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_ActiveWeapon].m_Ammoregentime;
-	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo)
+	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Zomb)
 	{
 		// If equipped and not active, regen ammo?
 		if (m_ReloadTimer <= 0)
@@ -1121,7 +1170,7 @@ unsigned long long CCharacter::calcExp(int level)
   if(level >= 800)
     exp = ~0;
   else
-    exp += ((10.0 * level + pow(2, level/25.0)) + pow(level, 1.8)) * pow(level, 1.7) - 150;
+    exp += ((10.0 * level + pow(2, level/20.0)) + pow(level, 1.8)) * pow(level, 1.9) - 150;
   return exp;
 }
 
@@ -1341,7 +1390,7 @@ void CCharacter::Booster()
 
 		if(m_Luft >= 50 && m_pPlayer->m_AccData.m_HealthRegen == 0)
 		{
-			TakeDamage(vec2(0,0), 1, -1, WEAPON_GAME);
+			TakeDamage(vec2(0,0), g_Config.m_WaterDmg, -1, WEAPON_GAME);
 		m_Luft = 1;
 
 		if(m_Health <= 0)
@@ -1448,7 +1497,6 @@ void CCharacter::Booster()
 						m_pPlayer->m_AccData.m_Level++;
 						m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
 
-						char aBuf[256];
 						GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 					}
 				}
@@ -1615,7 +1663,7 @@ void CCharacter::HandleCity()
 	}
 
 	if (GameServer()->Collision()->IsTile(m_Pos, TILE_MONEYCOLLECTOR)) {
-		char aBuf[256], numBuf[2][32];
+		char numBuf[2][32];
 		GameServer()->FormatInt(GameServer()->MoneyCollector()->m_Price, numBuf[0]);
 		GameServer()->FormatInt(GameServer()->MoneyCollector()->m_Money, numBuf[1]);
 		GameServer()->SendBroadcast_Localization(m_pPlayer->GetCID(), BROADCAST_PRIORITY_INTERFACE, BROADCAST_DURATION_REALTIME, _("~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp"), 
@@ -1832,7 +1880,6 @@ void CCharacter::HandleCity()
 				m_pPlayer->m_AccData.m_Level++;
 				m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
 
-				char aBuf[256];
 				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 			}
 		}
@@ -1876,6 +1923,8 @@ void CCharacter::Tick()
 		DieFromMonster(WEAPON_GAME);
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 	}
+
+	DoZombieMovement();
 	if(m_pPlayer->m_ForceBalanced)
 	{
 		char Buf[128];
@@ -1899,19 +1948,26 @@ void CCharacter::Tick()
 
 	if(!m_Frozen && !m_pPlayer->m_Insta && !m_GameZone && !m_Water && !m_SingleWater)
 	{
-		if(m_pPlayer->m_AccData.m_InfinityJumps == 2 && m_pPlayer->m_AciveUpgrade[ITEM_JUMP] == UPGRADE_FLY) {
-			if (m_Input.m_Jump && m_GravityY != -0.3) {
-				m_GravityY = -0.3;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID());
+		if(m_pPlayer->m_AccData.m_InfinityJumps == 2 && m_pPlayer->m_AciveUpgrade[ITEM_HOOK] == UPGRADE_FLY)
+		{
+			m_Core.m_Fly = true;
+			if (m_Input.m_Hook && m_GravityY != -0.3)
+			{
+				m_Core.m_Vel += ((normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY))) * max(0.001f, 1.5f));
+				
 			}
-			else if (!m_Input.m_Jump && m_GravityY < 0) {
+			else if (!m_Input.m_Hook && m_GravityY < 0) {
 				
 				m_GravityY = 0.5;
 				GameServer()->SendTuningParams(m_pPlayer->GetCID());
 			}
+			else
+				m_Core.m_Fly = false;
 		}
 		else if(m_pPlayer->m_AccData.m_InfinityJumps >= 1)
 			m_Core.m_Jumped &= ~2;
+		else
+			m_Core.m_Fly = false;
 	}
 
 	if(m_Frozen)
@@ -2152,9 +2208,15 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if((Protected() && !m_GameZone) || m_pPlayer->m_Insta)
 		return false;
 
-	m_Core.m_Vel += Force;	
+	m_Core.m_Vel += Force;
 
-	 // these will have force impact
+//	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
+//		return false;
+	
+//	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
+//		return false;
+	
+	// these will have force impact
 	if (m_pPlayer->m_God 
 	|| GameServer()->HasDmgDisabled(From, m_pPlayer->GetCID()) 
 	|| (m_GameZone && From == m_pPlayer->GetCID()))
@@ -2163,26 +2225,23 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
 		return false;
 
-/*	//City
-	if(!FromMonster)
-	{
-		if(m_pPlayer->m_AccData.m_NoSelfDMG && From == m_pPlayer->GetCID())
-			return false;
+	//City
+	if(m_pPlayer->m_AccData.m_NoSelfDMG && From == m_pPlayer->GetCID())
+		return false;
 
-		int LvlDmg = 0;
+/*	int LvlDmg = 0;
 
-		if (GameServer()->ValidID(From))
-			LvlDmg = floor(GameServer()->m_apPlayers[From]->m_AccData.m_LvlWeapon[Weapon] / 10.0);
+	if (GameServer()->ValidID(From))
+		LvlDmg = floor(GameServer()->m_apPlayers[From]->m_AccData.m_LvlWeapon[Weapon] / 10.0);
 
-		if (LvlDmg > g_Config.m_SvWLvlDmgMax)
-			LvlDmg = g_Config.m_SvWLvlDmgMax;
+	if (LvlDmg > g_Config.m_SvWLvlDmgMax)
+		LvlDmg = g_Config.m_SvWLvlDmgMax;
 	
-		// m_pPlayer only inflicts half damage on self
-		if(From == m_pPlayer->GetCID())
-			Dmg = max(1, Dmg/2);
-		else if (Weapon >= 0 && Weapon <= WEAPON_RIFLE)
-			Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others
-	}*/
+	// m_pPlayer only inflicts half damage on self
+	if(From == m_pPlayer->GetCID())
+		Dmg = max(1, Dmg/2);
+	else if (Weapon >= 0 && Weapon <= WEAPON_RIFLE)
+		Dmg += LvlDmg; // Add every 10 lvl 1 dmg to others*/
 
 	m_DamageTaken++;
 	if (GameServer()->ValidID(From)) {
@@ -2393,10 +2452,321 @@ void CCharacter::CheckLevelUp(int ClientID)
 		m_pPlayer->m_AccData.m_ExpPoints = 0;
 		m_pPlayer->m_AccData.m_Level++;
 		m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
-		char aBuf[256];
+		
 		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("You leveled up!"));
 	}
 
 	if(GameServer()->m_apPlayers[ClientID]->GetCharacter()->m_Health <= 0)
 		Die(-1, WEAPON_GAME);
+}
+
+void CCharacter::DoZombieMovement()
+{
+	if(!m_pPlayer->GetZomb())
+		return;
+
+	if(m_Move.m_LastX == m_Pos.x)//direction swap caused by a wall
+		m_Move.m_LastXTimer++;
+	else
+		m_Move.m_LastXTimer = 0;
+	m_Move.m_LastX = m_Pos.x;
+
+	if(IsGrounded())//reset jump
+		m_Move.m_JumpTimer = 0;
+
+	if(m_Move.m_LastXTimer > 50)//Direction change for non chaning X
+	{
+		m_Input.m_Direction = m_Input.m_Direction * -1;
+		m_Move.m_FJump = true;
+	}
+
+	if(GameServer()->Collision()->CheckPoint(vec2(m_Pos.x + m_Input.m_Direction * 45, m_Pos.y)) || GameServer()->Collision()->CheckPoint(vec2(m_Pos.x + m_Input.m_Direction * 77, m_Pos.y)) || m_Move.m_FJump || m_Core.m_Vel == vec2(0.f, 0.f))//set jump
+		m_Move.m_JumpTimer++;
+
+	if(m_Move.m_FJump)//Reset Collision jump
+		m_Move.m_FJump = false;
+
+	if(m_Move.m_CliffTimer)//Reset Cliff Timer
+		m_Move.m_CliffTimer--;
+
+	if(m_Move.m_JumpTimer == 1 || m_Move.m_JumpTimer == 31)//Jump + DoubleJump
+		m_Input.m_Jump = 1;
+	else
+		m_Input.m_Jump = 0;
+	
+	if(!m_Input.m_Direction)//rare but possible
+	{
+		int Rand = rand()%2;
+		if(Rand < 1)
+			m_Input.m_Direction = -1;
+		else
+			m_Input.m_Direction = 1;
+	}
+
+	if(GameServer()->Tuning()->m_PlayerCollision)//Zombies blocking other zombies
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			CCharacter *pChar = GameServer()->GetPlayerChar(i);
+			
+			if(!pChar || pChar == this)
+				continue;
+				
+			if(distance(m_Pos, pChar->m_Pos) <= 65.0f && m_Pos.y == pChar->m_Pos.y)
+			{
+				if(m_Pos.x > pChar->m_Pos.x && m_Input.m_Direction != pChar->m_Input.m_Direction)
+					m_Move.m_FJump = true;
+			}
+		}
+	}
+
+	//Can jump over cliff?!
+	if(!GameServer()->Collision()->CheckTiles(vec2(m_Pos.x + m_Input.m_Direction * 46, m_Pos.y), 15) && !m_Move.m_CliffTimer)
+	{
+		
+		m_Move.m_FJump = true;
+		m_Move.m_CliffTimer = 30;
+		if(!GameServer()->Collision()->CheckParable(vec2(m_Pos.x, m_Pos.y), 50, m_Input.m_Direction))
+		{
+			m_Input.m_Direction = m_Input.m_Direction * -1;
+			m_Move.m_CliffTimer = 0;
+		}
+	}
+
+	CCharacter *pClosest = this;
+	CCharacter *pCloseZomb = this;
+	for(int i = 0; i < MAX_CLIENTS; i++)//see a player? :D Do Aim - Don't jump over the cliff if you see a player falling down
+	{
+		CCharacter *pChar = GameServer()->GetPlayerChar(i);
+		
+		if(!pChar || pChar == this || !pChar->IsAlive() || !pChar->GetPlayer() || (GameServer()->Collision()->IntersectTile(m_Pos, pChar->m_Pos) && m_Core.m_HookState != HOOK_GRABBED))
+			continue;
+		
+		if(!GameServer()->m_apPlayers[i]->GetZomb() && (pClosest == this || distance(m_Pos, pClosest->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+			pClosest = pChar;
+		if(GameServer()->m_apPlayers[i]->GetZomb() == TEAM_BLUE && (pCloseZomb == this || distance(m_Pos, pCloseZomb->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+			pCloseZomb = pChar;
+	}
+	if(pClosest != this)
+	{
+		if(m_pPlayer->GetZomb(9))//Flombie fly movement //first movement, then Aim because Aim can cause death
+		{
+			if(pClosest->m_Pos.y < m_Pos.y)
+				m_Core.m_Vel.y -= 0.25f + GameServer()->Tuning()->m_Gravity;//must work
+			else if(pClosest->m_Pos.y > m_Pos.y)
+				m_Core.m_Vel.y += 0.25f;
+		}
+
+		//Do Aim
+		if (m_pPlayer->m_PuppyOwner != pClosest->GetPlayer()->GetCID())
+		{
+			if(pCloseZomb != this)
+				DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), pCloseZomb->m_Pos, pCloseZomb->GetPlayer()->GetCID());//Only do aiming if it sees a player, (but i wanted it always...)
+			else
+				DoZombieAim(pClosest->m_Pos, pClosest->GetPlayer()->GetCID(), vec2(0, 0), -1);//Only do aiming if it sees a player, (but i wanted it always...)
+			if(IsAlive() && pClosest && pClosest->IsAlive() && (pClosest->m_Pos.y > m_Pos.y || GameServer()->Collision()->CheckTiles(pClosest->m_Pos, 20)))
+			{
+				if(m_Pos.x > pClosest->m_Pos.x)
+					m_Input.m_Direction = -1;
+				else if(m_Pos.x == pClosest->m_Pos.x)
+					m_Input.m_Direction = 0;//rare but could
+				else
+					m_Input.m_Direction = 1;
+			}
+		}
+	}
+	else if(pCloseZomb != this)
+		DoZombieAim(vec2(0, 0), -1, pCloseZomb->m_Pos, pCloseZomb->GetPlayer()->GetCID());
+	else
+		ResetAiming();
+}
+
+void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int NearZombCID)
+{
+	if(!m_pPlayer->GetZomb())
+		return;
+
+	//if(m_Aim.m_FireCounter)
+		//m_Aim.m_FireCounter--;
+	if(m_pPlayer->GetZomb(8) && distance(m_Pos, VictimPos) > 100.0f)
+		VictimPos = GetGrenadeAngle(m_Pos, VictimPos, true) + m_Pos;
+
+	if(m_pPlayer->GetZomb(5) && distance(m_Pos, VictimPos) > 100.0f)
+		VictimPos = GetGrenadeAngle(m_Pos, VictimPos, false) + m_Pos;
+
+	//Direction is exactly to the player
+	m_Input.m_TargetY = 160 * (VictimPos.y - m_Pos.y) / sqrt((VictimPos.x - m_Pos.x)*(VictimPos.x - m_Pos.x) + (VictimPos.y - m_Pos.y)*(VictimPos.y - m_Pos.y));
+	m_Input.m_TargetX = 160 * (VictimPos.x - m_Pos.x) / sqrt((VictimPos.x - m_Pos.x)*(VictimPos.x - m_Pos.x) + (VictimPos.y - m_Pos.y)*(VictimPos.y - m_Pos.y));
+	m_LatestInput.m_TargetX = m_Input.m_TargetX;
+	m_LatestInput.m_TargetY = m_Input.m_TargetY;
+	// THIS IS THE FUCKING WORKING KEY, cost me 2 days
+	m_LastAction = Server()->Tick();
+	
+	// || 
+	if(m_pPlayer->GetZomb(2))
+		m_Aim.m_FireCounter = 21;
+
+	//Zele
+	if(m_pPlayer->GetZomb(11))
+	{
+		if(distance(m_Pos, VictimPos) <= 500.0f && distance(m_Pos, VictimPos) > 200.0f)
+		{
+			if(!GameServer()->Collision()->CheckPoint(VictimPos + vec2(0, 32)))
+				m_Core.m_Pos = VictimPos + vec2(0, 32);
+			else
+				m_Core.m_Pos = VictimPos - vec2(0, 32);
+			m_Core.m_Vel.y =- 0.1;
+			m_Pos = m_Core.m_Pos;
+		}
+	}
+
+	//Zeater
+	if(m_pPlayer->GetZomb(13) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && !GameServer()->m_apPlayers[NearZombCID]->GetZomb(13))
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			if(!m_pPlayer->m_SubZomb[i])
+			{
+				int VictimType = GameServer()->m_apPlayers[NearZombCID]->GetZomb();
+				if(m_pPlayer->GetZomb(VictimType))
+					return;
+				if(VictimType == 6)
+					IncreaseHealth(100);
+				else
+					IncreaseHealth(10);
+				m_pPlayer->m_Score++;
+				m_pPlayer->m_SubZomb[i] = VictimType;
+				GameServer()->GetPlayerChar(NearZombCID)->Die(m_pPlayer->GetCID(), WEAPON_GAME);
+
+				if(m_pPlayer->GetZomb(5))//gun
+					m_ActiveWeapon = WEAPON_GUN;
+				if(m_pPlayer->GetZomb(7))//Shotgun
+					m_ActiveWeapon = WEAPON_SHOTGUN;
+				if(m_pPlayer->GetZomb(8))//Grenade
+					m_ActiveWeapon = WEAPON_GRENADE;
+				if(m_pPlayer->GetZomb(2))//Rifle
+					m_ActiveWeapon = WEAPON_RIFLE;
+				m_aWeapons[m_ActiveWeapon].m_Ammo = -1;
+				break;
+			}
+		}
+	}
+
+
+	//Can do sth.
+	if(distance(m_Pos, VictimPos) <= GetTriggerDistance(m_pPlayer->GetZomb()) || (!m_pPlayer->GetZomb(4) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && GetTriggerDistance(m_pPlayer->GetZomb()) == 65.0f))//Zamer shouldnt attak other zombies
+	{
+		//Zinvi
+		if(m_pPlayer->GetZomb(12))
+			m_IsVisible = true;
+
+		//Zinja
+		if(m_pPlayer->GetZomb(10))
+		{
+			if(m_ActiveWeapon == WEAPON_HAMMER)
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA);
+			GiveNinja();
+		}
+
+		//Zooker
+		if(m_pPlayer->GetZomb(3))
+		{
+			if(VicCID != -1 && distance(m_Pos, VictimPos) < 380.0f && GameServer()->GetPlayerChar(VicCID))//Look hooklenght in tuning.h
+			{
+				m_Input.m_Hook = 1;
+				m_LatestInput.m_Hook = 1;
+				m_Core.m_Zooker = true;
+				m_Core.m_HookedPlayer = VicCID;
+				m_Core.m_HookState = HOOK_GRABBED;
+			}
+			if(m_Core.m_HookState != HOOK_IDLE && (!GameServer()->GetPlayerChar(m_Core.m_HookedPlayer) || !GameServer()->GetPlayerChar(m_Core.m_HookedPlayer)->IsAlive()))//return hook by death
+			{
+				m_Input.m_Hook = 0;
+				m_LatestInput.m_Hook = 0;
+				m_Core.m_HookState = HOOK_IDLE;
+				m_Core.m_HookTick = 0;
+				m_Core.m_Zooker = false;
+				m_Core.m_HookedPlayer = -1;
+			}
+		}
+
+		//Zamer
+		if(m_pPlayer->GetZomb(4))
+		{	
+			m_Aim.m_Explode = true;
+			GameServer()->CreateExplosion(vec2(m_Pos.x + 5, m_Pos.y + 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
+			GameServer()->CreateExplosion(vec2(m_Pos.x - 5, m_Pos.y + 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
+			GameServer()->CreateExplosion(vec2(m_Pos.x - 5, m_Pos.y - 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
+			GameServer()->CreateExplosion(vec2(m_Pos.x + 5, m_Pos.y - 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
+			for(int i = 0; i < 100; i++)
+				GameServer()->CreateSound(vec2(m_Pos.x + 5, m_Pos.y + 5), SOUND_GRENADE_EXPLODE, -1);
+			Die(m_pPlayer->GetCID(), WEAPON_SELF);
+			return;
+		}
+
+		//Fire!
+		m_Input.m_Fire = 1;
+		m_LatestPrevInput.m_Fire = 1;
+	}
+	else if(!m_pPlayer->GetZomb(8) && !m_pPlayer->GetZomb(5))
+	{
+		if(m_pPlayer->GetZomb(12))
+			m_IsVisible = false;
+		ResetAiming();
+	}
+	
+	if(VictimPos == vec2(0, 0) || VictimPos == m_Pos)//Reset all
+		ResetAiming();
+}
+
+vec2 CCharacter::GetGrenadeAngle(vec2 m_StartPos, vec2 m_ToShoot, bool GrenadeBot)
+{
+	/*
+	inline vec2 CalcPos(vec2 Pos, vec2 Velocity, float Curvature, float Speed, float Time)
+	{
+		vec2 n;
+		Time *= Speed;
+		n.x = Pos.x + Velocity.x*Time;
+		n.y = Pos.y + Velocity.y*Time + Curvature/10000*(Time*Time);
+		return n;
+	*/
+	if(m_ToShoot == vec2(0, 0))
+	{
+		return vec2(0, 0);
+	}
+	char aBuf[128];
+	vec2 m_Direction;
+	float Curvature = GameServer()->Tuning()->m_GunCurvature;
+	if(GrenadeBot)
+		Curvature = GameServer()->Tuning()->m_GrenadeCurvature;
+	m_Direction.x = (m_ToShoot.x - m_StartPos.x);
+	m_Direction.y = (m_ToShoot.y - m_StartPos.y - 32*Curvature);
+	str_format(aBuf, sizeof(aBuf), "AimPos %d %d", m_Direction.x, m_Direction.y);
+	return m_Direction;
+}
+
+void CCharacter::ResetAiming()
+{
+	m_Input.m_Fire = 0;
+	m_LatestPrevInput.m_Fire = 0;
+	if(m_pPlayer->GetZomb(10))
+	{
+		m_aWeapons[WEAPON_NINJA].m_Got = false;
+		m_ActiveWeapon = WEAPON_HAMMER;
+	}
+}
+
+float CCharacter::GetTriggerDistance(int Type)
+{
+	if(Type == 5 || Type == 9)//Zunner
+		return 4000.0f;
+	else if(Type == 8)
+		return 800.0f;//Grenade
+	else if(Type == 2)
+		return GameServer()->Tuning()->m_LaserReach;//Zoomer
+	else if(Type == 7 || Type == 10)//Zotter, Zinja
+		return 500.0f;
+	else if(Type == 3)//Zooker
+		return 380.0f;
+	return 65.0f;//Rest
 }

@@ -28,8 +28,11 @@
 
 #include "register.h"
 #include "server.h"
+#include <engine/server/sql_job.h>
 
 #include <city/components/localization.h>
+
+#include <engine/server/sql_connector.h>
 
 #if defined(CONF_FAMILY_WINDOWS)
 	#define _WIN32_WINNT 0x0501
@@ -191,6 +194,15 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 
 	m_RconClientID = -1;
 	m_RconAuthLevel = AUTHED_ADMIN;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		m_apSqlReadServers[i] = 0;
+		m_apSqlWriteServers[i] = 0;
+	}
+
+	CSqlConnector::SetReadServers(m_apSqlReadServers);
+	CSqlConnector::SetWriteServers(m_apSqlWriteServers);
 
 	Init();
 }
@@ -444,20 +456,22 @@ void CServer::GetClientAddr(int ClientID, char *pAddrStr, int Size)
 
 const char *CServer::ClientName(int ClientID)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
+//	if(m_aClients[ClientID].m_State == CClient::STATE_BOT || ClientID > MAX_PLAYERS)
+//		return "[*/Zomb*]";//needed
+	if(ClientID < 0|| ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";
-	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME)
+
+	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CClient::STATE_BOT)
 		return m_aClients[ClientID].m_aName;
 	else
 		return "(connecting)";
-
 }
 
 const char *CServer::ClientClan(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY)
 		return "";
-	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientID].m_State == CServer::CClient::STATE_BOT)
 		return m_aClients[ClientID].m_aClan;
 	else
 		return "";
@@ -475,7 +489,7 @@ int CServer::ClientCountry(int ClientID)
 
 bool CServer::ClientIngame(int ClientID)
 {
-	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME;
+	return ClientID >= 0 && ClientID < MAX_CLIENTS && (m_aClients[ClientID].m_State == CServer::CClient::STATE_INGAME);
 }
 
 int CServer::ClientIdByName(const char* Name) {
@@ -493,6 +507,9 @@ int CServer::ClientIdByName(const char* Name) {
 
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientID)
 {
+	if(m_aClients[ClientID].m_State == CClient::STATE_BOT || ClientID > MAX_PLAYERS)
+		return -1;
+
 	return SendMsgEx(pMsg, Flags, ClientID, false);
 }
 
@@ -518,17 +535,13 @@ int CServer::SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System)
 	if(Flags&MSGFLAG_FLUSH)
 		Packet.m_Flags |= NETSENDFLAG_FLUSH;
 
-	// write message to demo recorder
-	if(!(Flags&MSGFLAG_NORECORD))
-		m_DemoRecorder.RecordMessage(pMsg->Data(), pMsg->Size());
-
 	if(!(Flags&MSGFLAG_NOSEND))
 	{
 		if(ClientID == -1)
 		{
 			// broadcast
 			int i;
-			for(i = 0; i < MAX_CLIENTS; i++)
+			for(i = 0; i < MAX_PLAYERS; i++)
 				if(m_aClients[i].m_State == CClient::STATE_INGAME)
 				{
 					Packet.m_ClientID = i;
@@ -561,10 +574,10 @@ void CServer::DoSnapshot()
 	}
 
 	// create snapshots for all clients
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_PLAYERS; i++)
 	{
 		// client must be ingame to recive snapshots
-		if(m_aClients[i].m_State != CClient::STATE_INGAME)
+		if(m_aClients[i].m_State != CClient::STATE_INGAME && m_aClients[i].m_State != CClient::STATE_BOT)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -1101,9 +1114,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 
 	// count the players
 	int PlayerCount = 0, ClientCount = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_PLAYERS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -1178,9 +1191,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 	int Skip = Offset;
 	int Take = ClientsPerPacket;
 
-	for(i = 0; i < MAX_CLIENTS; i++)
+	for(i = 0; i < MAX_PLAYERS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
 			if (Skip-- > 0)
 				continue;
@@ -1209,9 +1222,9 @@ void CServer::SendServerInfo(NETADDR *pAddr, int Token, bool Extended, int Offse
 
 void CServer::UpdateServerInfo()
 {
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(int i = 0; i < MAX_PLAYERS; ++i)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(m_aClients[i].m_State != CClient::STATE_EMPTY && m_aClients[i].m_State != CClient::STATE_BOT)
 		{
 			NETADDR Addr = m_NetServer.ClientAddr(i);
 			SendServerInfo(&Addr, -1, true);
@@ -1450,9 +1463,9 @@ int CServer::Run()
 				NewTicks++;
 
 				// apply new input
-				for(int c = 0; c < MAX_CLIENTS; c++)
+				for(int c = 0; c < MAX_PLAYERS; c++)
 				{
-					if(m_aClients[c].m_State == CClient::STATE_EMPTY)
+					if(m_aClients[c].m_State == CClient::STATE_EMPTY || m_aClients[c].m_State == CClient::STATE_BOT)
 						continue;
 					for(int i = 0; i < 200; i++)
 					{
@@ -1511,6 +1524,7 @@ int CServer::Run()
 			net_socket_read_wait(m_NetServer.Socket(), 5);
 		}
 	}
+
 	// disconnect all clients on shutdown
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -1525,6 +1539,15 @@ int CServer::Run()
 
 	if(m_pCurrentMapData)
 		mem_free(m_pCurrentMapData);
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (m_apSqlReadServers[i])
+			delete m_apSqlReadServers[i];
+
+		if (m_apSqlWriteServers[i])
+			delete m_apSqlWriteServers[i];
+	}
 	return 0;
 }
 
@@ -1687,7 +1710,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 	for(i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pServer->m_aClients[i].m_State != CClient::STATE_EMPTY)
+		if(pServer->m_aClients[i].m_State != CClient::STATE_EMPTY && pServer->m_aClients[i].m_State != CClient::STATE_BOT)
 		{
 			Addr = pServer->m_NetServer.ClientAddr(i);
 			net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr));
@@ -1704,6 +1727,8 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
+	CServer* pServer = (CServer *)pUser;
+	pServer->GameServer()->SCT_Discord("Server is down! All players are offline!", "Server");
 	((CServer *)pUser)->m_RunServer = 0;
 }
 
@@ -1724,6 +1749,46 @@ void CServer::DemoRecorder_HandleAutoStart()
 			AutoDemos.Init(Storage(), "demos/server", "autorecord", ".demo", g_Config.m_SvAutoDemoMax);
 		}
 	}
+}
+
+void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+
+	if (pResult->NumArguments() != 7 && pResult->NumArguments() != 8)
+		return;
+
+	bool ReadOnly;
+	if (str_comp_nocase(pResult->GetString(0), "w") == 0)
+		ReadOnly = false;
+	else if (str_comp_nocase(pResult->GetString(0), "r") == 0)
+		ReadOnly = true;
+	else
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "MySQL", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
+		return;
+	}
+
+	//bool SetUpDb = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : false;
+
+	CSqlServer** apSqlServers = ReadOnly ? pSelf->m_apSqlReadServers : pSelf->m_apSqlWriteServers;
+
+	for (int i = 0; i < MAX_SQLSERVERS; i++)
+	{
+		if (!apSqlServers[i])
+		{
+			//apSqlServers[i] = new CSqlServer(pResult->GetString(1), pResult->GetString(2), pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly, SetUpDb);
+			apSqlServers[i] = new CSqlServer(pResult->GetString(1), "tw", pResult->GetString(3), pResult->GetString(4), pResult->GetString(5), pResult->GetInteger(6), ReadOnly);
+
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "Added new Sql%sServer: %d: DB: '%s' Prefix: '%s' User: '%s' IP: '%s' Port: %d", ReadOnly ? "Read" : "Write", i, apSqlServers[i]->GetDatabase(), apSqlServers[i]->GetPrefix(), apSqlServers[i]->GetUser(), apSqlServers[i]->GetIP(), apSqlServers[i]->GetPort());
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return;
+		}
+	}
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "MySQL", "failed to add new sqlserver: limit of sqlservers reached");
+
+	return;
 }
 
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
@@ -1827,6 +1892,8 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("command_access", ConchainCommandUpdate, this);
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevelUpdate, this);
+
+	Console()->Register("sql_add_server", "ssssssi?i", CFGFLAG_SERVER, ConAddSqlServer, this, "add a sqlserver");
 }
 
 
@@ -1970,3 +2037,209 @@ void CServer::SetClientLanguage(int ClientID, const char* pLanguage)
 {
 	str_copy(m_aClients[ClientID].m_aLanguage, pLanguage, sizeof(m_aClients[ClientID].m_aLanguage));
 }
+
+void CNetServer::BotInit(int BotID)
+{
+    m_aSlots[BotID].m_Connection.BotConnect();
+}
+
+void CServer::BotJoin(int BotID, int BotMode, bool Puppy)
+{
+	const char *pNames[] = {
+        "The Man",
+        "Zaby",
+        "Zoomer",
+        "Zooker",
+        "Zamer",
+        "Zunny",
+        "Zaster",
+        "Zotter",
+        "Zenade",
+        "Flombie",
+        "Zinja",
+        "Zele",
+        "Zinvis",
+        "Zeater",
+        "AniBot-pdf",
+        "Seabot",
+        "Chara",
+    };
+    const char *pClans[] = { 
+        "FFS",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]",
+        "[*/Zomb*]"
+    };
+
+    m_NetServer.BotInit(BotID);
+    m_aClients[BotID].m_State = CClient::STATE_INGAME;
+    m_aClients[BotID].m_Authed = AUTHED_NO;
+
+    str_copy(m_aClients[BotID].m_aName, Puppy ? "Puppy" : pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
+    str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet"  : pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
+}
+
+class CSqlJob_Server_FirstInit : public CSqlJob
+{
+private:
+	CServer* m_pServer;
+	int m_ClientID;
+	CSqlString<64> m_sNick;
+	
+public:
+	CSqlJob_Server_FirstInit(CServer* pServer, int ClientID)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
+	}
+
+	virtual bool Job(CSqlServer* pSqlServer)
+	{
+		char aBuf[512];
+		try
+		{
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT Nick, Seccurity FROM %s_Users "
+				"WHERE Nick = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sNick.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("sql", "Can't check newplayer security (MySQL Error: %s)", e.what());
+			return false;			
+		}
+		return true;
+	}
+};
+void CServer::FirstInit(int ClientID)
+{
+	CSqlJob* pJob = new CSqlJob_Server_FirstInit(this, ClientID);
+	pJob->Start();
+}	
+
+class CSqlJob_Server_Register : public CSqlJob
+{
+private:
+	CServer* m_pServer;
+	int m_ClientID;
+	CSqlString<64> m_sName;
+	CSqlString<64> m_sNick;
+	CSqlString<64> m_sPasswordHash;
+	CSqlString<64> m_sEmail;
+	
+public:
+	CSqlJob_Server_Register(CServer* pServer, int ClientID, const char* pName, const char* pPasswordHash, const char* pEmail)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+		m_sName = CSqlString<64>(pName);
+		m_sNick = CSqlString<64>(m_pServer->ClientName(m_ClientID));
+		m_sPasswordHash = CSqlString<64>(pPasswordHash);
+		if(pEmail)
+			m_sEmail = CSqlString<64>(pEmail);
+		else
+			m_sEmail = CSqlString<64>("");
+	}
+
+	virtual bool Job(CSqlServer* pSqlServer)
+	{
+
+		char aBuf[512];
+
+		try
+		{
+			//检查数据库中的名称或昵称
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' OR Nick = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				dbg_msg("sql", "用户名/昵称 %s 已被占用",m_sNick.ClrStr());
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username/nickname is already in used"));
+				return true;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		//Создаем сам аккаунт
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"INSERT INTO %s_Accounts "
+				"(Username, Nickname, PasswordHash, RconPassword, Money, Health, Armor, Kills, HouseID, Level, ExpPoints, Donor, VIP, Bounty, Arrested)"
+				"VALUES ('%s', '%s', '%s', '0', '0', '10', '10', '0', '0', '1', '0', '0',  '0', '0', '0')"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sNick.ClrStr(), m_sPasswordHash.ClrStr());
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		
+		// Получаем инфу пользователя
+		try
+		{	
+			str_format(aBuf, sizeof(aBuf), 
+				"SELECT UserId FROM %s_Users WHERE Username = '%s' AND PasswordHash = '%s';"
+				, pSqlServer->GetPrefix()
+				, m_sName.ClrStr(), m_sPasswordHash.ClrStr());
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if(pSqlServer->GetResults()->next())
+			{
+				int UsedID = (int)pSqlServer->GetResults()->getInt("UserId");
+				str_format(aBuf, sizeof(aBuf), 
+					"INSERT INTO %s_uClass (UserID, Username) VALUES ('%d', '%s');"
+					, pSqlServer->GetPrefix()
+					, UsedID, m_sName.ClrStr());
+				pSqlServer->executeSql(aBuf);
+
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
+				return true;
+			}
+			else
+			{
+				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+				return false;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
+			
+			return false;
+		}
+		return true;
+	}
+};

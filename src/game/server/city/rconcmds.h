@@ -31,6 +31,8 @@ CONSOLE_COMMAND("event_abort", "", CFGFLAG_SERVER, ConAbortEvent, this, "aborts 
 CONSOLE_COMMAND("event_timer", "", CFGFLAG_SERVER, ConEventTimer, this, "time till next event or till event end in seconds")
 CONSOLE_COMMAND("set_bounty", "vi", CFGFLAG_SERVER, ConSetBounty, this, "set_bounty <id> <amount>")
 
+CONSOLE_COMMAND("bot_spawn", "i", CFGFLAG_SERVER, ConSpawnBot, this, "")
+
 // police
 CONSOLE_COMMAND("mute", "vi?r", CFGFLAG_SERVER, ConMute, this, "")
 CONSOLE_COMMAND("muteip", "si?r", CFGFLAG_SERVER, ConMuteIP, this, "")

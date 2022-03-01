@@ -10,8 +10,9 @@ CHammerKill::CHammerKill(CGameWorld *pGameWorld, int Owner, int Victim)
 {
 	m_Owner = Owner;
 	m_Victim = Victim;
-
 	m_VictimTick = 10*50;
+	m_HammerCount = 0;
+	m_Power = -2;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -27,14 +28,30 @@ void CHammerKill::Reset()
 }
 
 void CHammerKill::Tick()
-{	
+{
+	if(GameServer()->m_apPlayers[m_Owner]->m_onMonster)
+		return;
+
 	CCharacter *Victim = GameServer()->GetPlayerChar(m_Victim);
 	CCharacter *Owner = GameServer()->GetPlayerChar(m_Owner);
+
+	if (m_Power == 0)
+		m_Power = 1;
 		
-	m_VictimTick--;
+	m_VictimTick-=m_Power;
+
+	if(Server()->Tick() % Server()->TickSpeed() * 3 == 0)
+		m_Power++;
 
 	if(Victim && Owner && m_VictimTick)
 	{
+		if (m_HammerCount == 7)
+		{
+			GameServer()->CreateExplosion(Owner->m_Pos, m_Victim, WEAPON_HAMMER, false);
+			Reset();
+			return;
+		}
+
 		for(int i = 0; i <= 360; i+=36)
 		{
 			vec2 TempPos = Victim->m_Pos + normalize(GetDir(pi/180 * (i+m_VictimTick))) * (m_VictimTick/3);
@@ -43,7 +60,13 @@ void CHammerKill::Tick()
 		
 		if((float)(m_VictimTick/3) < 28)
 		{
-			//GameServer()->CreateExplosion(Victim->m_Pos, m_Owner, WEAPON_RIFLE, false);
+			CCharacter *pChr = GameServer()->m_apPlayers[m_Owner]->GetCharacter();
+			if (pChr)
+			{
+				pChr->m_EmoteType = EMOTE_HAPPY;
+				pChr->m_EmoteStop = Server()->Tick() + Server()->TickSpeed();
+			}
+
 			Victim->Die(m_Owner, WEAPON_HAMMER);
 			GameServer()->m_World.DestroyEntity(this);
 			return;
@@ -51,7 +74,5 @@ void CHammerKill::Tick()
 			
 	}
 	else
-		Reset();
-
-	
+		Reset();	
 }

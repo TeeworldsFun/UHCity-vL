@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Copyright � 2013 Neox.                                                                                                */
 /* If you are missing that file, acquire a complete release at https://www.teeworlds.com/forum/viewtopic.php?pid=106934  */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 #include <new>
 #include <engine/shared/config.h>
@@ -740,7 +740,7 @@ void CMonster::FireWeapon()
                         ProjStartPos,
                         vec2(cosf(a), sinf(a))*Speed,
                         (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-                        1, 0, 0, -1, WEAPON_GUN, true);
+                        1, 0, 0, -1, WEAPON_GUN);
 
                     CNetObj_Projectile p;
                     pProj->FillInfo(&p);
@@ -756,7 +756,7 @@ void CMonster::FireWeapon()
                     ProjStartPos,
                     Direction,
                     (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-                    1, 0, 0, -1, WEAPON_GUN, true);
+                    1, 0, 0, -1, WEAPON_GUN);
 
                     CNetObj_Projectile p;
                     pProj->FillInfo(&p);
@@ -801,7 +801,7 @@ void CMonster::FireWeapon()
 					ProjStartPos,
 					vec2(cosf(a), sinf(a))*Speed,
 					(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
-					1, 0, 0, -1, WEAPON_SHOTGUN, true);
+					1, 0, 0, -1, WEAPON_SHOTGUN);
 
 				// pack the Projectile and send it to the client Directly
 				CNetObj_Projectile p;
@@ -846,7 +846,7 @@ void CMonster::FireWeapon()
                     ProjStartPos,
                     vec2(cosf(a), sinf(a))*Speed,
                     (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime),
-                    1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE, true);
+                    1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
 
                     // pack the Projectile and send it to the client Directly
                     CNetObj_Projectile p;
@@ -863,7 +863,7 @@ void CMonster::FireWeapon()
                     ProjStartPos,
                     Direction,
                     (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GrenadeLifetime),
-                    1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE, true);
+                    1, true, 0, SOUND_GRENADE_EXPLODE, WEAPON_GRENADE);
 
                 // pack the Projectile and send it to the client Directly
                 CNetObj_Projectile p;
@@ -1505,3 +1505,4 @@ void CMonster::Snap(int SnappingClient)
         apObjs[i]->m_Subtype = m_Type;
     }
 }
+*/

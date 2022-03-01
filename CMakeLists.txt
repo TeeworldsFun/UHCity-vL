@@ -92,8 +92,8 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   src/game/version.h
 )
 
-set(SERVER_EXECUTABLE teeworlds_srv CACHE STRING "Name of the built server executable")
-set(CLIENT_EXECUTABLE teeworlds CACHE STRING "Name of the build client executable")
+set(SERVER_EXECUTABLE UHCity-Server CACHE STRING "Name of the built server executable")
+set(CLIENT_EXECUTABLE UHCity-Client CACHE STRING "Name of the build client executable")
 
 ########################################################################
 # Compiler flags
@@ -262,8 +262,8 @@ find_package(SDL)
 find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
-find_package(ICU)
-
+find_package(MySQL)
+add_subdirectory(other/DPP)
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -297,7 +297,6 @@ function(show_dependency_status OUTPUT_NAME NAME)
 endfunction()
 
 if(SERVER_COMPILE)
-  show_dependency_status("ICU" ICU TRUE)
   show_dependency_status("OpenSSL" OPENSSL FALSE)
 endif()
 
@@ -308,16 +307,20 @@ show_dependency_status("Freetype" FREETYPE)
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   show_dependency_status("Hdiutil" HDIUTIL)
 endif()
+show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Pnglite" PNGLITE)
 show_dependency_status("PythonInterp" PYTHONINTERP)
 show_dependency_status("SDL" SDL)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
+show_dependency_status("MySQL" MYSQL)
 
 if(NOT(PYTHONINTERP_FOUND))
   message(SEND_ERROR "You must install Python to compile Teeworlds")
 endif()
-
+if(NOT(MYSQL_FOUND))
+  message(SEND_ERROR "You must install MySQL to compile the ${PROJECT_NAME}")
+endif()
 if(CLIENT AND NOT(FREETYPE_FOUND))
   message(SEND_ERROR "You must install Freetype to compile the Teeworlds client")
 endif()
@@ -360,6 +363,9 @@ add_library(json EXCLUDE_FROM_ALL OBJECT ${DEP_JSON_SRC})
 
 list(APPEND TARGETS_DEP md5)
 set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+if(NOT CRYPTO_FOUND)
+  set(DEP_MD5 $<TARGET_OBJECTS:md5>)
+endif()
 
 ########################################################################
 # COPY DATA AND DLLS
@@ -369,10 +375,10 @@ file(COPY data DESTINATION .)
 set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${SDL_COPY_FILES}
+  ${MYSQL_COPY_FILES}
 )
 
 set(COPY_FILES_SERVER
-  ${ICU_COPY_FILES}
   ${OPENSSL_COPY_FILES}
 )
 
@@ -589,11 +595,16 @@ set(GAME_GENERATED_SHARED
 
 set(DEPS ${DEP_MD5} ${ZLIB_DEP} ${DEP_JSON_SRC})
 
+find_package(ICU REQUIRED COMPONENTS uc i18n)
+
 # Libraries
 set(LIBS
   ${CMAKE_THREAD_LIBS_INIT} 
   ${ZLIB_LIBRARIES} 
-  ${PLATFORM_LIBS})
+  ${PLATFORM_LIBS}
+  ${ICU_LIBRARIES}
+  ${CRYPTO_LIBRARIES}
+)
 
 # Targets
 add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_GENERATED_SHARED} ${BASE})
@@ -781,10 +792,17 @@ set_glob(ENGINE_SERVER GLOB src/engine/server
   register.h
   server.cpp
   server.h
+  sql_connector.cpp
+  sql_connector.h
+  sql_job.cpp
+  sql_job.h
+  sql_server.cpp
+  sql_server.h
+  sql_string_helpers.cpp
+  sql_string_helpers.h
 )
 
 set(SERVER_INCLUDES_DIRS
-  ${ICU_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIRS}
 )
 
@@ -792,7 +810,7 @@ set(SERVER_LIBRARIES
   ${ICU_LIBRARIES}
 )
 
-file(GLOB CITY "src/teeother/components/*.cpp" "src/teeother/components/*.h" "src/teeother/tl/*.h" "src/teeother/system/*.h")
+file(GLOB CITY "src/city/components/*.cpp" "src/city/components/*.h" "src/city/tl/*.h" "src/city/system/*.h")
 
 set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/character.cpp
@@ -886,6 +904,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/shopitems/shotgun.h
   city/shopitems/vip.cpp
   city/shopitems/vip.h
+  discord/bot.cpp
+  discord/bot.h
   entity.cpp
   entity.h
   eventhandler.cpp
@@ -894,14 +914,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   gamecontext.h
   gamecontroller.cpp
   gamecontroller.h
-  gamemodes/ctf.cpp
-  gamemodes/ctf.h
-  gamemodes/dm.cpp
-  gamemodes/dm.h
-  gamemodes/mod.cpp
-  gamemodes/mod.h
-  gamemodes/tdm.cpp
-  gamemodes/tdm.h
+  gamemodes/city.cpp
+  gamemodes/city.h
   gameworld.cpp
   gameworld.h
   player.cpp
@@ -919,7 +933,11 @@ else()
 endif()
 
 # Libraries
-set(LIBS_SERVER ${LIBS} ${OPENSSL_LIBRARIES})
+set(LIBS_SERVER
+  ${LIBS}
+  ${OPENSSL_LIBRARIES}
+  ${MYSQL_LIBRARIES}
+)
 
 # Target
 set(TARGET_SERVER ${SERVER_EXECUTABLE})
@@ -930,9 +948,12 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:engine-shared>
   $<TARGET_OBJECTS:game-shared>
 )
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+
+target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
 target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
-target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS})
+target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
+
+
 
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
 list(APPEND TARGETS_LINK ${TARGET_SERVER})
@@ -1334,6 +1355,11 @@ foreach(target ${TARGETS_OWN})
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} PRIVATE ${CURL_INCLUDE_DIRS})
   target_include_directories(${target} PRIVATE ${ZLIB_INCLUDE_DIRS})
+
+  set_target_properties(${target} PROPERTIES
+    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD_REQUIRED ON
+)
 
   if(ICU_FOUND)
 	target_include_directories(${target} PRIVATE ${ICU_INCLUDE_DIRS})

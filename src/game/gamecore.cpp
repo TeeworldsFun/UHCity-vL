@@ -90,6 +90,10 @@ void CCharacterCore::Reset()
 	m_HookedPlayer = -1;
 	m_Jumped = 0;
 	m_TriggeredEvents = 0;
+	m_Fly = false;
+
+	// Zomb2
+	m_Zooker = false;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -158,7 +162,7 @@ void CCharacterCore::Tick(bool UseInput)
 			m_Jumped &= ~1;
 
 		// handle hook
-		if(m_Input.m_Hook)
+		if(m_Input.m_Hook && !m_Fly)
 		{
 			if(m_HookState == HOOK_IDLE)
 			{
@@ -321,7 +325,7 @@ void CCharacterCore::Tick(bool UseInput)
 			m_HookTick++;
 
 		if(m_HookedPlayer != -1 
-			&& (((m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5) || !m_pWorld->m_apCharacters[m_HookedPlayer])
+			&& (((m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5) && !m_Zooker || !m_pWorld->m_apCharacters[m_HookedPlayer])
 			|| m_DisablePlayerHook) && m_HookTick > 3 && m_HookedPlayer > -1) // boost hook
 		{
 			m_HookedPlayer = -1;

@@ -10,6 +10,7 @@
 #include <game/gamecore.h>
 
 #include "game/server/city/items/gravaura.h"
+#include "game/server/city/items/hammerkill.h"
 
 enum
 {
@@ -140,6 +141,7 @@ public:
 	int m_Menu;
 	int m_ShopPage;
 	int m_ShopGroup;
+	int m_Shop;
 	int m_FreezeWeapon;
 	int m_Transfers;
 	int m_GunFreezeCooldown;
@@ -164,6 +166,7 @@ public:
 	int64 m_LastSwitch;
 
 	CGravAura* m_GravAura;
+	CHammerKill* m_HammerKill;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
@@ -178,6 +181,30 @@ public:
 	int GetHealth() const { return m_Health; }
 
 	void CheckLevelUp(int ClientID);
+
+	//Zomb2
+	void DoZombieMovement();
+	void DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int NearZombCID);
+	void ResetAiming();
+	vec2 GetGrenadeAngle(vec2 m_StartPos, vec2 m_ToShoot, bool GrenadeBot);
+	float GetTriggerDistance(int Type);
+
+	struct MoveVars
+	{
+		bool m_FJump;
+		int m_LastX;
+		int m_LastXTimer;
+		int m_JumpTimer;
+		int m_CliffTimer;
+	} m_Move;
+
+	struct AimVars
+	{
+		int m_FireCounter;
+		int m_Angle;
+		bool m_Explode;
+	} m_Aim;
+	bool m_IsVisible;
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;

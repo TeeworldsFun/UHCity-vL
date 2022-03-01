@@ -122,11 +122,15 @@
             "value": ""
         },
         {
-            "key": "{str:PName} {str:RD} Instagib",
+            "key": "{str:PName} joined Instagib",
             "value": ""
         },
         {
-            "key": "Monster is not enabled",
+            "key": "{str:PName} left Instagib",
+            "value": ""
+        },
+        {
+            "key": "Zomb is not enabled",
             "value": ""
         },
         {
@@ -462,7 +466,7 @@
             "value": ""
         },
         {
-            "key": "Join our discord to contact us https://discord.gg/Rstb8ge",
+            "key": "Join our discord to contact us https://discord.gg/PhgUmS2qey",
             "value": ""
         },
         {
@@ -478,7 +482,7 @@
             "value": ""
         },
         {
-            "key": "If you forget your password or wish to donate, please ONLY contact UrinStone#8404 on Discord.",
+            "key": "If you forget your password or wish to donate, please ONLY contact TeeFlowerFell-Sans#9358 on Discord.",
             "value": ""
         },
         {
@@ -530,7 +534,7 @@
             "value": ""
         },
         {
-            "key": "Contact UrinStone#8404 at discord",
+            "key": "Contact TeeFlowerFell-Sans#9358 at discord",
             "value": ""
         },
         {
@@ -654,6 +658,10 @@
             "value": ""
         },
         {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": ""
+        },
+        {
             "key": "/plasma -- Beat them with your Plasma",
             "value": ""
         },
@@ -768,6 +776,14 @@
         {
             "key": "{str:hk} Hammerkill",
             "value": ""
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
         },
         {
             "key": "Buy Gunfreeze first!",
@@ -1094,7 +1110,7 @@
             "value": ""
         },
         {
-            "key": "Type /shop for more informations",
+            "key": "Or use /shop to quick Switch Shop menu",
             "value": ""
         },
         {
@@ -1142,7 +1158,7 @@
             "value": ""
         },
         {
-            "key": " Parse Error: Please contact UrinStone to get this fixed.",
+            "key": " Parse Error: Please contact TeeFlowerFell-Sans#9358 to get this fixed.",
             "value": ""
         },
         {
@@ -1154,7 +1170,7 @@
             "value": ""
         },
         {
-            "key": "Visit our Discord server https://discord.gg/Rstb8ge",
+            "key": "Visit our Discord server https://discord.gg/PhgUmS2qey",
             "value": ""
         },
         {
@@ -1162,11 +1178,11 @@
             "value": ""
         },
         {
-            "key": "~~~~~ MONSTER!! BY Neox76 ~~~~~",
+            "key": "~~~~~ Zomb!! BY Neox76 ~~~~~",
             "value": ""
         },
         {
-            "key": "Monster is coming! Join 'MOSTE' to Kill them!",
+            "key": "Zomb is coming! Join 'MOSTE' to Kill them!",
             "value": ""
         },
         {
@@ -1174,7 +1190,7 @@
             "value": ""
         },
         {
-            "key": "",
+            "key": "Use F3 and F4 to switch the shop menu",
             "value": ""
         },
         {

@@ -45,6 +45,7 @@ void CGameEvent::Tick() {
 
 void CGameEvent::Create(int Type, int Duration) {
     char aEvent[32];
+    char aBuf[256];
 
     Reset(); // make sure we always have only one event effect
 
@@ -59,6 +60,9 @@ void CGameEvent::Create(int Type, int Duration) {
     case EVENT_RISINGMC:
         RisingMC();
         break;
+    case EVENT_MONSTER:
+        Monster();
+        break;
     default:
         break;
     }
@@ -67,6 +71,8 @@ void CGameEvent::Create(int Type, int Duration) {
     m_Timer = Duration;
     EventInfo();
     GetEventStr(Type, aEvent, sizeof aEvent);
+    str_format(aBuf, sizeof(aBuf), "'%s' Event started for %d seconds", aEvent, Duration);
+    GameServer()->Discord()->SendChatTarget_Discord(aBuf, "Event");
     dbg_msg("event", "'%s' Event started for %d seconds", aEvent, Duration);
 }
 
@@ -81,7 +87,7 @@ void CGameEvent::EventInfo(int ClientID) {
             return;
         case EVENT_MONEYEXP:
             GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("~~~~~ MONEY&EXP EVENT ~~~~~"));
-            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s} "), "s", &m_Timer, NULL);
+            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
             str_format(aBuf, sizeof aBuf, "Money: x%d", m_Multiplier);
             GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
             str_format(aBuf, sizeof aBuf, "Exp: x%d", m_Multiplier);
@@ -93,10 +99,9 @@ void CGameEvent::EventInfo(int ClientID) {
             GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
             return;
         case EVENT_MONSTER:
-            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("~~~~~ MONSTER!! BY Neox76 ~~~~~"));
-            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("Monster is coming! Join 'MOSTE' to Kill them!"));
+            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("~~~~~ ZOMB COMING!! ~~~~~"));
+            GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("Zombie is coming! Kill them!"));
             GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
-            return;
         }
     } else {
         switch (m_CurrentEvent)
@@ -119,8 +124,8 @@ void CGameEvent::EventInfo(int ClientID) {
             GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
             return;
         case EVENT_MONSTER:
-            GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("~~~~~ MONSTER!! BY Neox76 ~~~~~"));
-            GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("Monster is coming! Join 'MOSTE' to Kill them!"));
+            GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("~~~~~ ZOMB COMING!! ~~~~~"));
+            GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("Zombie is coming! Kill them!"));
             GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Duration: {sec:s}"), "s", &m_Timer, NULL);
             return;
         default:
@@ -155,7 +160,7 @@ void CGameEvent::GetEventStr(int ID, char *Out, int Size) {
         str_format(Out, Size, "RisngMC");
         break;
     case EVENT_MONSTER:
-        str_format(Out, Size, "Monster");
+        str_format(Out, Size, "Zomb");
         break;
     default:
         str_format(Out, Size, "Unknown");
@@ -163,13 +168,37 @@ void CGameEvent::GetEventStr(int ID, char *Out, int Size) {
     }
 }
 
+char *CGameEvent::GetEvent(int Type)
+{
+    char aBuf[256];
+    switch (Type)
+    {
+    case EVENT_BOUNTY:
+        str_format(aBuf, sizeof(aBuf), "Bounty");
+        break;
+    case EVENT_MONEYEXP:
+        str_format(aBuf, sizeof(aBuf), "Money&Exp");
+        break;
+    case EVENT_RISINGMC:
+        str_format(aBuf, sizeof(aBuf), "RisngMC");
+        break;
+    case EVENT_MONSTER:
+        str_format(aBuf, sizeof(aBuf), "Zomb");
+        break;
+    default:
+        str_format(aBuf, sizeof(aBuf), "Unknown");
+        break;
+    }
+    return aBuf;
+}
+
 // Events
 
 void CGameEvent::Bounty() {
-    char aBuf[128], numBuf[16];
+    char numBuf[16];
     int Amount;
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         if (!GameServer()->m_apPlayers[i])
             continue;
 

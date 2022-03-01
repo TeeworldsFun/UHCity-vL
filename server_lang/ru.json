@@ -1,0 +1,1417 @@
+{
+    "translation":
+    [
+        {
+            "key": "Already logged in",
+            "value": "Вход в аккаунт уже выполнен"
+        },
+        {
+            "key": "Username too {str:ls}",
+            "value": "Имя пользователя слишком {str:ls}"
+        },
+        {
+            "key": "Password too {str:ls}",
+            "value": "Пароль слишком {str:ls}"
+        },
+        {
+            "key": "This account does not exist.",
+            "value": "Такого аккаунта не существует"
+        },
+        {
+            "key": "Please register first. (/register <user> <pass>)",
+            "value": "Пожайлуста, сначала зарегестрируйтесь. (/register <имя пользователя> <пароль>)"
+        },
+        {
+            "key": "Account already in use",
+            "value": "Аккаунт уже используется"
+        },
+        {
+            "key": "Wrong username or password",
+            "value": "Неправельное имя пользователя или пароль"
+        },
+        {
+            "key": "Login succesful",
+            "value": "Вход успешно выполнен"
+        },
+        {
+            "key": "Already logged in",
+            "value": "Вход в аккаунт уже выполнен"
+        },
+        {
+            "key": "Don't use invalid chars for username!",
+            "value": "Не используйте неподходящие символы для имени пользователя!"
+        },
+        {
+            "key": "Registration succesful - ('/login {str:Username} {str:Password}')",
+            "value": "Успешная регистрация - ('/login {str:Username} {str:Password}')"
+        },
+        {
+            "key": "Account deleted!",
+            "value": "Аккаунт удалён!"
+        },
+        {
+            "key": "Please, login to delete your account",
+            "value": "Пожайлуста, авторизируйтесь для удаления аккаунта"
+        },
+        {
+            "key": "Please, login to change the password",
+            "value": "Пожайлуста, авторизируйтесь для смены пароля"
+        },
+        {
+            "key": "Password successfully changed!",
+            "value": "Пароль успешно изменен!"
+        },
+        {
+            "key": "usage: /register <username> <password>",
+            "value": "использование: /register <имя пользователя> <пароль>"
+        },
+        {
+            "key": "Logout succesful",
+            "value": "Выход выполнен"
+        },
+        {
+            "key": "usage: /changepw <password>",
+            "value": "использование: /changepw <пароль>"
+        },
+        {
+            "key": "Password changed",
+            "value": "Пароль изменен"
+        },
+        {
+            "key": "You can't do this at the moment",
+            "value": "В данный момент вы не можете это сделать"
+        },
+        {
+            "key": "This is a donor feature",
+            "value": "Это только для доноров"
+        },
+        {
+            "key": "Welcome Home :)",
+            "value": "Добро пожаловать домой :)"
+        },
+        {
+            "key": "This is a donor feature",
+            "value": "Это только для доноров"
+        },
+        {
+            "key": "{str:RD} Rainbow",
+            "value": "{str:RD} Радуга"
+        },
+        {
+            "key": "{str:RD} Crown",
+            "value": "{str:RD} Корона"
+        },
+        {
+            "key": "This is a vip feature",
+            "value": "Это только для ВИПов"
+        },
+        {
+            "key": "Only for police",
+            "value": "Это только для полиции"
+        },
+        {
+            "key": "Jailrifle {str:RD}",
+            "value": "Jailrifle {str:RD}"
+        },
+        {
+            "key": "God {str:RD}",
+            "value": "Режим бога {str:RD}"
+        },
+        {
+            "key": "Instagib is not enabled",
+            "value": "Instagib не включен"
+        },
+        {
+            "key": "{str:PName} joined Instagib",
+            "value": "{str:PName} joined Instagib"
+        },
+        {
+            "key": "{str:PName} left Instagib",
+            "value": "{str:PName} left Instagib"
+        },
+        {
+            "key": "Zomb is not enabled",
+            "value": "Zomb не включен"
+        },
+        {
+            "key": "usage: /transfer <amount>",
+            "value": "использование: /transfer <кол-во>"
+        },
+        {
+            "key": "usage: /pm <name> <message>",
+            "value": "использование: /pm <имя> <сообщение>"
+        },
+        {
+            "key": "No such user",
+            "value": "Такого пользователя нет"
+        },
+        {
+            "key": "You can't pm yourself",
+            "value": "Ты не можешь отправить сообщение самому себе"
+        },
+        {
+            "key": "Out of range",
+            "value": "Вне диапазона"
+        },
+        {
+            "key": "No such player",
+            "value": "Такого игрока нет"
+        },
+        {
+            "key": "usage: /setpm <name>",
+            "value": "использование: /setpm <имя>"
+        },
+        {
+            "key": "No such user",
+            "value": "Такого пользователя нет"
+        },
+        {
+            "key": "You can't set yourself as pm partner",
+            "value": "Ты не можешь сделать себя своим же собеседником"
+        },
+        {
+            "key": "{str:VT} is now your pm partner",
+            "value": "{str:VT} теперь твой собеседник"
+        },
+        {
+            "key": "usage: /disabledmg <id>",
+            "value": "использование: /disabledmg <айди>"
+        },
+        {
+            "key": "You can't disabledmg on yourself",
+            "value": "Ты не можешь выключить урон по себе"
+        },
+        {
+            "key": "usage: /enabledmg <id>",
+            "value": "использование: /enabledmg <айди>"
+        },
+        {
+            "key": "You can't disabledmg on yourself",
+            "value": "Ты не можешь выключить урон по себе"
+        },
+        {
+            "key": "You can't enabledmg on yourself",
+            "value": "Ты не можешь включить урон по себе"
+        },
+        {
+            "key": "Visit a coach first",
+            "value": "Сначала посети тренера"
+        },
+        {
+            "key": "usage: /train <weapon> ?<amount>",
+            "value": "использование: /train <оружие> ?<кол-во>"
+        },
+        {
+            "key": "'{str:W}' does not exist",
+            "value": "'{str:W}' не существует"
+        },
+        {
+            "key": "You can't train more than 100ep at once",
+            "value": "Ты не можешь прокачать более 100ep за раз"
+        },
+        {
+            "key": "Bad boy...",
+            "value": "Плохой мальчик..."
+        },
+        {
+            "key": "You already reached the max level",
+            "value": "Ты уже достиг максимального уровня"
+        },
+        {
+            "key": "This would cost {str:D}$",
+            "value": "Это будет стоить {str:D}$"
+        },
+        {
+            "key": "Not enough money",
+            "value": "Не хватает денег"
+        },
+        {
+            "key": "Money: {str:Num0} (-{str:Num1}$)",
+            "value": "Баланс: {str:Num0} (-{str:Num1}$)"
+        },
+        {
+            "key": "There are no bounties to hunt",
+            "value": "Нет наград для охоты"
+        },
+        {
+            "key": "There are no bounties here",
+            "value": "Тут нет наград"
+        },
+        {
+            "key": "Stop fooling around",
+            "value": "Хватит дурачиться"
+        },
+        {
+            "key": "'{str:CN}': {str:BL}$",
+            "value": "'{str:CN}': {str:BL}$"
+        },
+        {
+            "key": "/bountylist {int:ID}",
+            "value": "/bountylist {int:ID}"
+        },
+        {
+            "key": "usage: /checkbounty <id>",
+            "value": "использование: /checkbounty <айди>"
+        },
+        {
+            "key": "This player has no bounty",
+            "value": "За этого игрока нет награды"
+        },
+        {
+            "key": "{str:CN} has a bounty of {str:nB}$",
+            "value": "За игрока {str:CN} назначена награда {str:nB}$"
+        },
+        {
+            "key": "usage: /setbounty <id> <amount>",
+            "value": "использование: /setbounty <айди> <кол-во>"
+        },
+        {
+            "key": "Put a bounty of at least 1.000$",
+            "value": "Награда должна быть хотя бы 1.000$"
+        },
+        {
+            "key": "Not enough money",
+            "value": "Не хватает денег"
+        },
+        {
+            "key": "Usage: /mcbuy <amount>",
+            "value": "использование: /mcbuy <кол-во>"
+        },
+        {
+            "key": "You need to be inside the Moneycollector",
+            "value": ""
+        },
+        {
+            "key": "Pfff...",
+            "value": ""
+        },
+        {
+            "key": "~~ Money Collector Help ~~",
+            "value": ""
+        },
+        {
+            "key": "The Money Collector collects 4% of the farmed income on the server.",
+            "value": ""
+        },
+        {
+            "key": "This money ends up in the pot.",
+            "value": ""
+        },
+        {
+            "key": "The pot is increased by 50% every hour.",
+            "value": ""
+        },
+        {
+            "key": "The price is reduced by 5% every 10 minutes",
+            "value": ""
+        },
+        {
+            "key": "The Holder can collect the money from the pot.",
+            "value": ""
+        },
+        {
+            "key": "Checkout /mccmds to get more information.",
+            "value": ""
+        },
+        {
+            "key": "~~ Money Collector Cmds ~~",
+            "value": ""
+        },
+        {
+            "key": "/mcbuy",
+            "value": ""
+        },
+        {
+            "key": "/mccollect",
+            "value": ""
+        },
+        {
+            "key": "/mchelp",
+            "value": ""
+        },
+        {
+            "key": "---------- STATS ----------",
+            "value": ""
+        },
+        {
+            "key": "AccID: {int:id}",
+            "value": ""
+        },
+        {
+            "key": "Username: {str:un}",
+            "value": ""
+        },
+        {
+            "key": "Level: {int:lv}",
+            "value": ""
+        },
+        {
+            "key": "Exp: {str:exp} / {str:nB}",
+            "value": ""
+        },
+        {
+            "key": "Hammer: {int:h} Gun: {int:g}, Shotgun: {int:sg}, Grenade: {int:gr}, Rifle: {int:r}",
+            "value": ""
+        },
+        {
+            "key": "Money: {str:Money}$",
+            "value": ""
+        },
+        {
+            "key": "Bounty: {str:B}$",
+            "value": ""
+        },
+        {
+            "key": "---------- COMMAND LIST ----------",
+            "value": ""
+        },
+        {
+            "key": "/info -- Infos about the server",
+            "value": ""
+        },
+        {
+            "key": "/help -- Help if you are new",
+            "value": ""
+        },
+        {
+            "key": "/me -- Account stats",
+            "value": ""
+        },
+        {
+            "key": "/disabledmg -- Disables damage on someone",
+            "value": ""
+        },
+        {
+            "key": "/enabledmg -- Enables damage on someone",
+            "value": ""
+        },
+        {
+            "key": "/transfer -- Drops money at your cursors position",
+            "value": ""
+        },
+        {
+            "key": "/donor -- Infos about Donor",
+            "value": ""
+        },
+        {
+            "key": "/vip -- Infos about VIP",
+            "value": ""
+        },
+        {
+            "key": "/upgrcmds -- Get a list of all Upgrade commands",
+            "value": ""
+        },
+        {
+            "key": "/instagib -- Play insta",
+            "value": ""
+        },
+        {
+            "key": "/cmdlist 1 -- see more commands",
+            "value": ""
+        },
+        {
+            "key": "/ids -- Display all IDs",
+            "value": ""
+        },
+        {
+            "key": "/event -- Gives the current event infos",
+            "value": ""
+        },
+        {
+            "key": "/setbounty -- Put a bounty on someone",
+            "value": ""
+        },
+        {
+            "key": "/checkbounty -- Check if a player has a bounty",
+            "value": ""
+        },
+        {
+            "key": "/bountylist -- Get a list of all bounties",
+            "value": ""
+        },
+        {
+            "key": "/writestats -- Writes your weaponlevel down",
+            "value": ""
+        },
+        {
+            "key": "/lang cn|en -- Change you server language",
+            "value": ""
+        },
+        {
+            "key": "We don't have so many commands :(",
+            "value": ""
+        },
+        {
+            "key": "---------- HELP ----------",
+            "value": ""
+        },
+        {
+            "key": "You need to register enter the game.",
+            "value": ""
+        },
+        {
+            "key": "-- /register <username> <password>",
+            "value": ""
+        },
+        {
+            "key": "If you already have an account you can login with",
+            "value": ""
+        },
+        {
+            "key": "-- /login <username> <password>",
+            "value": ""
+        },
+        {
+            "key": "If you have any questions you can always ask a team member.",
+            "value": ""
+        },
+        {
+            "key": "Join our discord to contact us https://discord.gg/Rstb8ge",
+            "value": ""
+        },
+        {
+            "key": "---------- INFO ----------",
+            "value": ""
+        },
+        {
+            "key": "UH|City is made by UrinStone.",
+            "value": ""
+        },
+        {
+            "key": "Join our Discord to be always informed about the latest updates.",
+            "value": ""
+        },
+        {
+            "key": "If you forget your password or wish to donate, please ONLY contact UrinStone#8404 on Discord.",
+            "value": ""
+        },
+        {
+            "key": "---------- RULES ----------",
+            "value": ""
+        },
+        {
+            "key": "- Don't use Bots / Lua scripts",
+            "value": ""
+        },
+        {
+            "key": "- no Multiacc (logging in with multiple accounts)",
+            "value": ""
+        },
+        {
+            "key": "- Don't abuse Bugs!",
+            "value": ""
+        },
+        {
+            "key": "- Don't insult other players",
+            "value": ""
+        },
+        {
+            "key": "- Don't Spam",
+            "value": ""
+        },
+        {
+            "key": "- Don't Funvote",
+            "value": ""
+        },
+        {
+            "key": "- Don't place unfair lights",
+            "value": ""
+        },
+        {
+            "key": "- Respect the Police",
+            "value": ""
+        },
+        {
+            "key": "You will be punished if you disregard the rules",
+            "value": ""
+        },
+        {
+            "key": "---------- DONOR ----------",
+            "value": ""
+        },
+        {
+            "key": "Donor costs 10€",
+            "value": ""
+        },
+        {
+            "key": "Contact UrinStone#8404 at discord",
+            "value": ""
+        },
+        {
+            "key": "Donor provides following features:",
+            "value": ""
+        },
+        {
+            "key": "- x5 Money and Exp",
+            "value": ""
+        },
+        {
+            "key": "- The nice crown",
+            "value": ""
+        },
+        {
+            "key": "- Rainbow",
+            "value": ""
+        },
+        {
+            "key": "- Your own House",
+            "value": ""
+        },
+        {
+            "key": "- Home teleport",
+            "value": ""
+        },
+        {
+            "key": "- Save and load a position",
+            "value": ""
+        },
+        {
+            "key": "- Exclusive 1000$ money tiles that give x6 money & exp",
+            "value": ""
+        },
+        {
+            "key": "Checkout /donorcmds for more information.",
+            "value": ""
+        },
+        {
+            "key": "---------- DONORCMDS ----------",
+            "value": ""
+        },
+        {
+            "key": " /save -- Saves your position",
+            "value": ""
+        },
+        {
+            "key": " /load -- Teleports you to the saved position",
+            "value": ""
+        },
+        {
+            "key": " /rainbow -- Gives you rainbow colors",
+            "value": ""
+        },
+        {
+            "key": " /crown -- The nice crown",
+            "value": ""
+        },
+        {
+            "key": " /home -- Teleports you Into your Home",
+            "value": ""
+        },
+        {
+            "key": "Checkout /donor to get more information.",
+            "value": ""
+        },
+        {
+            "key": "---------- IDS ----------",
+            "value": ""
+        },
+        {
+            "key": "[{int:id}] {str:CN}",
+            "value": ""
+        },
+        {
+            "key": "/ids {int:page}",
+            "value": ""
+        },
+        {
+            "key": "---------- VIP ----------",
+            "value": ""
+        },
+        {
+            "key": "VIP gives you x3 money and exp.",
+            "value": ""
+        },
+        {
+            "key": "Use movement cmds:",
+            "value": ""
+        },
+        {
+            "key": "- /up",
+            "value": ""
+        },
+        {
+            "key": "- /down",
+            "value": ""
+        },
+        {
+            "key": "- /left",
+            "value": ""
+        },
+        {
+            "key": "- /right",
+            "value": ""
+        },
+        {
+            "key": "- /tele",
+            "value": ""
+        },
+        {
+            "key": "---------- UPGRADE CMDS ----------",
+            "value": ""
+        },
+        {
+            "key": "/walls -- Laser walls",
+            "value": ""
+        },
+        {
+            "key": "/hammerkill -- Your target can't escape!",
+            "value": ""
+        },
+        {
+            "key": "/hammerexplode -- Explosion power!",
+            "value": ""
+        },
+        {
+            "key": "/plasma -- Beat them with your Plasma",
+            "value": ""
+        },
+        {
+            "key": "/portal -- Opens a portal to teleport between two points",
+            "value": ""
+        },
+        {
+            "key": "/fgun -- Freeze gun",
+            "value": ""
+        },
+        {
+            "key": "/swap -- Swaps the position with your target",
+            "value": ""
+        },
+        {
+            "key": "/rplasma -- Rifle plasma",
+            "value": ""
+        },
+        {
+            "key": "/fly -- Fly",
+            "value": ""
+        },
+        {
+            "key": "/bhook -- Boost other players",
+            "value": ""
+        },
+        {
+            "key": "/hhook -- Increases the hooked players healthregen",
+            "value": ""
+        },
+        {
+            "key": "/nfly -- Ninja fly",
+            "value": ""
+        },
+        {
+            "key": "/nbomber -- Bomb your enemys away",
+            "value": ""
+        },
+        {
+            "key": "/pushaura -- Pushes the other players",
+            "value": ""
+        },
+        {
+            "key": "/pullaura -- Pull the other players",
+            "value": ""
+        },
+        {
+            "key": "Please use '/upgrcmds <item>'",
+            "value": ""
+        },
+        {
+            "key": "You can checkout following items:",
+            "value": ""
+        },
+        {
+            "key": "Enter a shop first",
+            "value": ""
+        },
+        {
+            "key": "Use /shop <item> to see the items you want.",
+            "value": ""
+        },
+        {
+            "key": "Example: '/shop hammer' will show all hammer upgrades.",
+            "value": ""
+        },
+        {
+            "key": "To switch between pages use f3 or f4.",
+            "value": ""
+        },
+        {
+            "key": "Available menus are:",
+            "value": ""
+        },
+        {
+            "key": "Visit a coach first",
+            "value": ""
+        },
+        {
+            "key": "One exp costs 1.000.000$.",
+            "value": ""
+        },
+        {
+            "key": "Use /train <weapon> ?<amount>.",
+            "value": ""
+        },
+        {
+            "key": "Available weapons are:",
+            "value": ""
+        },
+        {
+            "key": "Buy Walls first!",
+            "value": ""
+        },
+        {
+            "key": "{str:RD} Walls",
+            "value": ""
+        },
+        {
+            "key": "Buy Plasma first!",
+            "value": ""
+        },
+        {
+            "key": "{str:plasma} Plasma",
+            "value": ""
+        },
+        {
+            "key": "Buy Hammerkill first!",
+            "value": ""
+        },
+        {
+            "key": "{str:hk} Hammerkill",
+            "value": ""
+        },
+        {
+            "key": "Buy Hammerexplode first!",
+            "value": "Buy Hammerexplode first!"
+        },
+        {
+            "key": "{str:hk} Hammerexplode",
+            "value": "{str:hk} Hammerexplode"
+        },
+        {
+            "key": "Buy Gunfreeze first!",
+            "value": ""
+        },
+        {
+            "key": "{str:gf} Gunfreeze",
+            "value": ""
+        },
+        {
+            "key": "Buy Rifleplasma first!",
+            "value": ""
+        },
+        {
+            "key": "{str:rp} Rifleplasma",
+            "value": ""
+        },
+        {
+            "key": "Buy Swap first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Swap",
+            "value": ""
+        },
+        {
+            "key": "Buy Fly first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Fly",
+            "value": ""
+        },
+        {
+            "key": "Buy Healhook first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Healhook",
+            "value": ""
+        },
+        {
+            "key": "Buy Boosthook first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Boosthook",
+            "value": ""
+        },
+        {
+            "key": "Buy Portal first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Portal",
+            "value": ""
+        },
+        {
+            "key": "Buy PushAura first!",
+            "value": ""
+        },
+        {
+            "key": "You can use this aura in {int:cd} seconds again",
+            "value": ""
+        },
+        {
+            "key": "Buy PullAura first!",
+            "value": ""
+        },
+        {
+            "key": "Buy Ninjafly first!",
+            "value": ""
+        },
+        {
+            "key": "Buy PullAura first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ED} Ninjafly",
+            "value": ""
+        },
+        {
+            "key": "Buy Ninjabomber first!",
+            "value": ""
+        },
+        {
+            "key": "{str:ed} Ninjabomber",
+            "value": ""
+        },
+        {
+            "key": "Available languages: {str:ListOfLanguage}",
+            "value": ""
+        },
+        {
+            "key": "All weapons",
+            "value": ""
+        },
+        {
+            "key": "Gun freeze",
+            "value": ""
+        },
+        {
+            "key": "Gun spread",
+            "value": ""
+        },
+        {
+            "key": "Fast reload",
+            "value": ""
+        },
+        {
+            "key": "Grenade spread",
+            "value": ""
+        },
+        {
+            "key": "Grenade bounce",
+            "value": ""
+        },
+        {
+            "key": "Gun explode",
+            "value": ""
+        },
+        {
+            "key": "Hammer walls",
+            "value": ""
+        },
+        {
+            "key": "Hammer shot",
+            "value": ""
+        },
+        {
+            "key": "Hammer kill",
+            "value": ""
+        },
+        {
+            "key": "Portal",
+            "value": ""
+        },
+        {
+            "key": "Health",
+            "value": ""
+        },
+        {
+            "key": "Armor",
+            "value": ""
+        },
+        {
+            "key": "Health regeneration",
+            "value": ""
+        },
+        {
+            "key": "Endless Hook",
+            "value": ""
+        },
+        {
+            "key": "Heal Hook",
+            "value": ""
+        },
+        {
+            "key": "Boost Hook",
+            "value": ""
+        },
+        {
+            "key": "Infinity ammo",
+            "value": ""
+        },
+        {
+            "key": "Infinity jumps",
+            "value": ""
+        },
+        {
+            "key": "Ninja Permanent",
+            "value": ""
+        },
+        {
+            "key": "Ninja at Start",
+            "value": ""
+        },
+        {
+            "key": "Ninja Switch",
+            "value": ""
+        },
+        {
+            "key": "Ninja fly",
+            "value": ""
+        },
+        {
+            "key": "Ninja Bomber",
+            "value": ""
+        },
+        {
+            "key": "No self damage",
+            "value": ""
+        },
+        {
+            "key": "Pullaura",
+            "value": ""
+        },
+        {
+            "key": "Pushaura",
+            "value": ""
+        },
+        {
+            "key": "Rifle spread",
+            "value": ""
+        },
+        {
+            "key": "Rifle swap",
+            "value": ""
+        },
+        {
+            "key": "Rifle plasma",
+            "value": ""
+        },
+        {
+            "key": "Shotgun spread",
+            "value": ""
+        },
+        {
+            "key": "Shotgun explode",
+            "value": ""
+        },
+        {
+            "key": "VIP",
+            "value": ""
+        },
+        {
+            "key": "Only the holder can collect this money",
+            "value": ""
+        },
+        {
+            "key": "There is nothing to collect :(",
+            "value": ""
+        },
+        {
+            "key": "You collected {str:m}$",
+            "value": ""
+        },
+        {
+            "key": "You must pay more than the indicated price",
+            "value": ""
+        },
+        {
+            "key": "You don't have enough money",
+            "value": ""
+        },
+        {
+            "key": "{str:n} is the new holder of the Moneycollector with a value of {str:m}$",
+            "value": ""
+        },
+        {
+            "key": "Money: {str:m}$",
+            "value": ""
+        },
+        {
+            "key": "Not enough money\n{str:Name}: {str:nb0}$\nMoney: {str:nb1}$",
+            "value": ""
+        },
+        {
+            "key": "Maximum '{str:Name}' ({int:Upgr}/{int:Max})",
+            "value": ""
+        },
+        {
+            "key": "{str:Name} ({int:upgr}/{int:max})\nCost: {str:cost}$\nMoney: {str:money}$",
+            "value": ""
+        },
+        {
+            "key": "You leveled up! You are now level: {int:LV}",
+            "value": ""
+        },
+        {
+            "key": "You need {int:cost} TC",
+            "value": ""
+        },
+        {
+            "key": "Ever seen a 0$ bill?",
+            "value": ""
+        },
+        {
+            "key": "Are you trying to cheat money?",
+            "value": ""
+        },
+        {
+            "key": "Not enough money.",
+            "value": ""
+        },
+        {
+            "key": "Too many transfers",
+            "value": ""
+        },
+        {
+            "key": "The wall doesn't need money...",
+            "value": ""
+        },
+        {
+            "key": "Protected zone entered",
+            "value": ""
+        },
+        {
+            "key": "Protected zone left",
+            "value": ""
+        },
+        {
+            "key": "Gamezone entered",
+            "value": ""
+        },
+        {
+            "key": "Gamezone left",
+            "value": ""
+        },
+        {
+            "key": "~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp",
+            "value": "~ Money Collector ~\nHolder: {str:h}\nPrice: {str:p}$\nPot: {str:po}$\n/mchelp"
+        },
+        {
+            "key": "Welcome to the coach!\nWrite /coach for more information",
+            "value": "Добро пожаловать к тренеру!\nНапиши /coach для детальной информацию"
+        },
+        {
+            "key": "{str:PP} has put a bounty of {str:m}$ on {str:vt}",
+            "value": "{str:PP} заказал голову {str:vt} за {str:m}$"
+        },
+        {
+            "key": "Welcome to the Shop!",
+            "value": "Добро пожаловть в магазин!"
+        },
+        {
+            "key": "Or use /shop to quick Switch Shop menu",
+            "value": "Напишите /shop для детальной информации"
+        },
+        {
+            "key": "~~~~~ BOUNTY EVENT ~~~~~",
+            "value": "~~~~~ СОБЫТЫЕ 'Охота' ~~~~~"
+        },
+        {
+            "key": "~~~~~ MONEY&EXP EVENT ~~~~~",
+            "value": "~~~~~ СОБЫТИЕ ДЕНЕГ И ОПЫТА ~~~~~"
+        },
+        {
+            "key": "~~~~~ RISING MC ~~~~~",
+            "value": "~~~~~ RISING MC ~~~~~"
+        },
+        {
+            "key": "We accept only dead tees.",
+            "value": "Мы принимаем только мертвых колобков."
+        },
+        {
+            "key": "Duration: {int:s}",
+            "value": "Продолжительность: {int:s}"
+        },
+        {
+            "key": "The Moneycollectors pot will rise",
+            "value": "The Moneycollectors pot will rise"
+        },
+        {
+            "key": "There is no event :(",
+            "value": "Сейчас нету событый ;("
+        },
+        {
+            "key": "You got a bounty of {str:m}$",
+            "value": "Ты получил награду: {str:m}$"
+        },
+        {
+            "key": "Event Over!",
+            "value": "Событие окончено!"
+        },
+        {
+            "key": "Sorry, your account data can't be read, We were deleted your account",
+            "value": "Извини, данные твоего аккаута не читабельны, мы удалили его"
+        },
+        {
+            "key": "'{str:ClientName}' joined with a bounty of {str:Bounty}$",
+            "value": "'{str:ClientName}' зашел и наградой {str:Bounty}$ за свою голову"
+        },
+        {
+            "key": "Parse Error: Please contact UrinStone to get this fixed.",
+            "value": "Ошибка данных: Пожайлуста свяжитесь с администраторамидля решения проблемы."
+        },
+        {
+            "key": "You received money from {str:Owner}",
+            "value": "Ты поличил денег от {str:Owner}"
+        },
+        {
+            "key": "Account Backup Create!",
+            "value": "Создать резервная копию аккаунта!"
+        },
+        {
+            "key": "Visit our Discord server https://discord.gg/PhgUmS2qey",
+            "value": "Заходите в наш Discord сервер https://discord.gg/PhgUmS2qey"
+        },
+        {
+            "key": "Player {str:PN} is now in the House {int:Number}",
+            "value": "Игрок {str:PN} сейчас в доме {int:Number}"
+        },
+        {
+            "key": "~~~~~ MONSTER!! BY Neox76 ~~~~~",
+            "value": "~~~~~ МОНСТР!! ~~~~~"
+        },
+        {
+            "key": "Monster is coming! Join 'MOSTE' to Kill them!",
+            "value": "Монстр приближается! Заходи в 'MOSTE' что бы убить его!"
+        },
+        {
+            "key": "Duration: {sec:s}",
+            "value": "Длительность: {sec:s}"
+        },
+        {
+            "key": "Use F3 and F4 to switch the shop menu",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        },
+        {
+            "key": "",
+            "value": ""
+        }
+    ]
+}

@@ -33,6 +33,7 @@ class CGameEvent {
         void EventInfo(int ClientID = -1);
         void Abort();
         void GetEventStr(int ID, char *Out, int Size);
+        char *GetEvent(int Type);
 
         int m_Timer;
         int m_CurrentEvent;

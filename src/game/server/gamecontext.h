@@ -19,6 +19,8 @@
 #include "game/server/city/moneycollector.h"
 #include "game/server/city/items/portal.h"
 
+#include <game/server/discord/bot.h>
+
 #include "entities/monster/monster.h"
 #include <city/components/localization.h>
 
@@ -66,6 +68,7 @@ class CGameContext : public IGameServer
 	class CFileSys *m_pFilesys;
 	class CMoneyCollector *m_pMoneyCollector;
 	class CGameEvent *m_pGameEvent;
+	CDiscordBot *m_pDiscord;
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -99,7 +102,8 @@ public:
 	CMoneyCollector *MoneyCollector() { return m_pMoneyCollector; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-
+	CDiscordBot *Discord() { return m_pDiscord; }
+	
 	CGameContext();
 	~CGameContext();
 
@@ -163,6 +167,8 @@ public:
 	void SendChatTarget(int To, const char *pText);
 	void SendPrivate(int ChatterClientID, int To, const char *pText, int SpamProtectionClientID = -1);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1);
+	void SendChatFromDiscord(const char *pText);
+	void SCT_Discord(const char *pText, const char *Desp);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendBroadcast(const char *pText, int ClientID);
@@ -173,13 +179,6 @@ public:
 	virtual void SendChatTarget_Localization_P(int To, int Category, int Number, const char* pText, ...);
 	void AddBroadcast(int ClientID, const char* pText, int Priority, int LifeSpan);
 	void SetClientLanguage(int ClientID, const char *pLanguage);
-
-	char *ITC(int I)
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "%d", I);
-		return aBuf;
-	}
 
 	//
 	void CheckPureTuning();
@@ -212,6 +211,7 @@ public:
 	virtual const char *NetVersion();
 
 	private: //KlickFoots Rconcmdsachen^^
+		static void ConSpawnBot(IConsole::IResult *pResult, void *pUserData);
 		static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 		static void ConAuth(IConsole::IResult *pResult, void *pUserData);
 		static void ConVip(IConsole::IResult *pResult, void *pUserData);
@@ -295,9 +295,11 @@ public:
 		static void ConChatWriteStats(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatIDs(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatEvent(IConsole::IResult* pResult, void* pUserData);
+		static void ConChatCredits(IConsole::IResult* pResult, void* pUserData);
 
 		static void ConChatWalls(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatHammerkill(IConsole::IResult* pResult, void* pUserData);
+		static void ConChatHammerExplode(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatPortal(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatPlasma(IConsole::IResult* pResult, void* pUserData);
 		static void ConChatGunfreeze(IConsole::IResult* pResult, void* pUserData);
@@ -325,7 +327,7 @@ public:
 				int m_TimedPriority;
 				char m_TimedMessage[1024];
 		};
-		CBroadcastState m_BroadcastStates[MAX_CLIENTS];
+		CBroadcastState m_BroadcastStates[MAX_PLAYERS];
 
 	public: //Ende :D
 
@@ -350,7 +352,7 @@ public:
 	void AddToBountyList(int ID);
 	void RemoveFromBountyList(int ID);
 	const int* BountyList() { return m_BountyList; }
-	const int BountyList(int i) { return m_BountyList[i]; }
+	int BountyList(int i) { return m_BountyList[i]; }
 
 	bool ValidID(int ID) { return ID >= 0 && ID < MAX_CLIENTS; }
 	int GetWIDByStr(const char *weapon);
@@ -372,11 +374,17 @@ public:
 	
 	//int m_TeleID[MAX_CLIENTS];
 
-	CMonster *m_apMonsters[MAX_MONSTERS];
-    CMonster *GetValidMonster(int MonsterID) const;
-	void OnMonsterDeath(int MonsterID);
+/*    CMonster *GetValidMonster(int MonsterID) const;
+	void OnMonsterDeath(int MonsterID);*/
 	bool IsValidPlayer(int PlayerID);
 
+	//Zomb2
+	void OnZombie(int ClientID, int Zomb);
+	void OnZombieKill(int ClientID);
+
+	int CreateNewDummy(int DummyID, int DummyMode, int ClientID = -1);
+
+	int GetPlayerNum();
 private:
 	int m_BountyList[MAX_CLIENTS];
 

@@ -66,12 +66,15 @@ void CHammer::Tick()
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_HammerKill, g_Config.m_EuHammerKill, Click, 1);
 		break;
 	case 4:
+		Server()->Localization()->Format_L(Buffer, pLanguage, _("Hammer explode"));
+		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_HammerExplode, g_Config.m_EuHammerExplode, Click, 1);
+		break;
+	case 5:
 		Server()->Localization()->Format_L(Buffer, pLanguage, _("Portal"));
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_Portal, g_Config.m_EuPortal, Click, 1);
 		break;
 	}
 }
-
 
 void CHammer::Snap(int SnappingClient)
 {
@@ -103,19 +106,6 @@ void CHammer::Snap(int SnappingClient)
 			pObj[i]->m_FromY = (int)m_Pos.y + 32;
 			pObj[i]->m_StartTick = Server()->Tick();
 		}
-
-		if(Server()->Tick()%100 == 0)
-		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
-		}
-
 	}
 	else if(m_Type == 2)//Shot
 	{
@@ -146,29 +136,29 @@ void CHammer::Snap(int SnappingClient)
 		pP->m_Y = (int)m_Pos.y;
 		pP->m_Type = POWERUP_WEAPON;
 		pP->m_Subtype = WEAPON_HAMMER;
-
-		if(Server()->Tick()%100 == 0)
+	}
+	else if(m_Type == 4)// Explode
+	{
+		if(Server()->Tick()%30 == 0)
 		{
-			CNetEvent_Death *pEvent = (CNetEvent_Death *)GameServer()->m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
-
-			if(pEvent)
-			{
-				pEvent->m_X = (int)m_Pos.x;
-				pEvent->m_Y = (int)m_Pos.y;
-				pEvent->m_ClientID = m_Owner;
-			}
+			CNetEvent_Explosion *pP = static_cast<CNetEvent_Explosion *>(Server()->SnapNewItem(NETEVENTTYPE_EXPLOSION, m_ID, sizeof(CNetEvent_Explosion)));
+			if(!pP)
+				return;
+			pP->m_X = (int)m_Pos.x;
+			pP->m_Y = (int)m_Pos.y;
 		}
 	}
-	else if(m_Type == 4)// portal
+	else if(m_Type == 5)// portal
 	{
-		/*CNetEvent_Spawn* pEvent = (CNetEvent_Spawn*)GameServer()->m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
+		if(Server()->Tick()%Server()->TickSpeed() / 100 == 0)
+		{
+			CNetEvent_Spawn* pEvent = (CNetEvent_Spawn*)GameServer()->m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
 
-		if(!pEvent)
-			return;
+			if(!pEvent)
+				return;
 
-		pEvent->m_X = (int)m_Pos.x;
-		pEvent->m_Y = (int)m_Pos.y;*/
-		if(Server()->Tick()%50 == 0)
-			GameServer()->CreatePlayerSpawn(m_Pos);
+			pEvent->m_X = (int)m_Pos.x;
+			pEvent->m_Y = (int)m_Pos.y;
+		}
 	}
 }

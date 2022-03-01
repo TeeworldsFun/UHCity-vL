@@ -31,7 +31,6 @@ private:
     int m_SpawnTimer;
     int m_StartPos[MAX_PROJECTILS];
     int m_StartRadius;
-
 };
 
 #endif

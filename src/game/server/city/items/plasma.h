@@ -38,6 +38,7 @@ private:
 	vec2 m_NodePos[100];
 	vec2 m_LastPos;
 	int m_Nodes;
+	int m_PlasmaDamage;
 };
 
 #endif

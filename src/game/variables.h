@@ -35,6 +35,7 @@ MACRO_CONFIG_INT(EuGunFreeze, eu_gun_freeze, 800000000, 0, 1000000000, CFGFLAG_S
 MACRO_CONFIG_INT(EuHammerWalls, eu_hammer_walls, 50000000, 0, 1000000, CFGFLAG_SERVER, "Price - Hammer walls")
 MACRO_CONFIG_INT(EuHammerShot, eu_hammer_shot, 30000000, 0, 1000000, CFGFLAG_SERVER, "Price - Hammer shot")
 MACRO_CONFIG_INT(EuHammerKill, eu_hammer_kill, 100000000, 0, 500000000, CFGFLAG_SERVER, "Price - Hammer kill")
+MACRO_CONFIG_INT(EuHammerExplode, eu_hammer_explode, 100000000, 0, 500000000, CFGFLAG_SERVER, "Price - Hammer explode")
 MACRO_CONFIG_LONGLONG(EuPortal, eu_portal, 500000000, 0, 1000000, CFGFLAG_SERVER, "Price - Portal")
 
 MACRO_CONFIG_INT(EuNinjaPermanent, eu_ninja_permanent, 5000000, 0, 1000000, CFGFLAG_SERVER, "Price - Ninja permanent")
@@ -53,7 +54,7 @@ MACRO_CONFIG_LONGLONG(EuPullAura, eu_special_pullaura, 1000000000, 0, 9000000000
 MACRO_CONFIG_STR(SvBroadcast, sv_broadcast, 128, "", CFGFLAG_SERVER, "Broadcast message")
 
 MACRO_CONFIG_INT(EnableInstagib, sv_enable_instagib, 1, 0, 1, CFGFLAG_SERVER, "Enable/Disable Instagib")
-MACRO_CONFIG_INT(EnableMonster, sv_enable_monster, 1, 0, 1, CFGFLAG_SERVER, "Enable/Disable Monster")
+MACRO_CONFIG_INT(EnableMonster, sv_enable_monster, 1, 0, 1, CFGFLAG_SERVER, "Enable/Disable Zomb game")
 MACRO_CONFIG_INT(SvChatDelay, sv_chat_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between chat messages")
 MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, "chat score will be increased by this on every message, and decremented by 1 on every tick.")
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000 , CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds")
@@ -118,7 +119,7 @@ MACRO_CONFIG_INT(SvPowerups, sv_powerups, 1, 0, 1, CFGFLAG_SERVER, "Allow poweru
 MACRO_CONFIG_INT(SvScorelimit, sv_scorelimit, 0, 0, 0, CFGFLAG_SERVER, "Score limit (0 disables)")
 MACRO_CONFIG_INT(SvTimelimit, sv_timelimit, 0, 0, 1000, CFGFLAG_SERVER, "Time limit in minutes (0 disables)")
 MACRO_CONFIG_STR(SvGametype, sv_gametype, 32, "dm", CFGFLAG_SERVER, "Game type (dm, tdm, ctf)")
-MACRO_CONFIG_INT(SvTournamentMode, sv_tournament_mode, 0, 0, 1, CFGFLAG_SERVER, "Tournament mode. When enabled, players joins the server as spectator")
+MACRO_CONFIG_INT(SvTournamentMode, sv_tournament_mode, 1, 1, 1, CFGFLAG_SERVER, "Tournament mode. When enabled, players joins the server as spectator")
 MACRO_CONFIG_INT(SvSpamprotection, sv_spamprotection, 1, 0, 1, CFGFLAG_SERVER, "Spam protection")
 
 MACRO_CONFIG_INT(SvRespawnDelayTDM, sv_respawn_delay_tdm, 3, 0, 10, CFGFLAG_SERVER, "Time needed to respawn after death in tdm gametype")
@@ -140,10 +141,21 @@ MACRO_CONFIG_INT(SvVoteKickBantime, sv_vote_kick_bantime, 5, 0, 1440, CFGFLAG_SE
 MACRO_CONFIG_INT(HardNinja, monster_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "")
 MACRO_CONFIG_INT(SvDeathAnimation, monster_death_animation, 0, 0, 1, CFGFLAG_SERVER, "")
 
+//Dmg
+MACRO_CONFIG_INT(WaterDmg, water_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+
+MACRO_CONFIG_INT(HammerDmg, hammer_dmg, 6, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(GunDmg, gun_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(ShotgunDmg, shotgun_dmg, 2, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(GrenadeDmg, grenade_dmg, 3, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(LaserDmg, laser_dmg, 5, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(NinjaDmg, ninja_dmg, 10, 0, 10000000, CFGFLAG_SERVER, "")
+
+MACRO_CONFIG_INT(HammerExplodeDmg, hammer_explode_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
+MACRO_CONFIG_INT(PlasmaDmg, plasma_dmg, 20, 0, 10000000, CFGFLAG_SERVER, "")
 
 /* # Discord # */
 MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's token.")
-MACRO_CONFIG_STR(SvDiscordServer, sv_discord_server, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed server's ID.")
 MACRO_CONFIG_STR(SvDiscordChannel, sv_discord_channel, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed channel's ID.")
 /* # Discord # */
 

@@ -26,6 +26,7 @@ private:
 	int m_EvalTick;
 	int m_Owner;
 	int m_Type;
+	int m_LaserDamage;
 };
 
 #endif

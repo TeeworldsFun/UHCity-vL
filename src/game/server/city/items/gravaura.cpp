@@ -54,6 +54,9 @@ void CGravAura::Tick()
 
         if (!pTarget)
             continue;
+        
+        if (GameServer()->Collision()->IntersectLine2(pOwner->m_Core.m_Pos, pTarget->m_Pos))
+            return;
 
         if (pTarget->GetPlayer()->m_Insta || pTarget->m_GameZone || pTarget->GetPlayer()->m_God || pTarget->Protected())
             return;
@@ -90,6 +93,9 @@ void CGravAura::Snap(int SnappingClient)
                 normalize(GetDir((pi/180) * (i * 360/MAX_PROJECTILS))) * 
                 ((((m_LifeTime - 3000) + m_StartPos[i]) % g_Config.m_SvGravAuraRadius) + g_Config.m_SvGravAuraRadius);
         }
+
+        if (GameServer()->Collision()->IntersectLine2(pChr->m_Core.m_Pos, TempPos))
+            continue;
         
         pObj[i]->m_X = m_Pos.x + TempPos.x;
 		pObj[i]->m_Y = m_Pos.y + TempPos.y;

@@ -86,9 +86,9 @@ public:
 		Returns:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
 	*/
-	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0, bool IgnoreCollide = true);
+	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
 
-	class CMonster *IntersectMonster(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
+//	class CMonster *IntersectMonster(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
 
 	/*
 		Function: closest_CCharacter
@@ -102,9 +102,9 @@ public:
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	class CCharacter *ClosestCharacter(vec2 Pos, float Radius, CEntity *ppNotThis, bool IgnoreCollide = true);
+	class CCharacter *ClosestCharacter(vec2 Pos, float Radius, CEntity *ppNotThis);
 
-	class CMonster *ClosestMonster(vec2 Pos, float Radius, CEntity *ppNotThis);
+//	class CMonster *ClosestMonster(vec2 Pos, float Radius, CEntity *ppNotThis);
 
 	/*
 		Function: insert_entity

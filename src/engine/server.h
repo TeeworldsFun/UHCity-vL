@@ -68,26 +68,22 @@ public:
 	template<class T>
 	int SendPackMsg(T *pMsg, int Flags, int ClientID)
 	{
-		int Result = 0;
-		T Tmp;
+		int result = 0;
+		T tmp;
 		if (ClientID == -1)
 		{
-			for (int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if (ClientIngame(i))
+			for(int i = 0; i < MAX_PLAYERS; i++)
+				if(ClientIngame(i))
 				{
-					mem_copy(&Tmp, pMsg, sizeof(T));
-					Result = SendPackMsgTranslate(&Tmp, Flags, i);
+					mem_copy(&tmp, pMsg, sizeof(T));
+					result = SendPackMsgTranslate(&tmp, Flags, i);
 				}
-			}
-		}
-		else
+		} else 
 		{
-			mem_copy(&Tmp, pMsg, sizeof(T));
-			Result = SendPackMsgTranslate(&Tmp, Flags, ClientID);
+			mem_copy(&tmp, pMsg, sizeof(T));
+			result = SendPackMsgTranslate(&tmp, Flags, ClientID);
 		}
-
-		return Result;
+		return result;
 	}
 
 	template<class T>
@@ -170,6 +166,9 @@ public:
 		return true;
 	}
 
+	virtual void BotJoin(int BotID, int BotMode, bool Puppy = false) = 0;
+
+
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;
@@ -206,6 +205,10 @@ public:
 	// Localization system
 	virtual const char* GetClientLanguage(int ClientID) = 0;
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
+
+// SQL
+public:
+	virtual void FirstInit(int ClientID) = 0;
 };
 
 class IGameServer : public IInterface
@@ -240,6 +243,7 @@ public:
 	virtual void SendBroadcast_Localization(int To, int Priority, int LifeSpan, const char* pText, ...) = 0;
 	virtual void SendBroadcast_Localization_P(int To, int Priority, int LifeSpan, int Number, const char* pText, ...) = 0;
 	virtual void SendChatTarget(int To, const char* pText) = 0;
+	virtual void SCT_Discord(const char *pText, const char *Desp) = 0;
 	virtual void SendChatTarget_Localization(int To, int Category, const char* pText, ...) = 0;
 	virtual void SendChatTarget_Localization_P(int To, int Category, int Number, const char* pText, ...) = 0;
 };

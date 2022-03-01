@@ -820,12 +820,14 @@ void CGameContext::GetData_Client(int ClientID)
 {
 	m_apPlayers[ClientID]->m_AccData = Server()->GetData_Server(ClientID);
 }
+
 bool CGameContext::Apply(int ClientID)
 {
 	if(!m_apPlayers[ClientID]->m_AccData.m_UserID) return false;
-	;
+	Server()->UpdateData(ClientID, m_apPlayers[ClientID]->m_AccData);
 	return true;
 }
+
 void CGameContext::OnClientConnected(int ClientID)
 {
 	// Check which team the player should be on

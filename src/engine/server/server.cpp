@@ -2172,6 +2172,7 @@ void CServer::BotJoin(int BotID, int BotMode, bool Puppy)
 	str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet" : pClans[BotMode], MAX_CLAN_LENGTH);	 // Clan des jeweiligen Dummys setzten
 }
 
+// SQL Integrations
 
 class CSqlJob_Server_Register : public CSqlJob
 {
@@ -2404,172 +2405,175 @@ public:
 class CSqlJob_Server_Update : public CSqlJob
 {
 private:
-	CServer* m_pServer;
+	CServer *m_pServer;
 	int m_ClientID;
-	
+
 public:
-	CSqlJob_Server_Update(CServer* pServer, int ClientID)
+	CSqlJob_Server_Update(CServer *pServer, int ClientID)
 	{
 		m_pServer = pServer;
 		m_ClientID = ClientID;
 	}
 
-	virtual bool Job(CSqlServer* pSqlServer)
+	virtual bool Job(CSqlServer *pSqlServer)
 	{
 
-		char aBuf[512];
-		if(m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID == 0) return false;
+		char aBuf[2048];
+		if (m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID == 0)
+			return false;
 
 		try
 		{
 			//检查数据库中的名称或昵称
-			str_format(aBuf, sizeof(aBuf), 
-				"UPDATE %s_Accounts SET;"
-				, pSqlServer->GetPrefix());
+			str_format(aBuf, sizeof(aBuf),
+					   "UPDATE %s_Accounts SET"
+					   "Username = '%s',"
+					   "Password = '%s',"
+					   "RconPassword = '%s',"
+					   "Money = '%d',"
+					   "Health = '%d',"
+					   "Armor = '%d',"
+					   "Kills = '%d',"
+					   "HouseID = '%d',"
+					   "Level = '%d',"
+					   "ExpPoints = '%d',"
+					   "Donor = '%d',"
+					   "VIP = '%d',"
+					   "Bounty = '%d',"
+					   "Arrested = '%d',"
+					   "AllWeapons = '%d',"
+					   "HealthRegen = '%d',"
+					   "InfinityAmmo = '%d',"
+					   "InfinityJumps = '%d',"
+					   "FastReload = '%d',"
+					   "NoSelfDMG = '%d',"
+					   "Portal = '%d',"
+					   "HammerLvl = '%d',"
+					   "GunLvl = '%d',"
+					   "ShotgunLvl = '%d',"
+					   "GrenadeLvl = '%d',"
+					   "RifleLvl = '%d',"
+					   "HammerExp = '%d',"
+					   "GunExp = '%d',"
+					   "ShotgunExp = '%d',"
+					   "GrenadeExp = '%d',"
+					   "RifleExp = '%d',"
+					   "GrenadeSpread = '%d',"
+					   "GrenadeBounce = '%d',"
+					   "GrenadeMine = '%d',"
+					   "ShotgunSpread = '%d',"
+					   "ShotgunExplode = '%d',"
+					   "ShotgunStars = '%d',"
+					   "RifleSpread = '%d',"
+					   "RifleSwap = '%d',"
+					   "RiflePlasma = '%d',"
+					   "GunSpread = '%d',"
+					   "GunExplode = '%d',"
+					   "GunFreeze = '%d',"
+					   "HammerWalls = '%d',"
+					   "HammerShot = '%d',"
+					   "HammerKill = '%d',"
+					   "HammerExplode = '%d',"
+					   "NinjaPermanent = '%d',"
+					   "NinjaStart = '%d',"
+					   "NinjaSwitch = '%d',"
+					   "NinjaFly = '%d',"
+					   "NinjaBomber = '%d',"
+					   "EndlessHook = '%d',"
+					   "HealHook = '%d',"
+					   "BoostHook = '%d',"
+					   "PushAura = '%d',"
+					   "PullAura = '%d'"
+					   "WHERE UserID = '%d';",
+				pSqlServer->GetPrefix(),
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Username,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Password,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Health,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Armor,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Kills,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HouseID,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Level,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpPoints,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Bounty,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Arrested,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_AllWeapons,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealthRegen,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_InfinityAmmo,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_InfinityJumps,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_FastReload,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NoSelfDMG,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Portal,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[0],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[1],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[2],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[3],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[4],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[0],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[1],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[2],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[3],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[4],
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeSpread,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeBounce,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeMine,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunSpread,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunExplode,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunStars,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSpread,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSwap,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RiflePlasma,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunSpread,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunExplode,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunFreeze,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerWalls,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerShot,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerKill,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerExplode,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaPermanent,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaStart,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaSwitch,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaFly,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaBomber,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_EndlessHook,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealHook,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_BoostHook,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PushAura,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura,
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
 			pSqlServer->executeSql(aBuf);
-
+			
+			#ifdef CONF_DEBUG
+			dbg_msg("sqlupdate", "%s", aBuf);
+			#endif
 		}
 		catch (sql::SQLException &e)
 		{
 			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
-			
-			return false;
-		}
-		
-		//Создаем сам аккаунт
-		try
-		{	
-			str_format(aBuf, sizeof(aBuf), 
-				"UPDATE %s_Accounts "
-				"SET"
-				
-				, pSqlServer->GetPrefix());
-			pSqlServer->executeSql(aBuf);
-		}
-		catch (sql::SQLException &e)
-		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
-			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
-			
-			return false;
-		}
-		
-		// Получаем инфу пользователя
-		try
-		{	
-			str_format(aBuf, sizeof(aBuf), 
-				"SELECT UserID FROM %s_Accounts WHERE Username = '%s' AND PasswordHash = '%s';"
-				, pSqlServer->GetPrefix());
-			pSqlServer->executeSqlQuery(aBuf);
 
-			if(pSqlServer->GetResults()->next())
-			{
-				int UserID = (int)pSqlServer->GetResults()->getUInt("UserID");
-				str_format(aBuf, sizeof(aBuf), 
-					"INSERT INTO %s_Items (UserID, Username) VALUES ('%d', '%s');",
-					pSqlServer->GetPrefix(),
-					UserID);
-				pSqlServer->executeSql(aBuf);
-
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
-				return true;
-			}
-			else
-			{
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
-				return false;
-			}
-		}
-		catch (sql::SQLException &e)
-		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
-			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
-			
 			return false;
 		}
+
 		return true;
 	}
 };
-
-/*
-template<typename T>
-T CServer::GetData_Server(int ClientID, int Type)
+inline void CServer::UpdateData_Server(int ClientID)
 {
-	if(!m_aClients[ClientID].m_AccData.m_UserID) return NULL;
-	switch (Type)
-	{
-	case e_UserID: return m_aClients[ClientID].m_AccData.m_UserID; break;
-	case e_Username: return m_aClients[ClientID].m_AccData.m_Username; break;
-	case e_Password: return m_aClients[ClientID].m_AccData.m_Password; break;
-	case e_RconPassword: return m_aClients[ClientID].m_AccData.m_RconPassword; break;
-	case e_Money: return m_aClients[ClientID].m_AccData.m_Money; break;
-	case e_Health: return m_aClients[ClientID].m_AccData.m_Health; break;
-	case e_Armor: return m_aClients[ClientID].m_AccData.m_Armor; break;
-	case e_Kills: return m_aClients[ClientID].m_AccData.m_Kills; break;
-	case e_HouseID: return m_aClients[ClientID].m_AccData.m_HouseID; break;
-	case e_Level: return m_aClients[ClientID].m_AccData.m_Level; break;
-	case e_ExpPoints: return m_aClients[ClientID].m_AccData.m_ExpPoints; break;
-	case e_Donor: return m_aClients[ClientID].m_AccData.m_Donor; break;
-	case e_VIP: return m_aClients[ClientID].m_AccData.m_VIP; break;
-	case e_Bounty: return m_aClients[ClientID].m_AccData.m_Bounty; break;
-	case e_Arrested: return m_aClients[ClientID].m_AccData.m_Arrested; break;
-	case e_AllWeapons: return m_aClients[ClientID].m_AccData.m_AllWeapons; break;
-	case e_HealthRegen: return m_aClients[ClientID].m_AccData.m_HealthRegen; break;
-	case e_InfinityAmmo: return m_aClients[ClientID].m_AccData.m_InfinityAmmo; break;
-	case e_InfinityJumps: return m_aClients[ClientID].m_AccData.m_InfinityJumps; break;
-	case e_FastReload: return m_aClients[ClientID].m_AccData.m_FastReload; break;
-	case e_NoSelfDMG: return m_aClients[ClientID].m_AccData.m_NoSelfDMG; break;
-	case e_Portal: return m_aClients[ClientID].m_AccData.m_Portal; break;
-	case e_HammerLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[0]; break;
-	case e_GunLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[1]; break;
-	case e_ShotgunLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[2]; break;
-	case e_GrenadeLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[3]; break;
-	case e_RifleLvl: return m_aClients[ClientID].m_AccData.m_LvlWeapon[4]; break;
-	case e_HammerExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[0]; break;
-	case e_GunExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[1]; break;
-	case e_ShotgunExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[2]; break;
-	case e_GrenadeExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[3]; break;
-	case e_RifleExp: return m_aClients[ClientID].m_AccData.m_ExpWeapon[4]; break;
-	case e_GrenadeSpread: return m_aClients[ClientID].m_AccData.m_GrenadeSpread; break;
-	case e_GrenadeBounce: return m_aClients[ClientID].m_AccData.m_GrenadeBounce; break;
-	case e_GrenadeMine: return m_aClients[ClientID].m_AccData.m_GrenadeMine; break;
-	case e_ShotgunSpread: return m_aClients[ClientID].m_AccData.m_ShotgunSpread; break;
-	case e_ShotgunExplode: return m_aClients[ClientID].m_AccData.m_ShotgunExplode; break;
-	case e_ShotgunStars: return m_aClients[ClientID].m_AccData.m_ShotgunStars; break;
-	case e_RifleSpread: return m_aClients[ClientID].m_AccData.m_RifleSpread; break;
-	case e_RifleSwap: return m_aClients[ClientID].m_AccData.m_RifleSwap; break;
-	case e_RiflePlasma: return m_aClients[ClientID].m_AccData.m_RiflePlasma; break;
-	case e_GunSpread: return m_aClients[ClientID].m_AccData.m_GunSpread; break;
-	case e_GunExplode: return m_aClients[ClientID].m_AccData.m_GunExplode; break;
-	case e_GunFreeze: return m_aClients[ClientID].m_AccData.m_GunFreeze; break;
-	case e_HammerWalls: return m_aClients[ClientID].m_AccData.m_HammerWalls; break;
-	case e_HammerShot: return m_aClients[ClientID].m_AccData.m_HammerShot; break;
-	case e_HammerKill: return m_aClients[ClientID].m_AccData.m_HammerKill; break;
-	case e_HammerExplode: return m_aClients[ClientID].m_AccData.m_HammerExplode; break;
-	case e_NinjaPermanent: return m_aClients[ClientID].m_AccData.m_NinjaPermanent; break;
-	case e_NinjaStart: return m_aClients[ClientID].m_AccData.m_NinjaStart; break;
-	case e_NinjaSwitch: return m_aClients[ClientID].m_AccData.m_NinjaSwitch; break;
-	case e_NinjaFly: return m_aClients[ClientID].m_AccData.m_NinjaFly; break;
-	case e_NinjaBomber: return m_aClients[ClientID].m_AccData.m_NinjaBomber; break;
-	case e_EndlessHook: return m_aClients[ClientID].m_AccData.m_EndlessHook; break;
-	case e_HealHook: return m_aClients[ClientID].m_AccData.m_HealHook; break;
-	case e_BoostHook: return m_aClients[ClientID].m_AccData.m_BoostHook; break;
-	case e_PushAura: return m_aClients[ClientID].m_AccData.m_PushAura; break;
-	case e_PullAura: return m_aClients[ClientID].m_AccData.m_PullAura; break;
-	
-	default: return 0;
-		break;
-	}
+	CSqlJob *pJob = new CSqlJob_Server_Update(this, ClientID);
+	pJob->Start();
 }
-*/
 _m_AccData CServer::GetData_Server(int ClientID)
 {
 	return m_aClients[ClientID].m_AccData;
 }
 
-void CServer::UpdateData(int ClientID)
+void CServer::UpdateData(int ClientID, _m_AccData AccData)
 {
+	m_aClients[ClientID].m_AccData = AccData;
 	return;
 }
 

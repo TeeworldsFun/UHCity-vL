@@ -433,9 +433,9 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 
 	// SQL integrations
-
 	virtual _m_AccData GetData_Server(int ClientID) = 0;
-	virtual void UpdateData(int ClientID) = 0;
+	virtual void UpdateData(int ClientID, _m_AccData AccData) = 0;
+	virtual void UpdateData_Server(int ClientID) = 0;
 	virtual void Register(int ClientID, const char* pUsername, const char* pPassword) = 0;
 	virtual void Login(int ClientID, const char* pUsername, const char* pPassword) = 0;
 };

@@ -382,14 +382,14 @@ void CGameContext::ConSetArmor(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConSetClientName(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	char Value[16];
-	str_append(Value, pResult->GetString(0), sizeof(Value));
+	std::string Value;
+	Value.append(pResult->GetString(0));
 	int ID = pResult->GetVictim();
 
-	if (Value) {
+	if (!Value.empty()) {
 		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "'%s' changed name to '%s'", pSelf->Server()->ClientName(ID), Value);
-		pSelf->Server()->SetClientName(ID, Value);
+		str_format(aBuf, sizeof aBuf, "'%s' changed name to '%s'", pSelf->Server()->ClientName(ID), Value.data());
+		pSelf->Server()->SetClientName(ID, Value.data());
 		pSelf->SendChat(-1, CHAT_ALL, aBuf);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}

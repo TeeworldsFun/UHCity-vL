@@ -267,7 +267,8 @@ public:
 
 	// SQL integrations
 	virtual _m_AccData GetData_Server(int ClientID);
-	virtual void UpdateData(int ClientID);
+	virtual void UpdateData(int ClientID, _m_AccData AccData);
+	virtual void UpdateData_Server(int ClientID);
 };
 
 #endif

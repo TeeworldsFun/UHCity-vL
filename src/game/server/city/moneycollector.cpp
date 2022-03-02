@@ -1,5 +1,6 @@
 #include "moneycollector.h"
 
+#include "growingexplosion.h"
 #include <fstream>
 
 IServer *CMoneyCollector::Server() const { return m_pGameServer->Server(); }
@@ -111,6 +112,7 @@ void CMoneyCollector::Buy(int ClientID, long long unsigned Amount) {
     str_format(aBuf, sizeof aBuf, "%s is the new holder of the Moneycollector with a value of %s$", Server()->ClientName(ClientID), numBuf);
     GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("{str:n} is the new holder of the Moneycollector with a value of {str:m}$"), "n", Server()->ClientName(ClientID), "m", numBuf, NULL);
     GameServer()->Discord()->SendChatTarget_Discord(aBuf, "Money Collecter");
+    new CGrowingExplosion(&GameServer()->m_World, GameServer()->m_apPlayers[ClientID]->GetCharacter()->m_Pos, vec2(0.0, -1.0), ClientID, 3, GROWINGEXPLOSIONEFFECT_LOVE);
     Apply();
 }
 

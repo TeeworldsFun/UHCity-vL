@@ -153,6 +153,23 @@ public:
 	void CreateDeath(vec2 Pos, int Who);
 	void CreateSound(vec2 Pos, int Sound, int Mask=-1);
 	void CreateSoundGlobal(int Sound, int Target=-1);
+	void CreateLolText(CEntity *pParent, bool Follow, vec2 Pos, vec2 Vel, int Lifespan, const char *pText);
+	void CreateLaserDotEvent(vec2 Pos0, vec2 Pos1, int LifeSpan);
+	void CreateHammerDotEvent(vec2 Pos, int LifeSpan);
+	void CreateLoveEvent(vec2 Pos);
+
+	// Menu, by MMOTee
+	void ClearVotes(int ClientID);
+	void AddVote(const char *Desc, const char *Cmd, int Type, int ClientID = -1);
+	void ResetVotes(int ClientID, int Type);
+	void AddBack(int ClientID);
+	struct CVoteOptions
+	{
+		char m_aDescription[VOTE_DESC_LENGTH] = { 0 };
+		char m_aCommand[VOTE_CMD_LENGTH] = { 0 };
+		void* data = { 0 };
+	};
+	array<CVoteOptions> m_PlayerVotes[MAX_CLIENTS];
 
 
 	enum
@@ -179,6 +196,8 @@ public:
 	virtual void SendChatTarget_Localization_P(int To, int Category, int Number, const char* pText, ...);
 	void AddBroadcast(int ClientID, const char* pText, int Priority, int LifeSpan);
 	void SetClientLanguage(int ClientID, const char *pLanguage);
+
+	virtual void AddVote_Localization(int To, const char* aCmd, const char* pText, ...);
 
 	//
 	void CheckPureTuning();
@@ -245,6 +264,8 @@ public:
 
 		static void ConFsBackupAccounts(IConsole::IResult* pResult, void* pUserData);
 		static void ConHouse(IConsole::IResult *pResult, void *pUserData);
+
+		static void ConLolText(IConsole::IResult *pResult, void *pUserData);
 
 		// chat
 		static void ConChatLogin(IConsole::IResult* pResult, void* pUserData);
@@ -328,6 +349,31 @@ public:
 				char m_TimedMessage[1024];
 		};
 		CBroadcastState m_BroadcastStates[MAX_PLAYERS];
+
+		struct LaserDotState
+		{
+			vec2 m_Pos0;
+			vec2 m_Pos1;
+			int m_LifeSpan;
+			int m_SnapID;
+		};
+		array<LaserDotState> m_LaserDots;
+
+		struct HammerDotState
+		{
+			vec2 m_Pos;
+			int m_LifeSpan;
+			int m_SnapID;
+		};
+		array<HammerDotState> m_HammerDots;
+
+		struct LoveDotState
+		{
+			vec2 m_Pos;
+			int m_LifeSpan;
+			int m_SnapID;
+		};
+		array<LoveDotState> m_LoveDots;
 
 	public: //Ende :D
 

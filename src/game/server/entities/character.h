@@ -205,6 +205,14 @@ public:
 		bool m_Explode;
 	} m_Aim;
 	bool m_IsVisible;
+
+	void Poison(int Count, int From);
+	bool IsInLove() const;
+	void LoveEffect();
+
+	int m_LoveTick;
+	int m_PoisonTick;
+	int m_Poison;
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;

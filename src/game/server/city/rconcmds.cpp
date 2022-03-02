@@ -24,6 +24,25 @@ void CGameContext::ConSpawnBot(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConLolText(IConsole::IResult *pResult, void *pUserData)
+{
+	int ClientID = pResult->GetInteger(0);
+	CGameContext *pSelf = (CGameContext *) pUserData;	
+	CCharacter *pChr = pSelf->GetPlayerChar(ClientID);
+	CCharacter *pCharacter;
+
+	if (!pSelf->m_apPlayers[ClientID] || !pChr)
+		return;
+
+	char Value[16];
+	str_append(Value, pResult->GetString(1), sizeof(Value));
+
+//	if(pResult->NumArguments() < 0 || pResult->NumArguments() > 1)
+//		return;
+
+	pChr->GameServer()->CreateLolText(pCharacter, true, vec2(0, -75), vec2 (0,-1), 10, Value);
+}
+
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *) pUserData;

@@ -16,6 +16,7 @@
 #include "game/server/city/items/gravaura.h"
 #include "game/server/city/transfer.h"
 #include "game/server/city/entities/spawnprotect.h"
+#include "game/server/city/entities/l-tele.h"
 
 //input count
 struct CInputCount
@@ -95,7 +96,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	{
 		m_Protected = true;
 		m_Core.m_Protected = true;
-		new CSpawProtect(GameWorld(), m_pPlayer->GetCID());
+		new CSpawnProtect(GameWorld(), m_pPlayer->GetCID());
 	}
 
 	m_InstaKills = 0;
@@ -134,6 +135,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	GameServer()->m_pController->OnCharacterSpawn(this);
 	GameServer()->SendTuningParams(m_pPlayer->GetCID());
+
+	m_LoveTick = -1;
+	m_Poison = 0;
+
 	return true;
 }
 
@@ -171,6 +176,7 @@ bool CCharacter::IsGrounded()
 // City
 void CCharacter::Tele()
 {
+	vec2 OldPos = m_Core.m_Pos;
 	vec2 TelePos = m_Pos + vec2(m_Input.m_TargetX,m_Input.m_TargetY);
 	
 	if (!Server()->IsAdmin(m_pPlayer->GetCID()))
@@ -217,6 +223,7 @@ void CCharacter::Tele()
 		pEvent->m_X = (int)TelePos.x;
 		pEvent->m_Y = (int)TelePos.y;
 	}
+	new CLaserTeleport(GameWorld(), OldPos, TelePos);
 }
 
 void CCharacter::SaveLoad(int Value)
@@ -1640,7 +1647,7 @@ void CCharacter::HandleCity()
 			m_Protected = true;
 			m_Core.m_Protected = true;
 			GameServer()->SendTuningParams(m_pPlayer->GetCID());
-			new CSpawProtect(GameWorld(), m_pPlayer->GetCID());
+			new CSpawnProtect(GameWorld(), m_pPlayer->GetCID());
 		}
 	}
 	else if (m_Protected || m_Core.m_Protected)
@@ -1769,7 +1776,7 @@ void CCharacter::HandleCity()
 
 		if (!GetPlayer()->m_Afk) {
 			GetPlayer()->m_Afk = true;
-			new CSpawProtect(GameWorld(), m_pPlayer->GetCID());
+			new CSpawnProtect(GameWorld(), m_pPlayer->GetCID());
 			GameServer()->SendTuningParams(GetPlayer()->GetCID());
 		}
 		
@@ -1923,6 +1930,9 @@ void CCharacter::Tick()
 		DieFromMonster(WEAPON_GAME);
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 	}
+
+	if(m_LoveTick > 0)
+		--m_LoveTick;
 
 	DoZombieMovement();
 	if(m_pPlayer->m_ForceBalanced)
@@ -2769,4 +2779,24 @@ float CCharacter::GetTriggerDistance(int Type)
 	else if(Type == 3)//Zooker
 		return 380.0f;
 	return 65.0f;//Rest
+}
+
+bool CCharacter::IsInLove() const
+{
+    return m_LoveTick > 0;
+}
+
+void CCharacter::LoveEffect()
+{
+	if(m_LoveTick <= 0)
+		m_LoveTick = Server()->TickSpeed()*5;
+}
+
+void CCharacter::Poison(int Count, int From)
+{
+	if(m_Poison <= 0)
+	{
+		m_PoisonTick = 0;
+		m_Poison = Count;
+	}
 }

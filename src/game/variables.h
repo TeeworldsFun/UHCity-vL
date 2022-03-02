@@ -159,6 +159,9 @@ MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG
 MACRO_CONFIG_STR(SvDiscordChannel, sv_discord_channel, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed channel's ID.")
 /* # Discord # */
 
+MACRO_CONFIG_INT(SvLoltextHspace, sv_loltext_hspace, 14, 10, 25, CFGFLAG_SERVER, "horizontal offset between loltext 'pixels'")
+MACRO_CONFIG_INT(SvLoltextVspace, sv_loltext_vspace, 14, 10, 25, CFGFLAG_SERVER, "vertical offset between loltext 'pixels'")
+
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly
 	MACRO_CONFIG_INT(DbgDummies, dbg_dummies, 0, 0, 15, CFGFLAG_SERVER, "")

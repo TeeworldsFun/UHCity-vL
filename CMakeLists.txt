@@ -456,6 +456,7 @@ generate_source("src/game/generated/server_data.h" "server_content_header")
 set_glob(BASE GLOB_RECURSE src/base
   detect.h
   math.h
+  math.cpp
   system.c
   system.h
   tl/algorithm.h
@@ -850,6 +851,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/transfer.h
   city/wall.cpp
   city/wall.h
+  city/growingexplosion.cpp
+  city/growingexplosion.h
   city/entities/carousel.cpp
   city/entities/carousel.h
   city/entities/door.cpp
@@ -860,6 +863,12 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/entities/teleport.h
   city/entities/trigger.cpp
   city/entities/trigger.h
+  city/entities/loltext.cpp
+  city/entities/loltext.h
+  city/entities/flying-point.cpp
+  city/entities/flying-point.h
+  city/entities/l-tele.cpp
+  city/entities/l-tele.h
   city/items/crown.cpp
   city/items/crown.h
   city/items/gravaura.cpp

@@ -16,6 +16,7 @@
 #include "gamemodes/city.h"
 #include <algorithm>
 #include <city/components/localization.h>
+#include <game/server/city/entities/loltext.h>
 
 #include "entities/pickup.h"
 enum
@@ -68,6 +69,15 @@ CGameContext::~CGameContext()
 		delete m_pVoteOptionHeap;
 
 	if(m_pDiscord) delete m_pDiscord;
+}
+
+void CGameContext::ClearVotes(int ClientID)
+{
+	m_PlayerVotes[ClientID].clear();
+	
+	// send vote options
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
 }
 
 void CGameContext::Clear()
@@ -129,6 +139,36 @@ void CGameContext::CreateHammerHit(vec2 Pos)
 	}
 }
 
+void CGameContext::CreateLaserDotEvent(vec2 Pos0, vec2 Pos1, int LifeSpan)
+{
+	CGameContext::LaserDotState State;
+	State.m_Pos0 = Pos0;
+	State.m_Pos1 = Pos1;
+	State.m_LifeSpan = LifeSpan;
+	State.m_SnapID = Server()->SnapNewID();
+	
+	m_LaserDots.add(State);
+}
+
+void CGameContext::CreateHammerDotEvent(vec2 Pos, int LifeSpan)
+{
+	CGameContext::HammerDotState State;
+	State.m_Pos = Pos;
+	State.m_LifeSpan = LifeSpan;
+	State.m_SnapID = Server()->SnapNewID();
+	
+	m_HammerDots.add(State);
+}
+
+void CGameContext::CreateLoveEvent(vec2 Pos)
+{
+	CGameContext::LoveDotState State;
+	State.m_Pos = Pos;
+	State.m_LifeSpan = Server()->TickSpeed();
+	State.m_SnapID = Server()->SnapNewID();
+	
+	m_LoveDots.add(State);
+}
 
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, bool FromMonster)
 {
@@ -406,6 +446,30 @@ void CGameContext::SendChatTarget_Localization_P(int To, int Category, int Numbe
 		}
 	}
 	
+	va_end(VarArgs);
+}
+
+void CGameContext::AddVote_Localization(int To, const char* aCmd, const char* pText, ...)
+{
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_PLAYERS : To+1);
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
+			AddVote(Buffer.buffer(), aCmd, i);
+		}
+	}
+	
+	Buffer.clear();
 	va_end(VarArgs);
 }
 
@@ -779,6 +843,48 @@ void CGameContext::OnTick()
 		}
 	}
 #endif
+
+	int DotIter;
+	
+	DotIter = 0;
+	while(DotIter < m_LaserDots.size())
+	{
+		m_LaserDots[DotIter].m_LifeSpan--;
+		if(m_LaserDots[DotIter].m_LifeSpan <= 0)
+		{
+			Server()->SnapFreeID(m_LaserDots[DotIter].m_SnapID);
+			m_LaserDots.remove_index(DotIter);
+		}
+		else
+			DotIter++;
+	}
+	
+	DotIter = 0;
+	while(DotIter < m_HammerDots.size())
+	{
+		m_HammerDots[DotIter].m_LifeSpan--;
+		if(m_HammerDots[DotIter].m_LifeSpan <= 0)
+		{
+			Server()->SnapFreeID(m_HammerDots[DotIter].m_SnapID);
+			m_HammerDots.remove_index(DotIter);
+		}
+		else
+			DotIter++;
+	}
+	
+	DotIter = 0;
+	while(DotIter < m_LoveDots.size())
+	{
+		m_LoveDots[DotIter].m_LifeSpan--;
+		m_LoveDots[DotIter].m_Pos.y -= 5.0f;
+		if(m_LoveDots[DotIter].m_LifeSpan <= 0)
+		{
+			Server()->SnapFreeID(m_LoveDots[DotIter].m_SnapID);
+			m_LoveDots.remove_index(DotIter);
+		}
+		else
+			DotIter++;
+	}
 }
 
 // Server hooks
@@ -1102,26 +1208,13 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 		if(str_comp_nocase(pMsg->m_Type, "option") == 0)
 		{
-			CVoteOptionServer *pOption = m_pVoteOptionFirst;
-			while(pOption)
+			for (int i = 0; i < m_PlayerVotes[ClientID].size(); ++i)
 			{
-				if(str_comp_nocase(pMsg->m_Value, pOption->m_aDescription) == 0)
+				if(str_comp_nocase(pMsg->m_Value, m_PlayerVotes[ClientID][i].m_aDescription) == 0)
 				{
-					str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientID),
-								pOption->m_aDescription, pReason);
-					str_format(aDesc, sizeof(aDesc), "%s", pOption->m_aDescription);
-					str_format(aCmd, sizeof(aCmd), "%s", pOption->m_aCommand);
-					break;
+					str_format(aDesc, sizeof(aDesc), "%s", m_PlayerVotes[ClientID][i].m_aDescription);
+					str_format(aCmd, sizeof(aCmd), "%s", m_PlayerVotes[ClientID][i].m_aCommand);
 				}
-
-				pOption = pOption->m_pNext;
-			}
-
-			if(!pOption)
-			{
-				str_format(aChatmsg, sizeof(aChatmsg), "'%s' isn't an option on this server", pMsg->m_Value);
-				SendChatTarget(ClientID, aChatmsg);
-				return;
 			}
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
@@ -2028,6 +2121,11 @@ void CGameContext::SetClientLanguage(int ClientID, const char *pLanguage)
 	}
 }
 
+void CGameContext::CreateLolText(CEntity *pParent, bool Follow, vec2 Pos, vec2 Vel, int Lifespan, const char *pText)
+{
+	CLoltext::Create(&m_World, pParent, Pos, Vel, Lifespan, pText, true, Follow);
+}
+
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
@@ -2189,6 +2287,29 @@ void CGameContext::OnSnap(int ClientID)
 	}
 
 	m_apPlayers[ClientID]->FakeSnap(ClientID);
+
+	for(int i=0; i < m_LoveDots.size(); i++)
+	{
+		if(ClientID >= 0)
+		{
+			vec2 CheckPos = m_LoveDots[i].m_Pos;
+			float dx = m_apPlayers[ClientID]->m_ViewPos.x-CheckPos.x;
+			float dy = m_apPlayers[ClientID]->m_ViewPos.y-CheckPos.y;
+			if(absolute(dx) > 1000.0f || absolute(dy) > 800.0f)
+				continue;
+			if(distance(m_apPlayers[ClientID]->m_ViewPos, CheckPos) > 1100.0f)
+				continue;
+		}
+		
+		CNetObj_Pickup *pObj = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, m_LoveDots[i].m_SnapID, sizeof(CNetObj_Pickup)));
+		if(pObj)
+		{
+			pObj->m_X = (int)m_LoveDots[i].m_Pos.x;
+			pObj->m_Y = (int)m_LoveDots[i].m_Pos.y;
+			pObj->m_Type = POWERUP_HEALTH;
+			pObj->m_Subtype = 0;
+		}
+	}
 }
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
@@ -2292,6 +2413,31 @@ int CGameContext::GetPlayerNum()
 			NumPlayer++;
 	}
 	return NumPlayer;
+}
+
+void CGameContext::AddVote(const char *Desc, const char *Cmd, int Type, int ClientID)
+{
+	while(*Desc && *Desc == ' ')
+		Desc++;
+
+	if(ClientID == -2)
+		return;
+
+	CVoteOptions Vote;	
+	str_copy(Vote.m_aDescription, Desc, sizeof(Vote.m_aDescription));
+	str_copy(Vote.m_aCommand, Cmd, sizeof(Vote.m_aCommand));
+	m_PlayerVotes[ClientID].add(Vote);
+	
+	// inform clients about added option
+	CNetMsg_Sv_VoteOptionAdd OptionMsg;	
+	OptionMsg.m_pDescription = Vote.m_aDescription;
+	Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
+}
+
+void CGameContext::AddBack(int ClientID)
+{	
+	AddVote("", "null", ClientID);
+	AddVote_Localization(ClientID, "back", "- 返回上一级菜单");
 }
 
 const char *CGameContext::GameType() { return m_pController && m_pController->m_pGameType ? m_pController->m_pGameType : ""; }

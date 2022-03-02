@@ -3,10 +3,10 @@
 #ifndef GAME_SERVER_ENTITIES_INFO_H
 #define GAME_SERVER_ENTITIES_INFO_H
 
-class CSpawProtect : public CEntity
+class CSpawnProtect : public CEntity
 {
 public:
-	CSpawProtect(CGameWorld *pGameWorld, int Owner);
+	CSpawnProtect(CGameWorld *pGameWorld, int Owner);
 
 	virtual void Reset();
 	virtual void Tick();

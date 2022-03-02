@@ -4,7 +4,7 @@
 #include <game/server/gamecontext.h>
 #include "spawnprotect.h"
 
-CSpawProtect::CSpawProtect(CGameWorld *pGameWorld, int Owner)
+CSpawnProtect::CSpawnProtect(CGameWorld *pGameWorld, int Owner)
 : CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
 	m_Owner = Owner;
@@ -12,12 +12,12 @@ CSpawProtect::CSpawProtect(CGameWorld *pGameWorld, int Owner)
 	GameWorld()->InsertEntity(this);
 }
 
-void CSpawProtect::Reset()
+void CSpawnProtect::Reset()
 {
 	GameServer()->m_World.DestroyEntity(this);
 }
 
-void CSpawProtect::Tick()
+void CSpawnProtect::Tick()
 {
 	CCharacter *pOwner = GameServer()->GetPlayerChar(m_Owner);
 
@@ -38,7 +38,7 @@ void CSpawProtect::Tick()
 }
 
 
-void CSpawProtect::Snap(int SnappingClient)
+void CSpawnProtect::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient, m_Pos))
 		return;

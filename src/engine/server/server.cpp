@@ -2198,7 +2198,7 @@ public:
 
 		try
 		{
-			//检查数据库中的名称或昵称
+			// Checking the username availability in the database
 			str_format(aBuf, sizeof(aBuf),
 					   "SELECT UserID FROM %s_Accounts WHERE Username = '%s';", pSqlServer->GetPrefix(), m_sName.ClrStr());
 			pSqlServer->executeSqlQuery(aBuf);
@@ -2212,7 +2212,7 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"), NULL);
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"), NULL);
 			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
 
 			return false;
@@ -2229,13 +2229,12 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
 
 			return false;
 		}
 
-		// Получаем инфу пользователя
 		try
 		{
 			str_format(aBuf, sizeof(aBuf),
@@ -2251,18 +2250,18 @@ public:
 						   UserID, m_sName.ClrStr());
 				pSqlServer->executeSql(aBuf);
 
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
+				m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Registration succesful - ('/login %s %s'): "));
 				return true;
 			}
 			else
 			{
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+				m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 				return false;
 			}
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
 
 			return false;
@@ -2318,13 +2317,13 @@ public:
 			}
 			else
 			{
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Username or password incorrect"));
+				m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Username or password incorrect"));
 				return false;
 			}
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
 			dbg_msg("sql", "Can't login (MySQL Error: %s)", e.what());
 
 			return false;
@@ -2380,17 +2379,16 @@ public:
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_BoostHook = pSqlServer->GetResults()->getUInt("BoostHook");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_PushAura = pSqlServer->GetResults()->getUInt("PushAura");
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura = pSqlServer->GetResults()->getUInt("PullAura");
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Login"));
 			}
 			else
 			{
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+				m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
 				return false;
 			}
 		}
 		catch(const std::exception& e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't login (MySQL Error: %s)", e.what());
 
 			return false;
@@ -2423,7 +2421,6 @@ public:
 
 		try
 		{
-			//检查数据库中的名称或昵称
 			str_format(aBuf, sizeof(aBuf),
 					   "UPDATE %s_Accounts SET "
 					   "Username = '%s',"
@@ -2465,7 +2462,7 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
 			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
 
 			return false;
@@ -2473,7 +2470,6 @@ public:
 		
 		try
 		{
-			//检查数据库中的名称或昵称
 			str_format(aBuf, sizeof(aBuf),
 					   "UPDATE %s_Items SET"
 					   "Arrested = '%d',"
@@ -2574,7 +2570,7 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
-			GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
+			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
 			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
 
 			return false;

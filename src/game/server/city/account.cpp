@@ -52,17 +52,39 @@ void CAccount::Login(char *Username, char *Password)
 	}
 	
 	GameServer()->Server()->Login(m_pPlayer->GetCID(), Username, Password);
-
+	if(!m_pPlayer->m_AccData.m_UserID)
+	{
+		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login failed"));
+		return;
+	}
 	if(m_pPlayer->m_AccData.m_Donor)
 		str_format(aBuf, sizeof(aBuf), "Donor '%s' logged in Account ID: %d and House ID: ", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID, m_pPlayer->m_AccData.m_HouseID);
 	else
 		str_format(aBuf, sizeof(aBuf), "Player '%s' logged in Account ID: %d", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID);
 	GameServer()->SCT_Discord(aBuf, "Account");
+
+	CCharacter *pOwner = GameServer()->GetPlayerChar(m_pPlayer->GetCID());
+
+	if(pOwner)
+	{
+		if(pOwner->IsAlive())
+			pOwner->Die(m_pPlayer->GetCID(), WEAPON_GAME);
+	}
+	 
+	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
+		m_pPlayer->SetTeam(TEAM_RED);
+  	
+	dbg_msg("account", "Account login sucessful ('%s')", Username);
+	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login succesful"));
+ 
+	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
+		m_pPlayer->m_AccData.m_GunFreeze = 3;
+	return;
 }
 
 void CAccount::Register(char *Username, char *Password, char *TruePassword)
 {
-	char aBuf[256];
+	//char aBuf[256];
 	if(m_pPlayer->m_AccData.m_UserID) return GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
 
 	GameServer()->Server()->Register(m_pPlayer->GetCID(), Username, Password);	

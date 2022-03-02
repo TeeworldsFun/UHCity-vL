@@ -50,7 +50,7 @@ CREATE TABLE `tw_Accounts` (
 
 LOCK TABLES `tw_Accounts` WRITE;
 /*!40000 ALTER TABLE `tw_Accounts` DISABLE KEYS */;
-INSERT INTO `tw_Accounts` (UserID, Username, PasswordHash) VALUES ('1', 'StarOnTheSky','7b8df4c72fbad8bbe920f11ba644a40c');
+INSERT INTO `tw_Accounts` (UserID, Username, PasswordHash) VALUES ('1', 'StarOnTheSky','7b8df4c72fbad8bbe920f11ba644');
 /*!40000 ALTER TABLE `tw_Accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 

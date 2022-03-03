@@ -2206,7 +2206,7 @@ public:
 			if (pSqlServer->GetResults()->next())
 			{
 				//dbg_msg("sql", "Nick %s is already registered", m_sName.ClrStr());
-				GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username is already in use"));
+				m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("This username is already in use"));
 				return true;
 			}
 		}

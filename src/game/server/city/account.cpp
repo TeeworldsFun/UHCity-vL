@@ -52,6 +52,7 @@ void CAccount::Login(char *Username, char *Password)
 	}
 	
 	GameServer()->Server()->Login(m_pPlayer->GetCID(), Username, Password);
+	m_pPlayer->m_AccData = GameServer()->Server()->GetData(m_pPlayer->GetCID());
 	if(!m_pPlayer->m_AccData.m_UserID)
 	{
 		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login failed"));
@@ -108,6 +109,8 @@ bool CAccount::Exists(const char *Username)
 
 void CAccount::Apply()
 {
+	GameServer()->Server()->UpdateData(m_pPlayer->GetCID(), m_pPlayer->m_AccData);
+	/*
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", m_pPlayer->m_AccData.m_Username);
 	std::remove(aBuf);
@@ -306,6 +309,7 @@ void CAccount::Apply()
 	Accfile = fopen(aBuf,"a+");
 	fputs(strBuf.GetString(), Accfile);
 	fclose(Accfile);
+	*/
 }
 
 void CAccount::Reset()

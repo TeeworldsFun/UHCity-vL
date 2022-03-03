@@ -26,7 +26,7 @@ CREATE TABLE `tw_Accounts` (
   `UserID` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `Username` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   `PasswordHash` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  `Rcon` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `RconPassword` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   `Level` int(11) UNSIGNED NOT NULL DEFAULT 1,
   `ExpPoints` bigint(16) UNSIGNED NOT NULL DEFAULT 0,
   `Money` bigint(16) UNSIGNED NOT NULL DEFAULT 0,

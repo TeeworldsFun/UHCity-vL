@@ -266,7 +266,8 @@ public:
 	virtual void SetClientLanguage(int ClientID, const char *pLanguage);
 
 	// SQL integrations
-	virtual _m_AccData GetData_Server(int ClientID);
+	// virtual void GetData_Server(int ClientID);
+	virtual _m_AccData GetData(int ClientID);
 	virtual void UpdateData(int ClientID, _m_AccData AccData);
 	virtual void UpdateData_Server(int ClientID);
 };

@@ -816,10 +816,13 @@ void CGameContext::OnClientEnter(int ClientID)
 	m_VoteUpdate = true;
 
 }
+
+/*
 void CGameContext::GetData_Client(int ClientID)
 {
-	m_apPlayers[ClientID]->m_AccData = Server()->GetData_Server(ClientID);
+	m_apPlayers[ClientID]->m_AccData = Server()->GetData(ClientID);
 }
+*/
 
 bool CGameContext::Apply(int ClientID)
 {

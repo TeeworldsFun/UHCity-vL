@@ -211,7 +211,7 @@ public:
 	virtual const char *NetVersion();
 
 	//todo mysql account
-	virtual void GetData_Client(int ClientID);
+	// virtual void GetData_Client(int ClientID);
 	virtual bool Apply(int ClientID);
 
 	private: //KlickFoots Rconcmdsachen^^

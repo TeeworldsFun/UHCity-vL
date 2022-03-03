@@ -2212,9 +2212,11 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"), NULL);
 			dbg_msg("sql", "Can't check username existance (MySQL Error: %s)", e.what());
-
 			return false;
 		}
 
@@ -2229,9 +2231,11 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't create new user (MySQL Error: %s)", e.what());
-
 			return false;
 		}
 
@@ -2261,6 +2265,9 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't get the ID of the new user (MySQL Error: %s)", e.what());
 
@@ -2301,7 +2308,9 @@ public:
 
 			if (pSqlServer->GetResults()->next())
 			{
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID = pSqlServer->GetResults()->getUInt("UserID");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID = pSqlServer->GetResults()->getInt("UserID");
+				strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, pSqlServer->GetResults()->getString("Username").c_str());
+				strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_Password, pSqlServer->GetResults()->getString("PasswordHash").c_str());
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Level = pSqlServer->GetResults()->getUInt("Level");
 				//strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword, pSqlServer->GetResults()->getString("Rcon").c_str());
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money = pSqlServer->GetResults()->getUInt64("Money");
@@ -2323,6 +2332,9 @@ public:
 		}
 		catch (sql::SQLException &e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
 			dbg_msg("sql", "Can't login (MySQL Error: %s)", e.what());
 
@@ -2388,8 +2400,145 @@ public:
 		}
 		catch(const std::exception& e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
 			dbg_msg("sql", "Can't login (MySQL Error: %s)", e.what());
+
+			return false;
+		}
+		// m_pServer->GetData_Server(m_ClientID);
+		return true;
+	}
+};
+
+/*
+class CSqlJob_Server_GetData : public CSqlJob
+{
+private:
+	CServer *m_pServer;
+	int m_ClientID;
+
+public:
+	CSqlJob_Server_GetData(CServer *pServer, int ClientID)
+	{
+		m_pServer = pServer;
+		m_ClientID = ClientID;
+	}
+
+	virtual bool Job(CSqlServer *pSqlServer)
+	{
+
+		char aBuf[512];
+
+		try
+		{
+			if(!m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID) return false;
+			str_format(aBuf, sizeof(aBuf),
+					   "SELECT * FROM %s_Accounts WHERE UserID = %d;", 
+					   pSqlServer->GetPrefix(), m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
+			pSqlServer->executeSqlQuery(aBuf);
+
+			if (pSqlServer->GetResults()->next())
+			{
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID = pSqlServer->GetResults()->getInt("UserID");
+				strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, pSqlServer->GetResults()->getString("Username").c_str());
+				strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_Password, pSqlServer->GetResults()->getString("PasswordHash").c_str());
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Level = pSqlServer->GetResults()->getUInt("Level");
+				//strcpy(m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword, pSqlServer->GetResults()->getString("Rcon").c_str());
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money = pSqlServer->GetResults()->getUInt64("Money");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpPoints = pSqlServer->GetResults()->getUInt64("ExpPoints");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Health = pSqlServer->GetResults()->getUInt("Health");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Armor = pSqlServer->GetResults()->getUInt("Armor");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Kills = pSqlServer->GetResults()->getUInt("Kills");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HouseID = pSqlServer->GetResults()->getUInt("HouseID");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Arrested = pSqlServer->GetResults()->getUInt("Arrested");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_VIP = pSqlServer->GetResults()->getInt("VIP");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Donor = pSqlServer->GetResults()->getInt("Donor");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Bounty = pSqlServer->GetResults()->getUInt("Bounty");
+			}
+			else
+			{
+				//m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("Username or password incorrect"));
+				return false;
+			}
+		}
+		catch (sql::SQLException &e)
+		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
+			// m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+			dbg_msg("sql", "Can't get data (MySQL Error: %s)", e.what());
+
+			return false;
+		}
+		try
+		{
+			str_format(aBuf, sizeof(aBuf),
+					   "SELECT * FROM %s_Items WHERE UserID = '%d';",
+					    pSqlServer->GetPrefix(), m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
+			pSqlServer->executeSqlQuery(aBuf);
+			if (pSqlServer->GetResults()->next())
+			{
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[0] = pSqlServer->GetResults()->getUInt("HammerLvl");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[1] = pSqlServer->GetResults()->getUInt("GunLvl");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[2] = pSqlServer->GetResults()->getUInt("ShotgunLvl");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[3] = pSqlServer->GetResults()->getUInt("GrenadeLvl");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_LvlWeapon[4] = pSqlServer->GetResults()->getUInt("RifleLvl");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[0] = pSqlServer->GetResults()->getUInt("HammerExp");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[1] = pSqlServer->GetResults()->getUInt("GunExp");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[2] = pSqlServer->GetResults()->getUInt("ShotgunExp");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[3] = pSqlServer->GetResults()->getUInt("GrenadeExp");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ExpWeapon[4] = pSqlServer->GetResults()->getUInt("RifleExp");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_AllWeapons = pSqlServer->GetResults()->getInt("AllWeapons");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealthRegen = pSqlServer->GetResults()->getInt("HealthRegen");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_InfinityAmmo = pSqlServer->GetResults()->getInt("InfinityAmmo");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_InfinityJumps = pSqlServer->GetResults()->getInt("InfinityJumps");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_FastReload = pSqlServer->GetResults()->getInt("FastReload");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NoSelfDMG = pSqlServer->GetResults()->getInt("NoSelfDMG");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_Portal = pSqlServer->GetResults()->getInt("Portal");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeSpread = pSqlServer->GetResults()->getUInt("GrenadeSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeBounce = pSqlServer->GetResults()->getUInt("GrenadeBounce");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GrenadeMine = pSqlServer->GetResults()->getUInt("GrenadeMine");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunSpread = pSqlServer->GetResults()->getUInt("ShotgunSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunExplode = pSqlServer->GetResults()->getUInt("ShotgunExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_ShotgunStars = pSqlServer->GetResults()->getUInt("ShotgunStars");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSpread = pSqlServer->GetResults()->getUInt("RifleSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RifleSwap = pSqlServer->GetResults()->getUInt("RifleSwap");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_RiflePlasma = pSqlServer->GetResults()->getUInt("RiflePlasma");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunSpread = pSqlServer->GetResults()->getUInt("GunSpread");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunExplode = pSqlServer->GetResults()->getUInt("GunExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_GunFreeze = pSqlServer->GetResults()->getUInt("GunFreeze");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerWalls = pSqlServer->GetResults()->getUInt("HammerWalls");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerShot = pSqlServer->GetResults()->getUInt("HammerShot");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerKill = pSqlServer->GetResults()->getUInt("HammerKill");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HammerExplode = pSqlServer->GetResults()->getUInt("HammerExplode");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaPermanent = pSqlServer->GetResults()->getUInt("NinjaPermanent");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaStart = pSqlServer->GetResults()->getUInt("NinjaStart");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaSwitch = pSqlServer->GetResults()->getUInt("NinjaSwitch");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaFly = pSqlServer->GetResults()->getUInt("NinjaFly");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_NinjaBomber = pSqlServer->GetResults()->getUInt("NinjaBomber");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_EndlessHook = pSqlServer->GetResults()->getUInt("EndlessHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_HealHook = pSqlServer->GetResults()->getUInt("HealHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_BoostHook = pSqlServer->GetResults()->getUInt("BoostHook");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PushAura = pSqlServer->GetResults()->getUInt("PushAura");
+				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura = pSqlServer->GetResults()->getUInt("PullAura");
+			}
+			else
+			{
+				// m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your login"));
+				return false;
+			}
+		}
+		catch(const std::exception& e)
+		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
+			// m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with register"));
+			dbg_msg("sql", "Can't get data (MySQL Error: %s)", e.what());
 
 			return false;
 		}
@@ -2397,7 +2546,13 @@ public:
 		return true;
 	}
 };
-//todo
+
+inline void CServer::GetData_Server(int ClientID)
+{
+	CSqlJob *pJob = new CSqlJob_Server_GetData(this, ClientID);
+	pJob->Start();
+}
+*/
 
 class CSqlJob_Server_UpdateData : public CSqlJob
 {
@@ -2423,9 +2578,7 @@ public:
 		{
 			str_format(aBuf, sizeof(aBuf),
 					   "UPDATE %s_Accounts SET "
-					   "Username = '%s',"
-					   "Password = '%s',"
-					   "RconPassword = '%s',"
+					   "PasswordHash = '%s',"
 					   "Money = '%d',"
 					   "Health = '%d',"
 					   "Armor = '%d',"
@@ -2439,9 +2592,7 @@ public:
 					   "Arrested = '%d' "
 					   "WHERE UserID = '%d';",
 				pSqlServer->GetPrefix(),
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_Username,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Password,
-				m_pServer->m_aClients[m_ClientID].m_AccData.m_RconPassword,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Money,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Health,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_Armor,
@@ -2456,12 +2607,12 @@ public:
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
 			pSqlServer->executeSql(aBuf);
 
-			#ifdef CONF_DEBUG
-			dbg_msg("sqlupdate", "%s", aBuf);
-			#endif
 		}
 		catch (sql::SQLException &e)
 		{
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
 			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
 
@@ -2471,8 +2622,7 @@ public:
 		try
 		{
 			str_format(aBuf, sizeof(aBuf),
-					   "UPDATE %s_Items SET"
-					   "Arrested = '%d',"
+					   "UPDATE %s_Items SET "
 					   "AllWeapons = '%d',"
 					   "HealthRegen = '%d',"
 					   "InfinityAmmo = '%d',"
@@ -2563,14 +2713,13 @@ public:
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_PullAura,
 				m_pServer->m_aClients[m_ClientID].m_AccData.m_UserID);
 			pSqlServer->executeSql(aBuf);
-			
-			#ifdef CONF_DEBUG
-			dbg_msg("sql", "%s", aBuf);
-			#endif
 		}
 		catch (sql::SQLException &e)
 		{
 			m_pServer->GameServer()->SendChatTarget_Localization(m_ClientID, CHATCATEGORY_DEFAULT, _("There is something wrong with your player data update, please contact admin"));
+			#ifdef CONF_DEBUG
+			dbg_msg("sql", "Command: %s", aBuf);
+			#endif
 			dbg_msg("sql", "Can't update player %s 's data.(MySQL Error: %s)", m_pServer->m_aClients[m_ClientID].m_AccData.m_Username, e.what());
 
 			return false;
@@ -2583,7 +2732,9 @@ inline void CServer::UpdateData_Server(int ClientID)
 	CSqlJob *pJob = new CSqlJob_Server_UpdateData(this, ClientID);
 	pJob->Start();
 }
-_m_AccData CServer::GetData_Server(int ClientID)
+
+
+inline _m_AccData CServer::GetData(int ClientID)
 {
 	return m_aClients[ClientID].m_AccData;
 }
@@ -2601,7 +2752,7 @@ inline void CServer::Register(int ClientID, const char* pUsername, const char* p
 	pJob->Start();
 }
 
-void CServer::Login(int ClientID, const char* pUsername, const char* pPassword)
+inline void CServer::Login(int ClientID, const char* pUsername, const char* pPassword)
 {
 	CSqlJob* pJob = new CSqlJob_Server_Login(this, ClientID, pUsername, pPassword);
 	pJob->Start();

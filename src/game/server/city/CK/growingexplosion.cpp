@@ -158,6 +158,15 @@ void CGrowingExplosion::Tick()
 								GameServer()->CreateLoveEvent(TileCenter);
 							}
 							break;
+						case GROWINGEXPLOSIONEFFECT_HIT_EFFECT:
+							GameServer()->CreateExplosion(TileCenter, m_Owner, WEAPON_HAMMER, false);
+							break;
+						case GROWINGEXPLOSIONEFFECT_BOOM:
+							if (random_prob(0.2f))
+							{
+								GameServer()->CreateExplosion(TileCenter, m_Owner, WEAPON_HAMMER, false);
+							}
+							break;
 						case GROWINGEXPLOSIONEFFECT_ELECTRIC:
 							{
 								vec2 EndPoint = m_SeedPos + vec2(32.0f*(i-m_MaxGrowing) - 16.0f + random_float()*32.0f, 32.0f*(j-m_MaxGrowing) - 16.0f + random_float()*32.0f);

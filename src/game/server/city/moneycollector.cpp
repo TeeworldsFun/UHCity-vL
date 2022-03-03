@@ -1,6 +1,6 @@
 #include "moneycollector.h"
 
-#include "growingexplosion.h"
+#include "CK/growingexplosion.h"
 #include <fstream>
 
 IServer *CMoneyCollector::Server() const { return m_pGameServer->Server(); }

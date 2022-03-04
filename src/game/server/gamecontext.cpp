@@ -911,7 +911,6 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
-	//Server()->FirstInit(ClientID);
 
 	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Welcome on UH|City"));
 	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Made by NoHack2Win & Urinstone"));
@@ -922,6 +921,20 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	m_VoteUpdate = true;
 
+}
+
+/*
+void CGameContext::GetData_Client(int ClientID)
+{
+	m_apPlayers[ClientID]->m_AccData = Server()->GetData(ClientID);
+}
+*/
+
+bool CGameContext::Apply(int ClientID)
+{
+	if(!m_apPlayers[ClientID]->m_AccData.m_UserID) return false;
+	Server()->UpdateData(ClientID, m_apPlayers[ClientID]->m_AccData);
+	return true;
 }
 
 void CGameContext::OnClientConnected(int ClientID)
@@ -958,6 +971,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
 	if(Discord() && ClientID <= MAX_PLAYERS) Discord()->LogExit(Server()->ClientName(ClientID));
 
+	if(m_apPlayers[ClientID]->m_AccData.m_UserID)
+		m_apPlayers[ClientID]->m_pAccount->Apply();
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];
@@ -982,7 +997,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 // char numBuf[16];
 // int someNum = 1000000;
 // FormatInt(someNum, numBuf);
-// numBuf should output "1.000.000"
+// numBuf should output "1,000,000"
 void CGameContext::FormatInt(long long n, char* out) {
 	long long i;
 	long long digit;

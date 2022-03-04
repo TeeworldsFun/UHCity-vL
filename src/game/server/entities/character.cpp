@@ -289,7 +289,7 @@ void CCharacter::Move(int dir)
 	m_Core.m_Pos = movePos;
 }
 
-void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, int Click, int Max)
+void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, int Click, int Max) //Regular
 {
 	char aBuf[128];
 	char numBuf[2][16];
@@ -309,9 +309,6 @@ void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, i
 					*Upgrade += 1;
 					m_pPlayer->m_AccData.m_Money -= Price;
 					str_format(aBuf, sizeof(aBuf), "%s (%d/%d)", Name, *Upgrade, Max);
-
-					if(m_pPlayer->m_AccData.m_UserID)
-						m_pPlayer->m_pAccount->Apply();
 
 					m_BuyTick = Server()->Tick();
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
@@ -1900,9 +1897,6 @@ void CCharacter::HandleCity()
 			}
 				
 		}
-
-		if(m_pPlayer->m_AccData.m_UserID)
-			m_pPlayer->m_pAccount->Apply();	
 	}
 
 }
@@ -2625,7 +2619,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 				m_Core.m_Pos = VictimPos + vec2(0, 32);
 			else
 				m_Core.m_Pos = VictimPos - vec2(0, 32);
-			m_Core.m_Vel.y =- 0.1;
+			m_Core.m_Vel.y -= 0.1;
 			m_Pos = m_Core.m_Pos;
 		}
 	}

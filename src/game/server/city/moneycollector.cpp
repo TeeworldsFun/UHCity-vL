@@ -34,7 +34,6 @@ void CMoneyCollector::AddMoney(long long unsigned Money) {
     if (m_Money > g_Config.m_SvMcPotMax)
         m_Money = g_Config.m_SvMcPotMax;
 
-    Apply();
 }
 
 void CMoneyCollector::Tick() {
@@ -44,12 +43,10 @@ void CMoneyCollector::Tick() {
         if (m_Money > g_Config.m_SvMcPotMax)
             m_Money = g_Config.m_SvMcPotMax;
 
-        Apply();
     }
 
     if (!(Server()->Tick() % (Server()->TickSpeed() * 600))) {
         m_Price -= m_Price * 0.05;
-        Apply();
     }
 }
 
@@ -79,7 +76,6 @@ void CMoneyCollector::Collect(int ClientID) {
 
     str_format(aBuf, sizeof aBuf, "You collected %s$", numBuf);
     GameServer()->SendChatTarget_Localization(ClientID, CHATCATEGORY_INFO, _("You collected {str:m}$"), "m", numBuf, NULL);
-    Apply();
 }
 
 void CMoneyCollector::Buy(int ClientID, long long unsigned Amount) {

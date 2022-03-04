@@ -7,11 +7,12 @@
 #include "engine/server/sql_connector.h"
 #include "engine/server/sql_server.h"
 
+
 class CSnapIDPool
 {
 	enum
 	{
-		MAX_IDS = 16*1024,
+		MAX_IDS = 16 * 1024,
 	};
 
 	class CID
@@ -31,7 +32,6 @@ class CSnapIDPool
 	int m_InUsage;
 
 public:
-
 	CSnapIDPool();
 
 	void Reset();
@@ -46,8 +46,9 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
-	CSqlServer* m_apSqlReadServers[MAX_SQLSERVERS];
-	CSqlServer* m_apSqlWriteServers[MAX_SQLSERVERS];
+	CSqlServer *m_apSqlReadServers[MAX_SQLSERVERS];
+	CSqlServer *m_apSqlWriteServers[MAX_SQLSERVERS];
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -55,20 +56,19 @@ public:
 
 	enum
 	{
-		AUTHED_NO=0,
+		AUTHED_NO = 0,
 		AUTHED_POLICE,
 		AUTHED_MAPPER,
 		AUTHED_MOD,
 		AUTHED_ADMIN,
 		AUTH_AMOUNT,
 
-		MAX_RCONCMD_SEND=16,
+		MAX_RCONCMD_SEND = 16,
 	};
 
 	class CClient
 	{
 	public:
-
 		enum
 		{
 			STATE_EMPTY = 0,
@@ -78,7 +78,7 @@ public:
 			STATE_INGAME,
 			STATE_BOT,
 
-			SNAPRATE_INIT=0,
+			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER
 		};
@@ -110,6 +110,8 @@ public:
 		int m_Authed;
 		int m_AuthTries;
 		int m_AccID;
+		
+		_m_AccData m_AccData;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -121,6 +123,9 @@ public:
 
 		char m_aLanguage[16]; // NICE
 	};
+
+	virtual void Register(int ClientID, const char* pUsername, const char* pPassword);
+	virtual void Login(int ClientID, const char* pUsername, const char* pPassword);
 
 	CClient m_aClients[MAX_CLIENTS];
 	int m_aIdMap[MAX_CLIENTS * VANILLA_MAX_CLIENTS];
@@ -134,7 +139,7 @@ public:
 	IEngineMap *m_pMap;
 
 	int64 m_GameStartTime;
-	//int m_CurrentGameTick;
+	// int m_CurrentGameTick;
 	int m_RunServer;
 	int m_MapReload;
 	int m_RconClientID;
@@ -142,7 +147,7 @@ public:
 	int m_PrintCBIndex;
 
 	int64 m_Lastheartbeat;
-	//static NETADDR4 master_server;
+	// static NETADDR4 master_server;
 
 	char m_aCurrentMap[64];
 	unsigned m_CurrentMapCrc;
@@ -170,23 +175,23 @@ public:
 
 	void DemoRecorder_HandleAutoStart();
 
-	//int Tick()
+	// int Tick()
 	int64 TickStartTime(int Tick);
-	//int TickSpeed()
+	// int TickSpeed()
 
 	int Init();
 
 	int AuthLvl(int ClientID);
 	bool IsAuthed(int ClientID);
-	//KlickFoots stuff
+	// KlickFoots stuff
 	bool IsPolice(int ClientID);
 	bool IsMapper(int ClientID);
 	bool IsMod(int ClientID);
 	bool IsAdmin(int ClientID);
 	void Logout(int ClientID);
-	void Police(int ClientID,int Switch);
-	void SetRconlvl(int ClientID,int Level);
-	//Normales Zeugs
+	void Police(int ClientID, int Switch);
+	void SetRconlvl(int ClientID, int Level);
+	// Normales Zeugs
 	int GetClientInfo(int ClientID, CClientInfo *pInfo);
 	void GetClientAddr(int ClientID, NETADDR *pAddr);
 	void GetClientAddr(int ClientID, char *pAddrStr, int Size);
@@ -194,7 +199,7 @@ public:
 	const char *ClientClan(int ClientID);
 	int ClientCountry(int ClientID);
 	bool ClientIngame(int ClientID);
-	int ClientIdByName(const char* Name);
+	int ClientIdByName(const char *Name);
 
 	virtual int SendMsg(CMsgPacker *pMsg, int Flags, int ClientID);
 	int SendMsgEx(CMsgPacker *pMsg, int Flags, int ClientID, bool System);
@@ -234,7 +239,7 @@ public:
 	static void ConBan(IConsole::IResult *pResult, void *pUser);
 	static void ConUnban(IConsole::IResult *pResult, void *pUser);
 	static void ConBans(IConsole::IResult *pResult, void *pUser);
- 	static void ConStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConStatus(IConsole::IResult *pResult, void *pUser);
 	static void ConShutdown(IConsole::IResult *pResult, void *pUser);
 	static void ConRecord(IConsole::IResult *pResult, void *pUser);
 	static void ConStopRecord(IConsole::IResult *pResult, void *pUser);
@@ -253,16 +258,18 @@ public:
 	void SnapSetStaticsize(int ItemType, int Size);
 
 	// 64 clients
-	virtual int* GetIdMap(int ClientID);
+	virtual int *GetIdMap(int ClientID);
 	virtual void SetClient(int ClientID, int Client);
 	virtual bool IsClient64(int ClientID) { return m_aClients[ClientID].m_Client != CLIENT_VANILLA; }
 
-	virtual const char* GetClientLanguage(int ClientID);
-	virtual void SetClientLanguage(int ClientID, const char* pLanguage);
+	virtual const char *GetClientLanguage(int ClientID);
+	virtual void SetClientLanguage(int ClientID, const char *pLanguage);
 
-// SQL
-public:
-	virtual void FirstInit(int ClientID);
+	// SQL integrations
+	// virtual void GetData_Server(int ClientID);
+	virtual _m_AccData GetData(int ClientID);
+	virtual void UpdateData(int ClientID, _m_AccData AccData);
+	virtual void UpdateData_Server(int ClientID);
 };
 
 #endif

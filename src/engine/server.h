@@ -10,12 +10,238 @@
 
 enum
 {
+	LEVEL,
+	EXP,
+	MONEY,
+	DONATE,
+	DGOLD,
+};
+
+enum
+{
 	CHATCATEGORY_DEFAULT=0,
 	CHATCATEGORY_INFO,
 	CHATCATEGORY_JOIN,
 	CHATCATEGORY_GOOD,
 };
 
+enum
+{
+		e_UserID,
+		e_Username,
+		e_Password,
+		e_RconPassword,
+
+		e_Money,
+		e_Health,
+		e_Armor,
+		e_Kills,
+		e_HouseID,
+
+		e_Level,
+		e_ExpPoints,
+
+		e_Donor,
+		e_VIP,
+
+		e_Bounty,
+
+		e_Arrested,
+
+		e_AllWeapons,
+		e_HealthRegen,
+		e_InfinityAmmo,
+		e_InfinityJumps,
+		e_FastReload,
+		e_NoSelfDMG,
+		e_Portal,
+
+		e_HammerLvl,
+        e_GunLvl,
+        e_ShotgunLvl,
+        e_GrenadeLvl,
+        e_RifleLvl,
+
+        e_HammerExp,
+        e_GunExp,
+        e_ShotgunExp,
+        e_GrenadeExp,
+        e_RifleExp,
+
+
+		e_GrenadeSpread,
+		e_GrenadeBounce,
+		e_GrenadeMine,
+
+		e_ShotgunSpread,
+		e_ShotgunExplode,
+		e_ShotgunStars,
+
+		e_RifleSpread,
+		e_RifleSwap,
+		e_RiflePlasma,
+
+		e_GunSpread,
+		e_GunExplode,
+		e_GunFreeze,
+
+		e_HammerWalls,
+		e_HammerShot,
+		e_HammerKill,
+		e_HammerExplode,
+
+		e_NinjaPermanent,
+		e_NinjaStart,
+		e_NinjaSwitch,
+		e_NinjaFly,
+		e_NinjaBomber,
+
+		e_EndlessHook,
+		e_HealHook,
+		e_BoostHook,
+
+		e_PushAura,
+		e_PullAura,
+		e_ValueCount
+};
+
+struct _m_AccData
+{
+	// Main
+	int m_UserID;
+	char m_Username[32];
+	char m_Password[32];
+	char m_RconPassword[32];
+
+	// basic
+	unsigned long long m_Money;
+	int m_Health;
+	int m_Armor;
+	int m_Kills;
+	int m_HouseID;
+
+	// levels
+	unsigned int m_Level;
+	unsigned long long m_ExpPoints;
+
+	// Rank
+	int m_Donor;
+	int m_VIP;
+
+	// Event
+	long long int m_Bounty;
+
+	// Punishments
+	int m_Arrested;
+
+	// Player
+	int m_AllWeapons;
+	int m_HealthRegen;
+	int m_InfinityAmmo;
+	int m_InfinityJumps;
+	int m_FastReload;
+	int m_NoSelfDMG;
+	int m_Portal;
+
+	// Weapons
+	unsigned int m_LvlWeapon[5];
+	unsigned int m_ExpWeapon[5];
+
+	int m_GrenadeSpread;
+	int m_GrenadeBounce;
+	int m_GrenadeMine;
+
+	int m_ShotgunSpread;
+	int m_ShotgunExplode;
+	int m_ShotgunStars;
+
+	int m_RifleSpread;
+	int m_RifleSwap;
+	int m_RiflePlasma;
+
+	int m_GunSpread;
+	int m_GunExplode;
+	int m_GunFreeze;
+
+	int m_HammerWalls;
+	int m_HammerShot;
+	int m_HammerKill;
+	int m_HammerExplode;
+
+	int m_NinjaPermanent;
+	int m_NinjaStart;
+	int m_NinjaSwitch;
+	int m_NinjaFly;
+	int m_NinjaBomber;
+
+	int m_EndlessHook;
+	int m_HealHook;
+	int m_BoostHook;
+
+	int m_PushAura;
+	int m_PullAura;
+};
+
+const char VarName[58][32] =
+	{
+		"UserID",
+		"Username",
+		"Password",
+		"RconPassword",
+		"Money",
+		"Health",
+		"Armor",
+		"Kills",
+		"HouseID",
+		"Level",
+		"ExpPoints",
+		"Donor",
+		"VIP",
+		"Bounty",
+		"Arrested",
+		"AllWeapons",
+		"HealthRegen",
+		"InfinityAmmo",
+		"InfinityJumps",
+		"FastReload",
+		"NoSelfDMG",
+		"Portal",
+		"HammerLvl",
+		"GunLvl",
+		"ShotgunLvl",
+		"GrenadeLvl",
+		"RifleLvl",
+		"HammerExp",
+		"GunExp",
+		"ShotgunExp",
+		"GrenadeExp",
+		"RifleExp",
+		"GrenadeSpread",
+		"GrenadeBounce",
+		"GrenadeMine",
+		"ShotgunSpread",
+		"ShotgunExplode",
+		"ShotgunStars",
+		"RifleSpread",
+		"RifleSwap",
+		"RiflePlasma",
+		"GunSpread",
+		"GunExplode",
+		"GunFreeze",
+		"HammerWalls",
+		"HammerShot",
+		"HammerKill",
+		"HammerExplode",
+		"NinjaPermanent",
+		"NinjaStart",
+		"NinjaSwitch",
+		"NinjaFly",
+		"NinjaBomber",
+		"EndlessHook",
+		"HealHook",
+		"BoostHook",
+		"PushAura",
+		"PullAura"};
 class IServer : public IInterface
 {
 	MACRO_INTERFACE("server", 0)
@@ -206,9 +432,13 @@ public:
 	virtual const char* GetClientLanguage(int ClientID) = 0;
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage) = 0;
 
-// SQL
-public:
-	virtual void FirstInit(int ClientID) = 0;
+	// SQL integrations
+	// virtual void GetData_Server(int ClientID) = 0;
+	virtual _m_AccData GetData(int ClientID) = 0;
+	virtual void UpdateData(int ClientID, _m_AccData AccData) = 0;
+	virtual void UpdateData_Server(int ClientID) = 0;
+	virtual void Register(int ClientID, const char* pUsername, const char* pPassword) = 0;
+	virtual void Login(int ClientID, const char* pUsername, const char* pPassword) = 0;
 };
 
 class IGameServer : public IInterface

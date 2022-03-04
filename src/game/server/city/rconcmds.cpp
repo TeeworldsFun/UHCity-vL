@@ -117,7 +117,6 @@ void CGameContext::ConDonor(IConsole::IResult *pResult, void *pUserData)
 
 		pSelf->SendChat(-1, CHAT_ALL, aBuf);
 
-		pChr->GetPlayer()->m_pAccount->Apply();
 	}
 }
 
@@ -134,8 +133,6 @@ void CGameContext::ConHouse(IConsole::IResult *pResult, void *pUserData)
 		pChr->GetPlayer()->m_AccData.m_HouseID = HouseID;
 
 		pSelf->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Player {str:PN} is now in the House {int:Number}"), "PN", pSelf->Server()->ClientName(PlayerID), "Number", &HouseID);
-
-		pChr->GetPlayer()->m_pAccount->Apply();
 		
 		str_format(aBuf, sizeof(aBuf), "Player %s is now in the House %d", pSelf->Server()->ClientName(PlayerID), HouseID);
 		pSelf->SCT_Discord(aBuf, "Donor's House");
@@ -401,14 +398,14 @@ void CGameContext::ConSetArmor(IConsole::IResult* pResult, void* pUserData)
 void CGameContext::ConSetClientName(IConsole::IResult* pResult, void* pUserData)
 {
 	CGameContext* pSelf = (CGameContext*)pUserData;
-	char Value[16];
-	str_append(Value, pResult->GetString(0), sizeof(Value));
+	std::string Value;
+	Value.append(pResult->GetString(0));
 	int ID = pResult->GetVictim();
 
-	if (Value) {
+	if (!Value.empty()) {
 		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "'%s' changed name to '%s'", pSelf->Server()->ClientName(ID), Value);
-		pSelf->Server()->SetClientName(ID, Value);
+		str_format(aBuf, sizeof aBuf, "'%s' changed name to '%s'", pSelf->Server()->ClientName(ID), Value.data());
+		pSelf->Server()->SetClientName(ID, Value.data());
 		pSelf->SendChat(-1, CHAT_ALL, aBuf);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}

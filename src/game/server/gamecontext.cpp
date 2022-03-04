@@ -865,6 +865,8 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
 	if(Discord() && ClientID <= MAX_PLAYERS) Discord()->LogExit(Server()->ClientName(ClientID));
 
+	if(m_apPlayers[ClientID]->m_AccData.m_UserID)
+		m_apPlayers[ClientID]->m_pAccount->Apply();
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
 	delete m_apPlayers[ClientID];
@@ -889,7 +891,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 // char numBuf[16];
 // int someNum = 1000000;
 // FormatInt(someNum, numBuf);
-// numBuf should output "1.000.000"
+// numBuf should output "1,000,000"
 void CGameContext::FormatInt(long long n, char* out) {
 	long long i;
 	long long digit;

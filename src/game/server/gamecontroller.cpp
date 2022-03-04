@@ -450,7 +450,6 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 				}
 
 				pVictim->GetPlayer()->m_AccData.m_Bounty = 0;
-				pVictim->GetPlayer()->m_pAccount->Apply();
 				GameServer()->RemoveFromBountyList(pVictim->GetPlayer()->GetCID());
 
 				str_format(aBuf, sizeof(aBuf), "+%s$ || current %s$", numBuf[1], numBuf[0]);
@@ -482,7 +481,6 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 				}
 
 				pVictim->GetPlayer()->m_AccData.m_Bounty = 0;
-				pVictim->GetPlayer()->m_pAccount->Apply();
 				GameServer()->RemoveFromBountyList(pVictim->GetPlayer()->GetCID());
 
 				//Kill msg 4 all <3

@@ -88,7 +88,6 @@ void CGameContext::ConChatChangePw(IConsole::IResult *pResult, void *pUserData)
 	Crypt(NewPw, (const unsigned char*) "d9", 1, 16, aHash);
 
     pP->m_pAccount->NewPassword(aHash);
-    pP->m_pAccount->Apply();
 }
 
 // functions
@@ -739,7 +738,6 @@ void CGameContext::ConChatSetbounty(IConsole::IResult *pResult, void *pUserData)
     pP->m_AccData.m_Money -= Amount;
     pTarget->m_AccData.m_Bounty += Amount;
     pSelf->AddToBountyList(Victim);
-    pP->m_pAccount->Apply();
 
     pSelf->FormatInt(Amount, numBuf);
     str_format(aBuf, sizeof aBuf, "%s has put a bounty of %s$ on %s",

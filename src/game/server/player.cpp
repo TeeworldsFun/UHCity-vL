@@ -40,9 +40,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	if(m_AccData.m_Health < 10)
 		m_AccData.m_Health = 10;
 
-	if(m_AccData.m_UserID)
-		m_pAccount->Apply();
-
 	SetLanguage(Server()->GetClientLanguage(ClientID));
 
 	m_Zomb = Zomb;
@@ -63,7 +60,7 @@ void CPlayer::Tick()
 	if(!Server()->ClientIngame(m_ClientID) && !m_Zomb)
 		return;
 	
-	Server()->SetClientScore(m_ClientID, m_Score);
+	Server()->SetClientScore(m_ClientID, m_AccData.m_Level);
 	Server()->SetClientAccID(m_ClientID, m_AccData.m_UserID);
 	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
 
@@ -227,40 +224,28 @@ void CPlayer::Snap(int SnappingClient)
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
 	if(!pClientInfo && !m_Zomb)
 		return;
+		
+	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	
-	if(!m_Zomb)
-	{
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
-	
-		if(str_comp(m_aRank, "") && Server()->Tick() % 100 < 50)
-			StrToInts(&pClientInfo->m_Clan0, 3, m_aRank);
-		else
-			StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
-		StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-		pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-		pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-	
-
-		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-		pClientInfo->m_UseCustomColor = m_Rainbow?true:m_TeeInfos.m_UseCustomColor;
-
-		pClientInfo->m_ColorBody = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorFeet;
-	}
+	if(str_comp(m_aRank, "") && Server()->Tick() % 100 < 50)
+		StrToInts(&pClientInfo->m_Clan0, 3, m_aRank);
 	else
-	{
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 		StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-		pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-		pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-	}
+	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
+	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
+	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
+	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
+	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
+	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	
+
+	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	pClientInfo->m_UseCustomColor = m_Rainbow?true:m_TeeInfos.m_UseCustomColor;
+
+	pClientInfo->m_ColorBody = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorBody;
+	pClientInfo->m_ColorFeet = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorFeet;
 	
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
@@ -290,13 +275,16 @@ void CPlayer::Snap(int SnappingClient)
 			return;
 
 		pSpectatorInfo->m_SpectatorID = m_SpectatorID;
-		pSpectatorInfo->m_X = m_ViewPos.x;
-		pSpectatorInfo->m_Y = m_ViewPos.y;
+		pSpectatorInfo->m_X = m_ViewPos.y;
+		pSpectatorInfo->m_Y = m_ViewPos.x;
 	}
 }
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
+	if(m_AccData.m_UserID)
+		m_pAccount->Apply();
+
 	// City
 	if(m_AccData.m_UserID)
 		m_pAccount->Reset();

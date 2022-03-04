@@ -55,8 +55,8 @@ void CAccount::Login(char *Username, char *Password)
 	m_pPlayer->m_AccData = GameServer()->Server()->GetData(m_pPlayer->GetCID());
 	if(!m_pPlayer->m_AccData.m_UserID)
 	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login failed"));
-		return;
+			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login failed"));
+			return;
 	}
 	if(m_pPlayer->m_AccData.m_Donor)
 		str_format(aBuf, sizeof(aBuf), "Donor '%s' logged in Account ID: %d and House ID: ", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID, m_pPlayer->m_AccData.m_HouseID);
@@ -397,8 +397,7 @@ void CAccount::Delete()
 	if(m_pPlayer->m_AccData.m_UserID)
 	{
 		Reset();
-		str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", m_pPlayer->m_AccData.m_Username);
-		std::remove(aBuf);
+		
 		dbg_msg("account", "Account deleted ('%s')", m_pPlayer->m_AccData.m_Username);
 		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account deleted!"));
 	}
@@ -423,8 +422,6 @@ void CAccount::NewPassword(char *NewPassword)
     }
 
 	str_copy(m_pPlayer->m_AccData.m_Password, NewPassword, 32);
-	Apply();
-
 	
 	dbg_msg("account", "Password changed - ('%s')", m_pPlayer->m_AccData.m_Username);
 	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password successfully changed!"));
@@ -600,8 +597,6 @@ bool CAccount::OldLogin(char *Username, char *Password)
  
 	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
 		m_pPlayer->m_AccData.m_GunFreeze = 3;
-
-	Apply();
 	std::remove(aBuf);
 	
 	return true;

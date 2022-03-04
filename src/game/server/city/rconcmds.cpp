@@ -24,6 +24,18 @@ void CGameContext::ConSpawnBot(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConFlame(IConsole::IResult *pResult, void *pUserData)
+{
+	int ClientID = pResult->GetInteger(0);
+	CGameContext *pSelf = (CGameContext *) pUserData;	
+	CCharacter *pChr = pSelf->GetPlayerChar(ClientID);
+
+	if (!pSelf->m_apPlayers[ClientID] || !pChr)
+		return;
+
+	pSelf->m_apPlayers[ClientID]->m_AccData.m_FlameThrower = 1;
+}
+
 void CGameContext::ConLolText(IConsole::IResult *pResult, void *pUserData)
 {
 	int ClientID = pResult->GetInteger(0);

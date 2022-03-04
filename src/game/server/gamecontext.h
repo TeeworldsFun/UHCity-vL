@@ -265,6 +265,7 @@ public:
 		static void ConHouse(IConsole::IResult *pResult, void *pUserData);
 
 		static void ConLolText(IConsole::IResult *pResult, void *pUserData);
+		static void ConFlame(IConsole::IResult *pResult, void *pUserData);
 
 		// chat
 		static void ConChatLogin(IConsole::IResult* pResult, void* pUserData);

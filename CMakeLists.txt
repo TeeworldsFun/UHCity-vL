@@ -871,6 +871,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/entities/flying-point.h
   city/entities/l-tele.cpp
   city/entities/l-tele.h
+  city/entities/flamethrower.cpp
+  city/entities/flamethrower.h
   city/items/crown.cpp
   city/items/crown.h
   city/items/gravaura.cpp

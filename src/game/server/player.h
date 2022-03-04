@@ -158,6 +158,7 @@ public:
 		int m_GrenadeSpread;
 		int m_GrenadeBounce;
 		int m_GrenadeMine;
+		int m_FlameThrower;
 
 		int m_ShotgunSpread;
 		int m_ShotgunExplode;

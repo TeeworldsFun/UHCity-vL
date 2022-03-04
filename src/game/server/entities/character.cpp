@@ -18,6 +18,7 @@
 #include "game/server/city/entities/spawnprotect.h"
 #include "game/server/city/entities/l-tele.h"
 #include "game/server/city/CK/lightning.h"
+#include "game/server/city/entities/flamethrower.h"
 
 //input count
 struct CInputCount
@@ -862,7 +863,11 @@ void CCharacter::FireWeapon()
 		case WEAPON_GRENADE:
 		{
 			CMsgPacker Msg(NETMSGTYPE_SV_EXTRAPROJECTILE);
-			if(!m_pPlayer->m_AccData.m_GrenadeSpread || m_GameZone)
+			if(m_pPlayer->m_AccData.m_FlameThrower)
+			{
+				CFlameThrower *pProj = new CFlameThrower(GameWorld(), Direction, ProjStartPos, m_pPlayer->GetCID(), 5);
+			}
+			else if(!m_pPlayer->m_AccData.m_GrenadeSpread || m_GameZone)
 			{
 				CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_GRENADE,
 				m_pPlayer->GetCID(),

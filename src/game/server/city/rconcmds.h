@@ -34,6 +34,7 @@ CONSOLE_COMMAND("set_bounty", "vi", CFGFLAG_SERVER, ConSetBounty, this, "set_bou
 CONSOLE_COMMAND("bot_spawn", "i", CFGFLAG_SERVER, ConSpawnBot, this, "")
 
 CONSOLE_COMMAND("loltext", "i", CFGFLAG_SERVER, ConLolText, this, "loltext <id> <text>")
+CONSOLE_COMMAND("set_flame", "i", CFGFLAG_SERVER, ConFlame, this, "")
 
 // police
 CONSOLE_COMMAND("mute", "vi?r", CFGFLAG_SERVER, ConMute, this, "")

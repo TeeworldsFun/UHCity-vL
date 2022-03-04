@@ -842,7 +842,7 @@ void CGameContext::ConChatMe(IConsole::IResult *pResult, void *pUserData)
     pSelf->FormatInt(pP->m_AccData.m_ExpPoints, numBuf[0]);
     pSelf->FormatInt(pChr->calcExp(pP->m_AccData.m_Level), numBuf[1]);
     str_format(aBuf, sizeof aBuf, "Exp: %s ep / %s ep", numBuf[0], numBuf[1]);
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Exp: {str:exp} / {str:nB}"), "exp", numBuf[0], "nB", numBuf[1], NULL);
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Exp: {str:exp} / {str:nB},  Flame: {int:flame}"), "exp", numBuf[0], "nB", numBuf[1], "flame", &pP->m_AccData.m_FlameThrower, NULL);
 
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Hammer: {int:h} Gun: {int:g}, Shotgun: {int:sg}, Grenade: {int:gr}, Rifle: {int:r}"),
         "h", &pP->m_AccData.m_LvlWeapon[WEAPON_HAMMER],

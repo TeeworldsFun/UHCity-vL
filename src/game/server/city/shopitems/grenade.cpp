@@ -62,7 +62,7 @@ void CGrenade::Tick()
 		pOwner->Buy(Buffer.buffer(), &pOwner->GetPlayer()->m_AccData.m_GrenadeBounce, g_Config.m_EuGrenadeBounce, Click, 5);
 		break;
 	case 3:
-		//pOwner->Buy("Rifle Plasma", &pOwner->GetPlayer()->m_AccData.m_Shotgun, g_Config.m_EuRiflePlasma, Click, 10);
+//		pOwner->Buy("Rifle Plasma", &pOwner->GetPlayer()->m_AccData, g_Config.m_EuRiflePlasma, Click, 10);
 		break;
 	}
 }

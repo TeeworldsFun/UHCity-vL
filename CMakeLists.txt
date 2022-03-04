@@ -851,8 +851,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/transfer.h
   city/wall.cpp
   city/wall.h
-  city/growingexplosion.cpp
-  city/growingexplosion.h
+  city/CK/growingexplosion.cpp
+  city/CK/growingexplosion.h
   city/entities/carousel.cpp
   city/entities/carousel.h
   city/entities/door.cpp

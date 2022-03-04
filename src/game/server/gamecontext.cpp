@@ -1358,7 +1358,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 
 		// City
-		if(g_Config.m_SvTournamentMode && pPlayer->GetTeam() == TEAM_SPECTATORS && !pPlayer->m_AccData.m_UserID && !pPlayer->m_Zomb)
+		if(g_Config.m_SvTournamentMode && pPlayer->GetTeam() == TEAM_SPECTATORS && !pPlayer->m_AccData.m_UserID && !pPlayer->m_Bot)
 		{
 			SendBroadcast("You must be logged in to join the game", ClientID);
 			return;
@@ -2272,15 +2272,12 @@ void CGameContext::OnShutdown()
 }
 
 void CGameContext::OnSnap(int ClientID)
-{
-	if(ClientID > MAX_PLAYERS)
-		return;
-	
+{	
 	m_World.Snap(ClientID);
 	m_pController->Snap(ClientID);
 	m_Events.Snap(ClientID);
 
-	for(int i = 0; i < MAX_PLAYERS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i])
 			m_apPlayers[i]->Snap(ClientID);

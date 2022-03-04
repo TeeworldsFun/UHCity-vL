@@ -154,7 +154,7 @@ public:
 	// Zomb2
 	void CheckZombie();
 	int RandZomb();
-	int m_Zombie[13];//not sure about the amount of zombies
+	int m_Bot[13];//not sure about the amount of zombies
 };
 
 #endif

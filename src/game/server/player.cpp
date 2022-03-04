@@ -45,7 +45,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 
 	SetLanguage(Server()->GetClientLanguage(ClientID));
 
-	m_Zomb = Zomb;
+	m_Bot = Zomb;
 	mem_zero(m_SubZomb, sizeof(m_SubZomb));
 }
 
@@ -60,7 +60,7 @@ void CPlayer::Tick()
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
 #endif
-	if(!Server()->ClientIngame(m_ClientID) && !m_Zomb)
+	if(!Server()->ClientIngame(m_ClientID) && !m_Bot)
 		return;
 	
 	Server()->SetClientScore(m_ClientID, m_Score);
@@ -77,7 +77,7 @@ void CPlayer::Tick()
 		m_ChatScore--;
 
 	// do latency stuff
-	if(!m_Zomb)
+	if(!m_Bot)
 	{
 		IServer::CClientInfo Info;
 		if(Server()->GetClientInfo(m_ClientID, &Info))
@@ -155,7 +155,7 @@ void CPlayer::Tick()
 	RainbowColor = (RainbowColor + 1) % 256;
 	m_RainbowColor = RainbowColor * 0x010000 + 0xff00;
 
-	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS && !m_Zomb)
+	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS && !m_Bot)
 		SetTeam(TEAM_SPECTATORS);
 
 	
@@ -216,19 +216,19 @@ void CPlayer::Snap(int SnappingClient)
 #ifdef CONF_DEBUG
 	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS-g_Config.m_DbgDummies)
 #endif
-	if(!Server()->ClientIngame(m_ClientID) && !m_Zomb)
+	if(!Server()->ClientIngame(m_ClientID) && !m_Bot)
 		return;
 
 	int FakeID = m_ClientID;
-	if (!Server()->Translate(FakeID, SnappingClient) && !m_Zomb)
+	if (!Server()->Translate(FakeID, SnappingClient) && !m_Bot)
 		return;
 
 	//dbg_msg("test", "test: %d", FakeID);
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
-	if(!pClientInfo && !m_Zomb)
+	if(!pClientInfo && !m_Bot)
 		return;
 	
-	if(!m_Zomb)
+	if(!m_Bot)
 	{
 		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 	
@@ -264,16 +264,16 @@ void CPlayer::Snap(int SnappingClient)
 	
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
-	if(!pPlayerInfo && !m_Zomb)
+	if(!pPlayerInfo && !m_Bot)
 		return;
 
-	if(m_Zomb)
+	if(m_Bot)
 		pPlayerInfo->m_Latency = 0;
 	else
 		pPlayerInfo->m_Latency = SnappingClient == -1 ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aActLatency[m_ClientID];
 	pPlayerInfo->m_Local = 0;
 	pPlayerInfo->m_ClientID = FakeID;
-	if(m_Zomb)
+	if(m_Bot)
 		pPlayerInfo->m_Score = -1;
 	else
 		pPlayerInfo->m_Score = m_Score;
@@ -303,7 +303,7 @@ void CPlayer::OnDisconnect(const char *pReason)
 
 	KillCharacter();
 
-	if(Server()->ClientIngame(m_ClientID) && !m_Zomb)
+	if(Server()->ClientIngame(m_ClientID) && !m_Bot)
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
@@ -455,8 +455,8 @@ void CPlayer::TryRespawn()
 	} else if(m_Insta) {
 		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Insta?2:0))
 			return;
-	} else if(m_onMonster || m_Zomb) {
-		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb||m_onMonster?4:0))// && !GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Zomb?4:0))
+	} else if(m_onMonster || m_Bot) {
+		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Bot||m_onMonster?4:0))// && !GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Bot?4:0))
 			return; 
 	} else {
 		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_AccData.m_Arrested?1:0))
@@ -479,10 +479,10 @@ void CPlayer::FakeSnap(int SnappingClient)
 	CNetObj_ClientInfo* pClientInfo = static_cast<CNetObj_ClientInfo*>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
 	
 	Server()->GetClientInfo(SnappingClient, &Info);
-	if (Info.m_Client != IServer::CLIENT_VANILLA || m_Zomb)
+	if (Info.m_Client != IServer::CLIENT_VANILLA || m_Bot)
 		return;
 
-	if (!pClientInfo && !m_Zomb)
+	if (!pClientInfo && !m_Bot)
 		return;
 
 	StrToInts(&pClientInfo->m_Name0, 4, " ");
@@ -500,9 +500,9 @@ void CPlayer::SetLanguage(const char* pLanguage)
 	str_copy(m_aLanguage, pLanguage, sizeof(m_aLanguage));
 }
 
-bool CPlayer::GetZomb(int Type)
+bool CPlayer::GetBot(int Type)
 {
-	if(m_Zomb == Type)
+	if(m_Bot == Type)
 		return true;
 	for(int i = 0; i < (int)(sizeof(m_SubZomb)/sizeof(m_SubZomb[0])); i++)
 	{

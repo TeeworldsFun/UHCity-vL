@@ -824,10 +824,6 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   entities/pickup.h
   entities/projectile.cpp
   entities/projectile.h
-  entities/monster/monster.cpp
-  entities/monster/monster.h
-  entities/monster/monsterdeath.cpp
-  entities/monster/monsterdeath.h
   city/account.cpp
   city/account.h
   city/chatcmds.cpp
@@ -853,6 +849,12 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/wall.h
   city/CK/growingexplosion.cpp
   city/CK/growingexplosion.h
+  city/CK/lightning.cpp
+  city/CK/lightning.h
+  city/CK/smokescreen.cpp
+  city/CK/smokescreen.h
+  city/CK/clock.cpp
+  city/CK/clock.h
   city/entities/carousel.cpp
   city/entities/carousel.h
   city/entities/door.cpp

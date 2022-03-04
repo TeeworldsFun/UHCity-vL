@@ -176,6 +176,7 @@ class CCharacterCore
 	CWorldCore *m_pWorld;
 	CCollision *m_pCollision;
 public:
+	static const float PhysicalSize;
 	vec2 m_Pos;
 	vec2 m_Vel;
 
@@ -184,6 +185,11 @@ public:
 	int m_HookTick;
 	int m_HookState;
 	int m_HookedPlayer;
+
+	static const float PassengerYOffset;
+	CCharacterCore* m_Passenger;
+	bool m_IsPassenger;
+	bool m_ProbablyStucked;
 
 	int m_Jumped;
 
@@ -201,6 +207,8 @@ public:
 	void Read(const CNetObj_CharacterCore *pObjCore);
 	void Write(CNetObj_CharacterCore *pObjCore);
 	void Quantize();
+	bool IsChildCharacter(CCharacterCore *suspect, CCharacterCore *me);
+	void SetPassenger(CCharacterCore *pPassenger);
 
 	// City
 

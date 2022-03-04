@@ -21,7 +21,6 @@
 
 #include <game/server/discord/bot.h>
 
-#include "entities/monster/monster.h"
 #include <city/components/localization.h>
 
 /*

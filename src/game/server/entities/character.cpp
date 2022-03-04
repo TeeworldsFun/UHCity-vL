@@ -17,6 +17,7 @@
 #include "game/server/city/transfer.h"
 #include "game/server/city/entities/spawnprotect.h"
 #include "game/server/city/entities/l-tele.h"
+#include "game/server/city/CK/lightning.h"
 
 //input count
 struct CInputCount
@@ -119,7 +120,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if (GetPlayer()->m_AccData.m_EndlessHook)
 		m_Core.m_EndlessHook = true;
 
-	if(!m_pPlayer->GetZomb()) m_SpawnProtection = Server()->Tick(); else m_SpawnProtection = 0;
+	if(!m_pPlayer->GetBot()) m_SpawnProtection = Server()->Tick(); else m_SpawnProtection = 0;
 
 	new CGui(GameWorld(), m_pPlayer->GetCID());
 	new CCrown(GameWorld(), m_pPlayer->GetCID());
@@ -963,9 +964,17 @@ void CCharacter::FireWeapon()
 						new CLaser(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), WEAPON_RIFLE);
 					}
 				}
+				else if(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_RIFLE] >= 5)
+				{
+					int ShotSpread = 3;
+
+					float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+					float a = GetAngle(Direction);
+					
+					new CLightning(GameWorld(), m_Pos, vec2(cosf(a), sinf(a)), 200, 100, m_pPlayer->GetCID(), 3, 2);
+				}
 				else
 					new CLaser(GameWorld(), m_Pos, Direction, GameServer()->Tuning()->m_LaserReach, m_pPlayer->GetCID(), WEAPON_RIFLE);
-				
 				GameServer()->CreateSound(m_Pos, SOUND_RIFLE_FIRE);
 			}
 			else
@@ -992,7 +1001,7 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
-	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone && !m_pPlayer->m_Zomb) // -1 == unlimited
+	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0 && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Insta && !m_GameZone && !m_pPlayer->m_Bot) // -1 == unlimited
 		m_aWeapons[m_ActiveWeapon].m_Ammo--;
 
 	if(!m_ReloadTimer)
@@ -1085,7 +1094,7 @@ void CCharacter::HandleWeapons()
 
 	// ammo regen
 	int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_ActiveWeapon].m_Ammoregentime;
-	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Zomb)
+	if(AmmoRegenTime && !m_pPlayer->m_AccData.m_InfinityAmmo && !m_pPlayer->m_Bot)
 	{
 		// If equipped and not active, regen ammo?
 		if (m_ReloadTimer <= 0)
@@ -2220,10 +2229,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, bool From
 
 	m_Core.m_Vel += Force;
 
-//	if(!m_pPlayer->m_Zomb && !GameServer()->m_apPlayers[From]->m_Zomb && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
+//	if(!m_pPlayer->m_Bot && !GameServer()->m_apPlayers[From]->m_Bot && GameServer()->m_apPlayers[From]->m_onMonster && m_pPlayer->m_onMonster)
 //		return false;
 	
-//	if(m_pPlayer->m_Zomb && GameServer()->m_apPlayers[From]->m_Zomb)
+//	if(m_pPlayer->m_Bot && GameServer()->m_apPlayers[From]->m_Bot)
 //		return false;
 	
 	// these will have force impact
@@ -2472,7 +2481,7 @@ void CCharacter::CheckLevelUp(int ClientID)
 
 void CCharacter::DoZombieMovement()
 {
-	if(!m_pPlayer->GetZomb())
+	if(!m_pPlayer->GetBot())
 		return;
 
 	if(m_Move.m_LastX == m_Pos.x)//direction swap caused by a wall
@@ -2552,14 +2561,14 @@ void CCharacter::DoZombieMovement()
 		if(!pChar || pChar == this || !pChar->IsAlive() || !pChar->GetPlayer() || (GameServer()->Collision()->IntersectTile(m_Pos, pChar->m_Pos) && m_Core.m_HookState != HOOK_GRABBED))
 			continue;
 		
-		if(!GameServer()->m_apPlayers[i]->GetZomb() && (pClosest == this || distance(m_Pos, pClosest->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+		if(!GameServer()->m_apPlayers[i]->GetBot() && (pClosest == this || distance(m_Pos, pClosest->m_Pos) > distance(m_Pos, pChar->m_Pos)))
 			pClosest = pChar;
-		if(GameServer()->m_apPlayers[i]->GetZomb() == TEAM_BLUE && (pCloseZomb == this || distance(m_Pos, pCloseZomb->m_Pos) > distance(m_Pos, pChar->m_Pos)))
+		if(GameServer()->m_apPlayers[i]->GetBot() == TEAM_BLUE && (pCloseZomb == this || distance(m_Pos, pCloseZomb->m_Pos) > distance(m_Pos, pChar->m_Pos)))
 			pCloseZomb = pChar;
 	}
 	if(pClosest != this)
 	{
-		if(m_pPlayer->GetZomb(9))//Flombie fly movement //first movement, then Aim because Aim can cause death
+		if(m_pPlayer->GetBot(9))//Flombie fly movement //first movement, then Aim because Aim can cause death
 		{
 			if(pClosest->m_Pos.y < m_Pos.y)
 				m_Core.m_Vel.y -= 0.25f + GameServer()->Tuning()->m_Gravity;//must work
@@ -2593,15 +2602,15 @@ void CCharacter::DoZombieMovement()
 
 void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int NearZombCID)
 {
-	if(!m_pPlayer->GetZomb())
+	if(!m_pPlayer->GetBot())
 		return;
 
 	//if(m_Aim.m_FireCounter)
 		//m_Aim.m_FireCounter--;
-	if(m_pPlayer->GetZomb(8) && distance(m_Pos, VictimPos) > 100.0f)
+	if(m_pPlayer->GetBot(8) && distance(m_Pos, VictimPos) > 100.0f)
 		VictimPos = GetGrenadeAngle(m_Pos, VictimPos, true) + m_Pos;
 
-	if(m_pPlayer->GetZomb(5) && distance(m_Pos, VictimPos) > 100.0f)
+	if(m_pPlayer->GetBot(5) && distance(m_Pos, VictimPos) > 100.0f)
 		VictimPos = GetGrenadeAngle(m_Pos, VictimPos, false) + m_Pos;
 
 	//Direction is exactly to the player
@@ -2613,11 +2622,11 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 	m_LastAction = Server()->Tick();
 	
 	// || 
-	if(m_pPlayer->GetZomb(2))
+	if(m_pPlayer->GetBot(2))
 		m_Aim.m_FireCounter = 21;
 
 	//Zele
-	if(m_pPlayer->GetZomb(11))
+	if(m_pPlayer->GetBot(11))
 	{
 		if(distance(m_Pos, VictimPos) <= 500.0f && distance(m_Pos, VictimPos) > 200.0f)
 		{
@@ -2631,14 +2640,14 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 	}
 
 	//Zeater
-	if(m_pPlayer->GetZomb(13) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && !GameServer()->m_apPlayers[NearZombCID]->GetZomb(13))
+	if(m_pPlayer->GetBot(13) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && !GameServer()->m_apPlayers[NearZombCID]->GetBot(13))
 	{
 		for(int i = 0; i < 3; i++)
 		{
 			if(!m_pPlayer->m_SubZomb[i])
 			{
-				int VictimType = GameServer()->m_apPlayers[NearZombCID]->GetZomb();
-				if(m_pPlayer->GetZomb(VictimType))
+				int VictimType = GameServer()->m_apPlayers[NearZombCID]->GetBot();
+				if(m_pPlayer->GetBot(VictimType))
 					return;
 				if(VictimType == 6)
 					IncreaseHealth(100);
@@ -2648,13 +2657,13 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 				m_pPlayer->m_SubZomb[i] = VictimType;
 				GameServer()->GetPlayerChar(NearZombCID)->Die(m_pPlayer->GetCID(), WEAPON_GAME);
 
-				if(m_pPlayer->GetZomb(5))//gun
+				if(m_pPlayer->GetBot(5))//gun
 					m_ActiveWeapon = WEAPON_GUN;
-				if(m_pPlayer->GetZomb(7))//Shotgun
+				if(m_pPlayer->GetBot(7))//Shotgun
 					m_ActiveWeapon = WEAPON_SHOTGUN;
-				if(m_pPlayer->GetZomb(8))//Grenade
+				if(m_pPlayer->GetBot(8))//Grenade
 					m_ActiveWeapon = WEAPON_GRENADE;
-				if(m_pPlayer->GetZomb(2))//Rifle
+				if(m_pPlayer->GetBot(2))//Rifle
 					m_ActiveWeapon = WEAPON_RIFLE;
 				m_aWeapons[m_ActiveWeapon].m_Ammo = -1;
 				break;
@@ -2664,14 +2673,14 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 
 
 	//Can do sth.
-	if(distance(m_Pos, VictimPos) <= GetTriggerDistance(m_pPlayer->GetZomb()) || (!m_pPlayer->GetZomb(4) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && GetTriggerDistance(m_pPlayer->GetZomb()) == 65.0f))//Zamer shouldnt attak other zombies
+	if(distance(m_Pos, VictimPos) <= GetTriggerDistance(m_pPlayer->GetBot()) || (!m_pPlayer->GetBot(4) && NearZombPos != m_Pos && distance(m_Pos, NearZombPos) <= 65.0f && GetTriggerDistance(m_pPlayer->GetBot()) == 65.0f))//Zamer shouldnt attak other zombies
 	{
 		//Zinvi
-		if(m_pPlayer->GetZomb(12))
+		if(m_pPlayer->GetBot(12))
 			m_IsVisible = true;
 
 		//Zinja
-		if(m_pPlayer->GetZomb(10))
+		if(m_pPlayer->GetBot(10))
 		{
 			if(m_ActiveWeapon == WEAPON_HAMMER)
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA);
@@ -2679,7 +2688,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		}
 
 		//Zooker
-		if(m_pPlayer->GetZomb(3))
+		if(m_pPlayer->GetBot(3))
 		{
 			if(VicCID != -1 && distance(m_Pos, VictimPos) < 380.0f && GameServer()->GetPlayerChar(VicCID))//Look hooklenght in tuning.h
 			{
@@ -2701,7 +2710,7 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		}
 
 		//Zamer
-		if(m_pPlayer->GetZomb(4))
+		if(m_pPlayer->GetBot(4))
 		{	
 			m_Aim.m_Explode = true;
 			GameServer()->CreateExplosion(vec2(m_Pos.x + 5, m_Pos.y + 5), m_pPlayer->GetCID(), WEAPON_GAME, false);
@@ -2718,9 +2727,9 @@ void CCharacter::DoZombieAim(vec2 VictimPos, int VicCID, vec2 NearZombPos, int N
 		m_Input.m_Fire = 1;
 		m_LatestPrevInput.m_Fire = 1;
 	}
-	else if(!m_pPlayer->GetZomb(8) && !m_pPlayer->GetZomb(5))
+	else if(!m_pPlayer->GetBot(8) && !m_pPlayer->GetBot(5))
 	{
-		if(m_pPlayer->GetZomb(12))
+		if(m_pPlayer->GetBot(12))
 			m_IsVisible = false;
 		ResetAiming();
 	}
@@ -2759,7 +2768,7 @@ void CCharacter::ResetAiming()
 {
 	m_Input.m_Fire = 0;
 	m_LatestPrevInput.m_Fire = 0;
-	if(m_pPlayer->GetZomb(10))
+	if(m_pPlayer->GetBot(10))
 	{
 		m_aWeapons[WEAPON_NINJA].m_Got = false;
 		m_ActiveWeapon = WEAPON_HAMMER;

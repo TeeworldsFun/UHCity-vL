@@ -1,3 +1,4 @@
+/* (c) Paul 'Anime.pdf'. */
 #ifndef GAME_SERVER_DISCORD_BOT_H
 #define GAME_SERVER_DISCORD_BOT_H
 

@@ -73,6 +73,9 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 	return 1.0f/powf(Curvature, (Value-Start)/Range);
 }
 
+const float CCharacterCore::PhysicalSize = 28.0f;
+const float CCharacterCore::PassengerYOffset = -50;
+
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision)
 {
 	m_pWorld = pWorld;
@@ -113,6 +116,8 @@ void CCharacterCore::Tick(bool UseInput)
 			m_IsGrounded = false;
 	}
 	
+	bool Stucked = false;
+	Stucked = m_pCollision->TestBox(m_Pos, vec2(PhysicalSize, PhysicalSize));
 
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
@@ -121,6 +126,27 @@ void CCharacterCore::Tick(bool UseInput)
 	float MaxSpeed = m_IsGrounded ? m_pWorld->m_Tuning.m_GroundControlSpeed : m_pWorld->m_Tuning.m_AirControlSpeed;
 	float Accel = m_IsGrounded ? m_pWorld->m_Tuning.m_GroundControlAccel : m_pWorld->m_Tuning.m_AirControlAccel;
 	float Friction = m_IsGrounded ? m_pWorld->m_Tuning.m_GroundFriction : m_pWorld->m_Tuning.m_AirFriction;
+
+	if (m_Passenger && (m_Passenger->m_Input.m_Jump > 0))
+	{
+		SetPassenger(nullptr);
+	}
+
+	if (m_Passenger) {
+		m_Passenger->m_Vel = m_Vel;
+		if (abs(m_Passenger->m_Vel.y) <= 1.0f)
+			m_Passenger->m_Vel.y = 0.0f;
+		m_Passenger->m_Pos.x = m_Pos.x;
+		m_Passenger->m_Pos.y = m_Pos.y + PassengerYOffset;
+	}
+
+	if (m_ProbablyStucked) {
+		m_Pos.y += 1;
+		if (!Stucked) {
+			m_ProbablyStucked = false;
+			m_Pos.y -= 1;
+		}
+	}
 
 	// handle input
 	if(UseInput)
@@ -483,3 +509,28 @@ void CCharacterCore::Quantize()
 	Read(&Core);
 }
 
+bool CCharacterCore::IsChildCharacter(CCharacterCore *suspect, CCharacterCore *me) {
+	if (me->m_Passenger) {
+		if (me->m_Passenger == suspect)
+			return true;
+		else return IsChildCharacter(suspect, me->m_Passenger);
+	}
+	else return false;
+}
+
+void CCharacterCore::SetPassenger(CCharacterCore *pPassenger)
+{
+	if(m_Passenger == pPassenger)
+		return;
+
+	if (m_Passenger)
+	{
+		m_Passenger->m_IsPassenger = false;
+		m_Passenger->m_ProbablyStucked = true;
+	}
+	m_Passenger = pPassenger;
+	if (pPassenger)
+	{
+		m_Passenger->m_IsPassenger = true;
+	}
+}

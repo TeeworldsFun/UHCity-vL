@@ -16,6 +16,7 @@
 #include "city/shopitems/vip.h"
 #include "city/shopitems/health.h"
 #include "city/home.h"
+#include "city/CK/clock.h"
 
 IGameController::IGameController(class CGameContext *pGameServer)
 {
@@ -221,16 +222,8 @@ bool IGameController::OnEntity(int Index, vec2 Pos)
 		new CVip(&GameServer()->m_World, Pos);
 	else if(Index == ENTITY_FLAGSTAND_RED)
 		new CBuyHealth(&GameServer()->m_World, Pos);
-	else if(Index == ENTITY_MONSTER && !m_MonsterEvent)
-	{
-		m_aMonsterSpawnPos[m_MonsterSpawnNum] = Pos;
-        m_MonsterSpawnNum ++;
-	}
-	else if(Index == ENTITY_MEVENT && m_MonsterEvent)
-	{
-		m_aMonsterSpawnPos[m_MonsterSpawnNum] = Pos;
-        m_MonsterSpawnNum ++;
-	}
+	else if(Index == ENTITY_CLOCK)
+		new CClock(&GameServer()->m_World, Pos);
 	else
 		return false;
 
@@ -418,7 +411,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
 	
-	if(pVictim->GetPlayer()->m_Zomb && !pKiller)
+	if(pVictim->GetPlayer()->m_Bot && !pKiller)
 		return 0;
 	
 	if(pKiller == pVictim->GetPlayer())
@@ -437,7 +430,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 				char aBuf[128];
 				char numBuf[2][32];
 				long long KillReward = 500 + pVictim->GetPlayer()->m_AccData.m_Bounty;
-				if(pVictim->GetPlayer()->m_Zomb)
+				if(pVictim->GetPlayer()->m_Bot)
 					KillReward += 10000;
 				pKiller->m_AccData.m_Money += KillReward;
 				pKiller->m_AccData.m_ExpPoints += KillReward;
@@ -514,31 +507,31 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->IncreaseHealth(pChr->GetPlayer()->m_AccData.m_Health);
 	pChr->IncreaseArmor(pChr->GetPlayer()->m_AccData.m_Armor);
 
-	if(pChr->GetPlayer()->GetZomb(5) || pChr->GetPlayer()->GetZomb(9))//Zunner, Flombie
+	if(pChr->GetPlayer()->GetBot(5) || pChr->GetPlayer()->GetBot(9))//Zunner, Flombie
 	{
 		pChr->GiveWeapon(WEAPON_GUN, -1);
 		pChr->SetWeapon(WEAPON_GUN);
 	}
-	else if(pChr->GetPlayer()->GetZomb(2))//Zoomer
+	else if(pChr->GetPlayer()->GetBot(2))//Zoomer
 	{
 		pChr->GiveWeapon(WEAPON_RIFLE, -1);
 		pChr->SetWeapon(WEAPON_RIFLE);
 	}
-	else if(pChr->GetPlayer()->GetZomb(7))//Zotter
+	else if(pChr->GetPlayer()->GetBot(7))//Zotter
 	{
 		pChr->GiveWeapon(WEAPON_SHOTGUN, -1);
 		pChr->SetWeapon(WEAPON_SHOTGUN);
 	}
-	else if(pChr->GetPlayer()->GetZomb(8))//Zenade
+	else if(pChr->GetPlayer()->GetBot(8))//Zenade
 	{
 		pChr->GiveWeapon(WEAPON_GRENADE, -1);
 		pChr->SetWeapon(WEAPON_GRENADE);
 	}
-	else if(!pChr->GetPlayer()->m_Zomb)
+	else if(!pChr->GetPlayer()->m_Bot)
 	{// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER, -1);
 	
-	if(!pChr->GetPlayer()->m_Zomb)
+	if(!pChr->GetPlayer()->m_Bot)
 		pChr->GiveWeapon(WEAPON_GUN, 10);
 
 	if(pChr->GetPlayer()->m_AccData.m_AllWeapons)
@@ -970,17 +963,17 @@ void IGameController::CheckZombie()
 			if(Random == -1)
 				break;
 			// GameServer()->CreateNewDummy(i, Random);
-			m_Zombie[Random]--;
+			m_Bot[Random]--;
 		}
 	}
 }
 
 int IGameController::RandZomb()
 {
-	int size = (int)(sizeof(m_Zombie)/sizeof(m_Zombie[0]));
+	int size = (int)(sizeof(m_Bot)/sizeof(m_Bot[0]));
 	int Rand = rand()%size;
 	int WTF = 1;
-	while(!m_Zombie[Rand])
+	while(!m_Bot[Rand])
 	{
 		Rand = rand()%size;
 		WTF--;

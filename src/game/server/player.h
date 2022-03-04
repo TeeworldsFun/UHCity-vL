@@ -39,8 +39,8 @@ public:
 
 	//Zomb2
 	void DeleteCharacter();
-	int GetZomb() { return m_Zomb; };
-	bool GetZomb(int Zomb);
+	int GetBot() { return m_Bot; };
+	bool GetBot(int Type);
 
 	CCharacter *GetCharacter();
 
@@ -221,7 +221,7 @@ public:
 
 	//Zomb2
 	int m_SubZomb[3];//all Types, 3 times ( 0, 1, 2)
-	int m_Zomb;
+	int m_Bot;
 	///////////////////////////////
 	//1 = Zaby
 	//2 = Zoomer

@@ -28,3 +28,7 @@ teeworlds_srv_d
 *-Server
 *-Debug
 build/
+
+#IDEs
+.vscode/**
+cmake-build-**

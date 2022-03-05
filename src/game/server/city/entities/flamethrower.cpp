@@ -1,3 +1,8 @@
+/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+/*
+    By Puppet
+*/
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
 #include "flamethrower.h"
@@ -12,6 +17,8 @@ CFlameThrower::CFlameThrower(CGameWorld *pGameWorld, vec2 Direction, vec2 ProjSt
 
     m_PosTmp[0] = m_Pos + Direction * 100.0f;
 
+    m_Activated = false;
+
     for (int i = 0; i < MAX_PROJECTILES; i++)
         m_IDs[i] = Server()->SnapNewID();
 
@@ -25,50 +32,24 @@ void CFlameThrower::Reset()
     //     Server()->SnapFreeID(m_IDs[i]);
 }
 
-void CFlameThrower::HitCharacter()
+void CFlameThrower::HitCharacter(vec2 Pos)
 {
-    CPlayer *m_pPlayer = GameServer()->m_apPlayers[m_Owner];
-    if (!m_pPlayer)
+    // deal damage
+    CCharacter *apEnts[MAX_CLIENTS];
+    float Radius = 135.0f;
+    float InnerRadius = 48.0f;
+    int Num = GameWorld()->FindEntities(Pos, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+    for (int i = 0; i < Num; i++)
     {
-        Reset();
-        return;
-    }
-
-    CCharacter *m_pOwner = m_pPlayer->GetCharacter();
-    if (!m_pOwner || !m_pOwner->IsAlive())
-    {
-        Reset();
-        return;
-    }
-
-    for (int i = 0; i < MAX_PROJECTILES; i++)
-    {
-        for (int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
-        {
-            if (ClientID == m_Owner || !m_PosTmp[i])
-                continue;
-
-            if (GameServer()->Collision()->IntersectLine(m_pOwner->m_Pos, m_PosTmp[i], NULL, NULL) || GameServer()->Collision()->CheckPoint(m_PosTmp[i]))
-                return;
-        
-            // deal damage
-            CCharacter *apEnts[MAX_CLIENTS];
-            float Radius = 135.0f;
-            float InnerRadius = 48.0f;
-            int Num = GameWorld()->FindEntities(m_PosTmp[i], Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-            for (int i = 0; i < Num; i++)
-            {
-                vec2 Diff = apEnts[i]->m_Pos - m_PosTmp[i];
-                vec2 ForceDir(0, 1);
-                float l = length(Diff);
-                if (l)
-                    ForceDir = normalize(Diff);
-                l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
-                float Dmg = m_Damage * l;
-                if ((int)Dmg)
-                    apEnts[i]->TakeDamage(vec2(0.0f, 0.0f), (int)Dmg, m_Owner, WEAPON_GRENADE);
-            }
-        }
+        vec2 Diff = apEnts[i]->m_Pos - Pos;
+        vec2 ForceDir(0, 1);
+        float l = length(Diff);
+        if (l)
+            ForceDir = normalize(Diff);
+        l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+        float Dmg = m_Damage * l;
+        if ((int)Dmg)
+            apEnts[i]->TakeDamage(vec2(0.0f, 0.0f), (int)Dmg, m_Owner, WEAPON_GRENADE);
     }
 }
 
@@ -95,8 +76,6 @@ void CFlameThrower::Tick()
 
         m_PosTmp[i] = m_PosTmp[i - 1] + GetDir(GetAngle(m_Dir)) * 32 * 2;
     }
-
-    HitCharacter();
 }
 
 void CFlameThrower::Snap(int SnappingClient)
@@ -124,7 +103,7 @@ void CFlameThrower::Snap(int SnappingClient)
             return;
         }
 
-        if (GameServer()->Collision()->IntersectLine(m_pOwner->m_Pos, m_PosTmp[i], NULL, NULL) || GameServer()->Collision()->CheckPoint(m_PosTmp[i]))
+        if (GameServer()->Collision()->IntersectLine(m_pOwner->m_Pos, m_PosTmp[i], NULL, NULL, true) || GameServer()->Collision()->CheckPoint(m_PosTmp[i]))
         {
             Reset();
             return;
@@ -136,6 +115,8 @@ void CFlameThrower::Snap(int SnappingClient)
 
         pEplosion[i]->m_X = (int)m_PosTmp[i].x;
         pEplosion[i]->m_Y = (int)m_PosTmp[i].y;
+
+        HitCharacter(m_PosTmp[i]);
     }
 
     Reset();

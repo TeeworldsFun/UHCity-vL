@@ -25,6 +25,7 @@ private:
         MAX_PROJECTILES = 6
     };
 
+    bool m_Activated;
     int m_Owner;
     int m_Damage;
     vec2 m_Pos;

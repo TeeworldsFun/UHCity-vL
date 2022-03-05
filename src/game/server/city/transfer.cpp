@@ -110,7 +110,7 @@ void CTransfer::Snap(int SnappingClient)
 		pProj[i]->m_VelX = (int)0;
 		pProj[i]->m_VelY = (int)0;
 		pProj[i]->m_StartTick = Server()->Tick()-100;
-		pProj[i]->m_Type = WEAPON_RIFLE;
+		pProj[i]->m_Type = WEAPON_GRENADE;
 
 	}
 }

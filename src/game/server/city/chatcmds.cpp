@@ -22,7 +22,7 @@ void CGameContext::ConChatLogin(IConsole::IResult *pResult, void *pUserData)
 	mem_zero(aHash, sizeof(aHash));
 	Crypt(Password, (const unsigned char*) "d9", 1, 14, aHash);
 	
-    pSelf->m_apPlayers[pResult->GetClientID()]->m_pAccount->Login(Username, aHash);
+    pSelf->Sql()->login(Username, aHash, pResult->GetClientID());
 }
 
 void CGameContext::ConChatRegister(IConsole::IResult *pResult, void *pUserData)
@@ -42,7 +42,7 @@ void CGameContext::ConChatRegister(IConsole::IResult *pResult, void *pUserData)
     char aHash[64];
 	Crypt(Password, (const unsigned char*) "d9", 1, 14, aHash);
 
-    pSelf->m_apPlayers[pResult->GetClientID()]->m_pAccount->Register(Username, aHash, Password);
+    pSelf->Sql()->create_account(Username, aHash, pResult->GetClientID());
 }
 
 void CGameContext::ConChatLogout(IConsole::IResult *pResult, void *pUserData)
@@ -57,8 +57,8 @@ void CGameContext::ConChatLogout(IConsole::IResult *pResult, void *pUserData)
     if (!pP->m_AccData.m_UserID)
         return;
 
-    pP->m_pAccount->Apply();
-    pP->m_pAccount->Reset();
+    pSelf->Sql()->update(pResult->GetClientID());
+    pP->ResetAcc();
 
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Logout succesful"));
     pChr->Die(pP->GetCID(), WEAPON_GAME);
@@ -87,8 +87,7 @@ void CGameContext::ConChatChangePw(IConsole::IResult *pResult, void *pUserData)
     char aHash[64];
 	Crypt(NewPw, (const unsigned char*) "d9", 1, 16, aHash);
 
-    pP->m_pAccount->NewPassword(aHash);
-    pP->m_pAccount->Apply();
+    pSelf->Sql()->change_password(pResult->GetClientID(), aHash);
 }
 
 // functions
@@ -739,7 +738,6 @@ void CGameContext::ConChatSetbounty(IConsole::IResult *pResult, void *pUserData)
     pP->m_AccData.m_Money -= Amount;
     pTarget->m_AccData.m_Bounty += Amount;
     pSelf->AddToBountyList(Victim);
-    pP->m_pAccount->Apply();
 
     pSelf->FormatInt(Amount, numBuf);
     str_format(aBuf, sizeof aBuf, "%s has put a bounty of %s$ on %s",

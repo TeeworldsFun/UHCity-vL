@@ -18,7 +18,7 @@ public:
     virtual void Tick();
     virtual void Snap(int SnappingClient);
 
-    virtual void HitCharacter();
+    virtual void HitCharacter(vec2 Pos);
 
 private:
     enum {

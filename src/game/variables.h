@@ -51,6 +51,14 @@ MACRO_CONFIG_LONGLONG(EuHookBoost, eu_hook_boost, 50000000, 0, 900000000000, CFG
 MACRO_CONFIG_LONGLONG(EuPushAura, eu_special_pushaura, 1000000000, 0, 900000000000, CFGFLAG_SERVER, "Price - PushAura")
 MACRO_CONFIG_LONGLONG(EuPullAura, eu_special_pullaura, 1000000000, 0, 900000000000, CFGFLAG_SERVER, "Price - PullAura")
 
+/* SQL */
+MACRO_CONFIG_STR(SvSqlUser, sv_sql_user, 32, "nameless", CFGFLAG_SERVER, "SQL User")
+MACRO_CONFIG_STR(SvSqlPw, sv_sql_pw, 32, "tee", CFGFLAG_SERVER, "SQL Password")
+MACRO_CONFIG_STR(SvSqlIp, sv_sql_ip, 32, "127.0.0.1", CFGFLAG_SERVER, "SQL Database IP")
+MACRO_CONFIG_INT(SvSqlPort, sv_sql_port, 0, 65535, 3306, CFGFLAG_SERVER, "SQL Database port")
+MACRO_CONFIG_STR(SvSqlDatabase, sv_sql_database, 16, "goaway", CFGFLAG_SERVER, "SQL Database name")
+MACRO_CONFIG_STR(SvSqlPrefix, sv_sql_prefix, 16, "tw", CFGFLAG_SERVER, "SQL Database table prefix")
+
 MACRO_CONFIG_STR(SvBroadcast, sv_broadcast, 128, "", CFGFLAG_SERVER, "Broadcast message")
 
 MACRO_CONFIG_INT(EnableInstagib, sv_enable_instagib, 1, 0, 1, CFGFLAG_SERVER, "Enable/Disable Instagib")

@@ -312,9 +312,6 @@ void CCharacter::Buy(const char *Name, int *Upgrade, long long unsigned Price, i
 					m_pPlayer->m_AccData.m_Money -= Price;
 					str_format(aBuf, sizeof(aBuf), "%s (%d/%d)", Name, *Upgrade, Max);
 
-					if(m_pPlayer->m_AccData.m_UserID)
-						m_pPlayer->m_pAccount->Apply();
-
 					m_BuyTick = Server()->Tick();
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), aBuf);
 					GameServer()->FormatInt(m_pPlayer->m_AccData.m_Money, numBuf[0]);
@@ -1914,9 +1911,6 @@ void CCharacter::HandleCity()
 			}
 				
 		}
-
-		if(m_pPlayer->m_AccData.m_UserID)
-			m_pPlayer->m_pAccount->Apply();	
 	}
 
 }

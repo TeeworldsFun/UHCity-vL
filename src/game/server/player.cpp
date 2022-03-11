@@ -35,13 +35,9 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 	m_onMonster = false;
 
 	m_GravAuraCooldown = 0;
-	m_pAccount = new CAccount(this, m_pGameServer);
 
 	if(m_AccData.m_Health < 10)
 		m_AccData.m_Health = 10;
-
-	if(m_AccData.m_UserID)
-		m_pAccount->Apply();
 
 	SetLanguage(Server()->GetClientLanguage(ClientID));
 
@@ -297,9 +293,11 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::OnDisconnect(const char *pReason)
 {
+	GameServer()->Sql()->update(m_ClientID);
+
 	// City
 	if(m_AccData.m_UserID)
-		m_pAccount->Reset();
+		ResetAcc();
 
 	KillCharacter();
 
@@ -520,4 +518,66 @@ void CPlayer::DeleteCharacter()
 		delete m_pCharacter;
 		m_pCharacter = 0;
 	}
+}
+
+void CPlayer::ResetAcc()
+{
+	if (m_AccData.m_Bounty)
+		GameServer()->RemoveFromBountyList(m_ClientID);
+
+	str_copy(m_AccData.m_Username, "", 32);
+	str_copy(m_AccData.m_Password, "", 32);
+	m_AccData.m_UserID = 0;
+	
+	m_AccData.m_HouseID = 0;
+	m_AccData.m_Money = 0;
+	m_AccData.m_Health = 10;
+	m_AccData.m_Armor = 10;
+	SetLanguage("en");
+	m_AccData.m_Donor = 0;
+	m_AccData.m_VIP = 0;
+	m_AccData.m_Level = 1;
+	m_AccData.m_ExpPoints = 0;
+
+	for (int i = 0; i < 5; i++) {
+		m_AccData.m_LvlWeapon[i] = 0;
+		m_AccData.m_ExpWeapon[i] = 0;
+	}
+		
+	m_AccData.m_Bounty = 0;
+	m_AccData.m_Arrested = 0;
+	m_AccData.m_AllWeapons = 0;
+	m_AccData.m_HealthRegen = 0;
+	m_AccData.m_InfinityAmmo = 0;
+	m_AccData.m_InfinityJumps = 0;
+	m_AccData.m_FastReload = 0;
+	m_AccData.m_NoSelfDMG = 0;
+	m_AccData.m_GrenadeSpread = 0;
+	m_AccData.m_GrenadeBounce = 0;
+	m_AccData.m_GrenadeMine = 0;
+	m_AccData.m_ShotgunSpread = 0;
+	m_AccData.m_ShotgunExplode = 0;
+	m_AccData.m_ShotgunStars = 0;
+	m_AccData.m_RifleSpread = 0;
+	m_AccData.m_RifleSwap = 0;
+	m_AccData.m_RiflePlasma = 0;
+	m_AccData.m_GunSpread = 0;
+	m_AccData.m_GunExplode = 0;
+	m_AccData.m_GunFreeze = 0;
+	m_AccData.m_HammerWalls = 0;
+	m_AccData.m_HammerShot = 0;
+	m_AccData.m_HammerKill = 0;
+	m_AccData.m_HammerExplode = 0;
+	m_AccData.m_NinjaPermanent = 0;
+	m_AccData.m_NinjaStart = 0;
+	m_AccData.m_NinjaSwitch = 0;
+	m_AccData.m_NinjaFly = 0;
+	m_AccData.m_NinjaBomber = 0;
+	m_AccData.m_HealHook = 0;
+	m_AccData.m_BoostHook = 0;
+	m_AccData.m_EndlessHook = 0;
+	m_AccData.m_Portal = 0;
+	m_AccData.m_PushAura = 0;
+	m_AccData.m_PullAura = 0;
+	m_AccData.m_FlameThrower = 0;
 }

@@ -1,1103 +1,818 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+/* SQL class 0.5 by Sushi */
+/* SQL class 0.6 by FFS   */
 
-#include <string.h>
-#include <fstream>
-#include <engine/config.h>
-#include "account.h"
-#include "filesys.h"
-#include "base/rapidjson/document.h"
-#include "base/rapidjson/reader.h"
-#include "base/rapidjson/writer.h"
-#include "base/rapidjson/filereadstream.h"
-#include "base/rapidjson/filewritestream.h"
-#include "base/rapidjson/error/en.h"
-#if defined(CONF_FAMILY_WINDOWS)
-	#include <tchar.h>
-	#include <direct.h>
-#endif
-#if defined(CONF_FAMILY_UNIX)
-	#include <sys/types.h>
-	#include <fcntl.h>
-	#include <unistd.h>
-#endif
+#include "../gamecontext.h"
 
-using namespace rapidjson;
+#include <engine/shared/config.h>
 
-CAccount::CAccount(CPlayer *pPlayer, CGameContext *pGameServer)
+static LOCK sql_lock = 0;
+class CGameContext *m_pGameServer;
+CGameContext *GameServer() { return m_pGameServer; }
+
+CSQL::CSQL(class CGameContext *pGameServer)
 {
-   m_pPlayer = pPlayer;
-   m_pGameServer = pGameServer;
-}
+	if(sql_lock == 0)
+		sql_lock = lock_create();
 
-/*
-#ifndef GAME_VERSION_H
-#define GAME_VERSION_H
-#ifndef NON_HASED_VERSION
-#include "generated/nethash.cpp"
-#define GAME_VERSION "0.6.1"
-#define GAME_NETVERSION "0.6 626fce9a778df4d4" //the std game version
-#endif
-#endif
-*/
-
-void CAccount::Login(char *Username, char *Password)
-{
-	char aBuf[128];
-	if(m_pPlayer->m_AccData.m_UserID)
-	{
-		dbg_msg("account", "Account login failed ('%s' - Already logged in)", Username);
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
-		return;
-	}
-	/*else if(strlen(Username) > 15 || !strlen(Username))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Username too {str:ls}"), strlen(Username)?"long":"short");
-		return;
-    }
-	else if(strlen(Password) > 15 || !strlen(Password))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password too {str:ls}"), strlen(Password)?"long":"short");
-		return;
-    }*/
-	else if(!Exists(Username))
-	{
-		if (!OldLogin(Username, Password)) {
-			dbg_msg("account", "Account login failed ('%s' - Missing)", Username);
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("This account does not exist."));
-			GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please register first. (/register <user> <pass>)"));
-		}
-
-		return;
-	}
-
-	char AccText[4096];
-	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", Username);
-	
-	FILE *Accfile;
-	Accfile = fopen(aBuf, "r");
-	fscanf(Accfile, "%s\n", AccText);
-	fclose(Accfile);
-
-	Document AccD;
-	ParseResult res = AccD.Parse(AccText);
-	AccD.Parse(aBuf);
-
-	if (res.IsError()) {
-		dbg_msg("account", "parse error");
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Sorry, your account data can't be read, We were deleted your account"));
-		return;
-	}
-
-	tl_assert(AccD.IsObject());
-	Value::ConstMemberIterator itr;
-
-	if (AccD["user"].HasMember("accdata")) {
-		itr = AccD["user"].FindMember("accdata");
-	}
-	else 
-		return;
-
-	Value& user = AccD["user"];
-
-	str_format(aBuf, sizeof(aBuf), "is %s", user["accdata"]["username"].GetString());
-	
-	for(int i = 0; i < MAX_SERVER; i++)
-	{
-		for(int j = 0; j < MAX_CLIENTS; j++)
-		{
-			if(GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->m_AccData.m_UserID == user["accdata"]["accid"].GetInt())
-			{
-				dbg_msg("account", "Account login failed ('%s' - already in use (local))", Username);
-				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account already in use"));
-				return;
-			}
-
-			if(!GameServer()->m_aaExtIDs[i][j])
-				continue;
-
-			if(user["accdata"]["accid"].GetInt() == GameServer()->m_aaExtIDs[i][j])
-			{
-				dbg_msg("account", "Account login failed ('%s' - already in use (extern))", Username);
-				GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account already in use"));
-				return;
-			}
-		}
-	}
-
-	if(strcmp(Username, user["accdata"]["username"].GetString()))
-	{
-		dbg_msg("account", "Account login failed ('%s' - Wrong username)", Username);
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Wrong username or password1"));
-		return;
-	}
-
-	if(strcmp(Password, user["accdata"]["password"].GetString()))
-	{
-		dbg_msg("account", "Account login failed ('%s' - %s -Wrong password)", Password, user["accdata"]["password"].GetString());
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Wrong username or password2"));
-		return;
-	}
-
-	m_pPlayer->m_AccData.m_UserID = user["accdata"]["accid"].GetInt();
-	str_copy(m_pPlayer->m_AccData.m_Username, user["accdata"]["username"].GetString(), sizeof(m_pPlayer->m_AccData.m_Username));
-	str_copy(m_pPlayer->m_AccData.m_Password, user["accdata"]["password"].GetString(), sizeof(m_pPlayer->m_AccData.m_Password));
-
-	if (user["general"].HasMember("level"))
-		m_pPlayer->m_AccData.m_Level = user["general"]["level"].GetInt();
-	if (user["general"].HasMember("exp"))
-		m_pPlayer->m_AccData.m_ExpPoints = user["general"]["exp"].GetInt64();
-	m_pPlayer->m_AccData.m_Money = user["general"]["money"].GetInt64();
-	m_pPlayer->m_AccData.m_Health = user["general"]["health"].GetInt();
-	m_pPlayer->m_AccData.m_Armor = user["general"]["armor"].GetInt();
-	m_pPlayer->m_AccData.m_HouseID = user["general"]["houseid"].GetInt();
-
-	if (user.HasMember("level")) {
-		if (user["level"].HasMember("normal"))
-			m_pPlayer->m_AccData.m_Level = user["level"]["normal"].GetInt();
-		if (user["level"].HasMember("hammer"))
-			m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_HAMMER] = user["level"]["hammer"].GetInt() > 500 ? 500 : m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_HAMMER] = user["level"]["hammer"].GetInt();
-		if (user["level"].HasMember("gun"))
-			m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GUN] = user["level"]["gun"].GetInt() > 500 ? 500 : m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GUN] = user["level"]["gun"].GetInt();
-		if (user["level"].HasMember("shotgun"))
-			m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN] = user["level"]["shotgun"].GetInt() > 500 ? 500 : m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN] = user["level"]["shotgun"].GetInt();
-		if (user["level"].HasMember("grenade"))
-			m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GRENADE] = user["level"]["grenade"].GetInt() > 500 ? 500 : m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GRENADE] = user["level"]["grenade"].GetInt();
-		if (user["level"].HasMember("rifle"))
-			m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_RIFLE] = user["level"]["rifle"].GetInt() > 500 ? 500 : m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_RIFLE] = user["level"]["rifle"].GetInt();
-	}
-
-	if (user.HasMember("exp")) {
-		if (user["exp"].HasMember("normal"))
-			m_pPlayer->m_AccData.m_ExpPoints = user["exp"]["normal"].GetInt64();
-		if (user["exp"].HasMember("hammer"))
-			m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_HAMMER] = user["exp"]["hammer"].GetInt();
-		if (user["exp"].HasMember("gun"))
-			m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GUN] = user["exp"]["gun"].GetInt();
-		if (user["exp"].HasMember("shotgun"))
-			m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_SHOTGUN] = user["exp"]["shotgun"].GetInt();
-		if (user["exp"].HasMember("grenade"))
-			m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GRENADE] = user["exp"]["grenade"].GetInt();
-		if (user["exp"].HasMember("rifle"))
-			m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_RIFLE] = user["exp"]["rifle"].GetInt();
-	}
-
-	
-
-	if (user.HasMember("auth")) {
-		if (user["auth"].HasMember("authlvl"))
-			if(user["auth"]["authlvl"].GetInt()) GameServer()->Server()->SetRconlvl(m_pPlayer->GetCID(), user["auth"]["authlvl"].GetInt());
-		if (user["auth"].HasMember("vip"))
-			m_pPlayer->m_AccData.m_VIP = user["auth"]["vip"].GetInt();
-	}
-	if (user.HasMember("donor"))
-		m_pPlayer->m_AccData.m_Donor = user["donor"].GetInt();
-	
-	if (user.HasMember("hammerexplode"))
-		m_pPlayer->m_AccData.m_HammerExplode = user["hammerexplode"].GetInt();
-
-	if (user.HasMember("language"))
-		m_pPlayer->SetLanguage(user["language"].GetString());
-	
-	if (user.HasMember("event")) {
-		if (user["event"].HasMember("bounty"))
-			m_pPlayer->m_AccData.m_Bounty = user["event"]["bounty"].GetInt64();
-	}
-
-	m_pPlayer->m_AccData.m_AllWeapons = user["items"]["basic"]["allweapons"].GetInt();
-	m_pPlayer->m_AccData.m_HealthRegen = user["items"]["basic"]["healthregen"].GetInt();
-	m_pPlayer->m_AccData.m_InfinityAmmo = user["items"]["basic"]["infinityammo"].GetInt();
-	m_pPlayer->m_AccData.m_InfinityJumps = user["items"]["basic"]["infinityjumps"].GetInt();
-	m_pPlayer->m_AccData.m_FastReload = user["items"]["basic"]["fastreload"].GetInt() >= 1 ? 1 : 0;
-	m_pPlayer->m_AccData.m_NoSelfDMG = user["items"]["basic"]["noselfdmg"].GetInt();
-
-	m_pPlayer->m_AccData.m_GunSpread = user["items"]["gun"]["gunspread"].GetInt();
-	m_pPlayer->m_AccData.m_GunExplode = user["items"]["gun"]["gunexplode"].GetInt();
-	m_pPlayer->m_AccData.m_GunFreeze = user["items"]["gun"]["freezegun"].GetInt();
-
-	m_pPlayer->m_AccData.m_ShotgunSpread = user["items"]["shotgun"]["shotgunspread"].GetInt();
-	m_pPlayer->m_AccData.m_ShotgunExplode = user["items"]["shotgun"]["shotgunexplode"].GetInt();
-	m_pPlayer->m_AccData.m_ShotgunStars = user["items"]["shotgun"]["shotgunstars"].GetInt();
-
-	m_pPlayer->m_AccData.m_GrenadeSpread = user["items"]["grenade"]["grenadespread"].GetInt();
-	m_pPlayer->m_AccData.m_GrenadeBounce = user["items"]["grenade"]["grenadebounce"].GetInt();
-	m_pPlayer->m_AccData.m_GrenadeMine = user["items"]["grenade"]["grenademine"].GetInt();
-
-	m_pPlayer->m_AccData.m_RifleSpread = user["items"]["rifle"]["riflespread"].GetInt();
-	m_pPlayer->m_AccData.m_RifleSwap = user["items"]["rifle"]["rifleswap"].GetInt();
-	m_pPlayer->m_AccData.m_RiflePlasma = user["items"]["rifle"]["rifleplasma"].GetInt();
-
-	m_pPlayer->m_AccData.m_HammerWalls = user["items"]["hammer"]["hammerwalls"].GetInt();
-	m_pPlayer->m_AccData.m_HammerShot = user["items"]["hammer"]["hammershot"].GetInt();
-	m_pPlayer->m_AccData.m_HammerKill = user["items"]["hammer"]["hammerkill"].GetInt();
-	if (user["items"]["hammer"].HasMember("portal"))
-		m_pPlayer->m_AccData.m_Portal = user["items"]["hammer"]["portal"].GetInt();
-
-	m_pPlayer->m_AccData.m_NinjaPermanent = user["items"]["ninja"]["ninjapermanent"].GetInt();
-	m_pPlayer->m_AccData.m_NinjaStart = user["items"]["ninja"]["ninjastart"].GetInt();
-	m_pPlayer->m_AccData.m_NinjaSwitch = user["items"]["ninja"]["ninjaswitch"].GetInt();
-	if (user["items"]["ninja"].HasMember("fly"))
-		m_pPlayer->m_AccData.m_NinjaFly = user["items"]["ninja"]["fly"].GetInt();
-	if (user["items"]["ninja"].HasMember("bomber"))
-		m_pPlayer->m_AccData.m_NinjaBomber = user["items"]["ninja"]["bomber"].GetInt();
-
-	if (user["items"].HasMember("hook")) {
-		if (user["items"]["hook"].HasMember("endless"))
-			m_pPlayer->m_AccData.m_EndlessHook = user["items"]["hook"]["endless"].GetInt();
-		if ((user["items"]["hook"].HasMember("heal")))
-			m_pPlayer->m_AccData.m_HealHook = user["items"]["hook"]["heal"].GetInt();
-		if ((user["items"]["hook"].HasMember("boost")))
-			m_pPlayer->m_AccData.m_BoostHook = user["items"]["hook"]["boost"].GetInt();
-	}
-
-	if (user["items"].HasMember("special")) {
-		if (user["items"]["special"].HasMember("pushaura"))
-			m_pPlayer->m_AccData.m_PushAura = user["items"]["special"]["pushaura"].GetInt();
-		if (user["items"]["special"].HasMember("pullaura"))
-			m_pPlayer->m_AccData.m_PullAura = user["items"]["special"]["pullaura"].GetInt();
-	}
-
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_pPlayer->GetCID());
-	m_pPlayer->m_Score = m_pPlayer->m_AccData.m_Level;
-
-	if(pOwner)
-	{
-		if(pOwner->IsAlive())
-			pOwner->Die(m_pPlayer->GetCID(), WEAPON_GAME);
-	}
-	 
-	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
-		m_pPlayer->SetTeam(TEAM_RED);
-
-	if (m_pPlayer->m_AccData.m_Bounty) {
-		char numBuf[32];
-		GameServer()->FormatInt(m_pPlayer->m_AccData.m_Bounty, numBuf);
-		GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("'{str:ClientName}' joined with a bounty of {str:Bounty}$"), "ClientName", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), "Bounty", numBuf);
-		GameServer()->AddToBountyList(m_pPlayer->GetCID());
-	}
-  	
-	dbg_msg("account", "Account login sucessful ('%s')", Username);
-	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login succesful"));
- 
-	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
-		m_pPlayer->m_AccData.m_GunFreeze = 3;
-	
-	if(m_pPlayer->m_AccData.m_Donor)
-		str_format(aBuf, sizeof(aBuf), "Donor '%s' logged in Account ID: %d and House ID: ", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID, m_pPlayer->m_AccData.m_HouseID);
-	else
-		str_format(aBuf, sizeof(aBuf), "Player '%s' logged in Account ID: %d", GameServer()->Server()->ClientName(m_pPlayer->GetCID()), m_pPlayer->m_AccData.m_UserID);
-	GameServer()->SCT_Discord(aBuf, "Account");
-}
-
-void CAccount::Register(char *Username, char *Password, char *TruePassword)
-{
-	char aBuf[125];
-	if(str_comp(Username, "++UserIDs++") == 0)
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("?"));
-		return;
-	}
-
-	if(str_comp(Username, "") == 0)
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("?"));
-		return;
-	}
-
-	if(Exists(Username))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_JOIN, _("Username already exists"));
-		return;
-	}
-
-	if(m_pPlayer->m_AccData.m_UserID)
-	{
-		dbg_msg("account", "Account registration failed ('%s' - Logged in)", Username);
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Already logged in"));
-		return;
-	}
-	if(strlen(Username) > 15 || !strlen(Username))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Username too {str:ls}"), strlen(Password)?"long":"short");
-		return;
-    }
-	else if(strlen(TruePassword) > 15 || !strlen(TruePassword))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password too {str:ls}"), strlen(Password)?"long":"short");
-		return;
-    }
-
-	#if defined(CONF_FAMILY_UNIX)
-	char Filter[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-_";
-	// "äöü<>|!§$%&/()=?`´*'#+~«»¢“”æßðđŋħjĸł˝;,·^°@ł€¶ŧ←↓→øþ\\";
-	char *p = strpbrk(Username, Filter);
-	if(!p)
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Don't use invalid chars for username!"));
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("A - Z, a - z, 0 - 9, . - _"));
-		return;
-	}
-	
-	if(fs_makedir("accounts")) // that was some useless stuff
-		dbg_msg("account", "Account folder created!");
-	#endif
-
-	#if defined(CONF_FAMILY_WINDOWS)
-	static TCHAR * ValidChars = _T("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-_");
-	if (_tcsspnp(Username, ValidChars))
-	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Don't use invalid chars for username!"));
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("A - Z, a - z, 0 - 9, . - _"));
-		return;
-	}
-
-	if(mkdir("accounts"))
-		dbg_msg("account", "Account folder created!");
-	#endif
-
-	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", Username);
-
-	Document doc;
-	StringBuffer strBuf;
-    Writer<StringBuffer> writer(strBuf);
-	FILE *Accfile;
-
-	writer.StartObject();
-
-    writer.Key("user");
-    writer.StartObject();
-
-    writer.Key("accdata");
-    writer.StartObject();
-    writer.Key("accid");
-    writer.Int(NextID());
-	writer.Key("username");
-	writer.String(Username);
-	writer.Key("password");
-	writer.String(Password);
-	writer.EndObject();
-
-	writer.Key("general");
-	writer.StartObject();
-    writer.Key("money");
-    writer.Int64(m_pPlayer->m_AccData.m_Money);
-	writer.Key("health");
-    writer.Int(m_pPlayer->m_AccData.m_Health<10?10:m_pPlayer->m_AccData.m_Health);
-	writer.Key("armor");
-    writer.Int(m_pPlayer->m_AccData.m_Armor<10?10:m_pPlayer->m_AccData.m_Armor);
-	writer.Key("houseid");
-    writer.Int(m_pPlayer->m_AccData.m_HouseID);
-    writer.EndObject();
-
-	writer.Key("level");
-	writer.StartObject();
-	writer.Key("normal");
-    writer.Int64(m_pPlayer->m_AccData.m_Level);
-	writer.Key("hammer");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_HAMMER]);
-    writer.Key("gun");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GUN]);
-	writer.Key("shotung");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN]);
-	writer.Key("grenade");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GRENADE]);
-	writer.Key("rifle");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_RIFLE]);
-    writer.EndObject();
-
-	writer.Key("exp");
-	writer.StartObject();
-	writer.Key("normal");
-	writer.Int64(m_pPlayer->m_AccData.m_ExpPoints);
-	writer.Key("hammer");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_HAMMER]);
-    writer.Key("gun");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GUN]);
-	writer.Key("shotung");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_SHOTGUN]);
-	writer.Key("grenade");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GRENADE]);
-	writer.Key("rifle");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_RIFLE]);
-    writer.EndObject();
-
-	writer.Key("auth");
-	writer.StartObject();
-	writer.Key("authlvl");
-	writer.Int(0);
-	writer.Key("vip");
-	writer.Int(m_pPlayer->m_AccData.m_VIP);
-	writer.EndObject();
-
-	writer.Key("donor");
-	writer.Int(m_pPlayer->m_AccData.m_Donor);
-
-	writer.Key("hammerexplode");
-	writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
-
-	writer.Key("language");
-	writer.String(m_pPlayer->GetLanguage());
-	
-	writer.Key("event");
-	writer.StartObject();
-	writer.Key("bounty");
-	writer.Int64(m_pPlayer->m_AccData.m_Bounty);
-	writer.EndObject();
-
-    writer.Key("items");
-    writer.StartObject();
-
-	writer.Key("basic");
-	writer.StartObject();
-	writer.Key("allweapons");
-	writer.Int(m_pPlayer->m_AccData.m_AllWeapons);
-	writer.Key("healthregen");
-	writer.Int(m_pPlayer->m_AccData.m_HealthRegen);
-	writer.Key("infinityammo");
-	writer.Int(m_pPlayer->m_AccData.m_InfinityAmmo);
-	writer.Key("infinityjumps");
-	writer.Int(m_pPlayer->m_AccData.m_InfinityJumps);
-	writer.Key("fastreload");
-	writer.Int(m_pPlayer->m_AccData.m_FastReload);
-	writer.Key("noselfdmg");
-	writer.Int(m_pPlayer->m_AccData.m_NoSelfDMG);
-	writer.Key("portal");
-	writer.Int(m_pPlayer->m_AccData.m_Portal);
-	writer.EndObject();
-
-    writer.Key("gun");
-    writer.StartObject();
-	writer.Key("gunspread");
-    writer.Int(m_pPlayer->m_AccData.m_GunSpread);
-	writer.Key("gunexplode");
-    writer.Int(m_pPlayer->m_AccData.m_GunExplode);
-    writer.Key("freezegun");
-    writer.Int(m_pPlayer->m_AccData.m_GunFreeze);
-    writer.EndObject();
-
-	writer.Key("shotgun");
-    writer.StartObject();
-	writer.Key("shotgunspread");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunSpread);
-	writer.Key("shotgunexplode");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunExplode);
-    writer.Key("shotgunstars");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunStars);
-    writer.EndObject();
-
-	writer.Key("grenade");
-    writer.StartObject();
-	writer.Key("grenadespread");
-    writer.Int(m_pPlayer->m_AccData.m_GunSpread);
-	writer.Key("grenadebounce");
-    writer.Int(m_pPlayer->m_AccData.m_GrenadeBounce);
-    writer.Key("grenademine");
-    writer.Int(m_pPlayer->m_AccData.m_GrenadeMine);
-    writer.EndObject();
-
-	writer.Key("rifle");
-    writer.StartObject();
-	writer.Key("riflespread");
-    writer.Int(m_pPlayer->m_AccData.m_RifleSpread);
-	writer.Key("rifleswap");
-    writer.Int(m_pPlayer->m_AccData.m_RifleSwap);
-    writer.Key("rifleplasma");
-    writer.Int(m_pPlayer->m_AccData.m_RiflePlasma);
-    writer.EndObject();
-
-	writer.Key("hammer");
-    writer.StartObject();
-	writer.Key("hammerwalls");
-    writer.Int(m_pPlayer->m_AccData.m_HammerWalls);
-	writer.Key("hammershot");
-    writer.Int(m_pPlayer->m_AccData.m_HammerShot);
-    writer.Key("hammerkill");
-    writer.Int(m_pPlayer->m_AccData.m_HammerKill);
-    writer.EndObject();
-
-	writer.Key("ninja");
-    writer.StartObject();
-	writer.Key("ninjapermanent");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaPermanent);
-	writer.Key("ninjastart");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaStart);
-    writer.Key("ninjaswitch");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaSwitch);
-	writer.Key("fly");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaFly);
-	writer.Key("bomber");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaBomber);
-    writer.EndObject();
-
-	writer.Key("hook");
-	writer.StartObject();
-	writer.Key("endless");
-    writer.Int(m_pPlayer->m_AccData.m_EndlessHook);
-	writer.Key("heal");
-    writer.Int(m_pPlayer->m_AccData.m_HealHook);
-	writer.Key("boost");
-    writer.Int(m_pPlayer->m_AccData.m_BoostHook);
-	writer.EndObject();
-
-    writer.EndObject();
-    writer.EndObject();
-    writer.EndObject();
-
-	Accfile = fopen(aBuf, "a+");
-	fputs(strBuf.GetString(), Accfile);
-	fclose(Accfile);
-
-	dbg_msg("account", "Registration succesful ('%s')", Username);
-	str_format(aBuf, sizeof(aBuf), "Registration succesful - ('/login %s %s'): ", Username, Password);
-	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Registration succesful - ('/login {str:Username} {str:Password}')"), "Username", Username, "Password", TruePassword, NULL);
-	Login(Username, Password);
-}
-
-bool CAccount::Exists(const char *Username)
-{
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", Username);
-
-    if(FILE *Accfile = fopen(aBuf, "r"))
-    {
-        fclose(Accfile);
-        return true;
-    }
-    return false;
-}
-
-void CAccount::Apply()
-{
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", m_pPlayer->m_AccData.m_Username);
-	std::remove(aBuf);
-	StringBuffer strBuf;
-    Writer<StringBuffer> writer(strBuf);
-	FILE *Accfile;
-	
-	writer.StartObject();
-
-    writer.Key("user");
-    writer.StartObject();
-
-    writer.Key("accdata");
-    writer.StartObject();
-    writer.Key("accid");
-    writer.Int(m_pPlayer->m_AccData.m_UserID);
-	writer.Key("username");
-	writer.String(m_pPlayer->m_AccData.m_Username);
-	writer.Key("password");
-	writer.String(m_pPlayer->m_AccData.m_Password);
-	writer.EndObject();
-
-	writer.Key("general");
-	writer.StartObject();
-    writer.Key("money");
-    writer.Int64(m_pPlayer->m_AccData.m_Money);
-	writer.Key("health");
-    writer.Int(m_pPlayer->m_AccData.m_Health<10?10:m_pPlayer->m_AccData.m_Health);
-	writer.Key("armor");
-    writer.Int(m_pPlayer->m_AccData.m_Armor<10?10:m_pPlayer->m_AccData.m_Armor);
-	writer.Key("houseid");
-    writer.Int(m_pPlayer->m_AccData.m_HouseID);
-    writer.EndObject();
-
-	writer.Key("level");
-	writer.StartObject();
-	writer.Key("normal");
-    writer.Int(m_pPlayer->m_AccData.m_Level);
-	writer.Key("hammer");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_HAMMER]);
-    writer.Key("gun");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GUN]);
-	writer.Key("shotgun");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN]);
-	writer.Key("grenade");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_GRENADE]);
-	writer.Key("rifle");
-    writer.Int(m_pPlayer->m_AccData.m_LvlWeapon[WEAPON_RIFLE]);
-    writer.EndObject();
-
-	writer.Key("exp");
-	writer.StartObject();
-	writer.Key("normal");
-	writer.Int64(m_pPlayer->m_AccData.m_ExpPoints);
-	writer.Key("hammer");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_HAMMER]);
-    writer.Key("gun");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GUN]);
-	writer.Key("shotung");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_SHOTGUN]);
-	writer.Key("grenade");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_GRENADE]);
-	writer.Key("rifle");
-    writer.Int(m_pPlayer->m_AccData.m_ExpWeapon[WEAPON_RIFLE]);
-    writer.EndObject();
-
-	writer.Key("auth");
-	writer.StartObject();
-	writer.Key("authlvl");
-	writer.Int(GameServer()->Server()->AuthLvl(m_pPlayer->GetCID()));
-	writer.Key("vip");
-	writer.Int(m_pPlayer->m_AccData.m_VIP);
-	writer.EndObject();
-
-	writer.Key("donor");
-	writer.Int(m_pPlayer->m_AccData.m_Donor);
-
-	writer.Key("hammerexplode");
-	writer.Int(m_pPlayer->m_AccData.m_HammerExplode);
-
-	writer.Key("language");
-	writer.String(m_pPlayer->GetLanguage());
-
-	writer.Key("event");
-	writer.StartObject();
-	writer.Key("bounty");
-	writer.Int64(m_pPlayer->m_AccData.m_Bounty);
-	writer.EndObject();
-
-    writer.Key("items");
-    writer.StartObject();
-
-	writer.Key("basic");
-	writer.StartObject();
-	writer.Key("allweapons");
-	writer.Int(m_pPlayer->m_AccData.m_AllWeapons);
-	writer.Key("healthregen");
-	writer.Int(m_pPlayer->m_AccData.m_HealthRegen);
-	writer.Key("infinityammo");
-	writer.Int(m_pPlayer->m_AccData.m_InfinityAmmo);
-	writer.Key("infinityjumps");
-	writer.Int(m_pPlayer->m_AccData.m_InfinityJumps);
-	writer.Key("fastreload");
-	writer.Int(m_pPlayer->m_AccData.m_FastReload);
-	writer.Key("noselfdmg");
-	writer.Int(m_pPlayer->m_AccData.m_NoSelfDMG);
-	writer.EndObject();
-    writer.Key("gun");
-    writer.StartObject();
-	writer.Key("gunspread");
-    writer.Int(m_pPlayer->m_AccData.m_GunSpread);
-	writer.Key("gunexplode");
-    writer.Int(m_pPlayer->m_AccData.m_GunExplode);
-    writer.Key("freezegun");
-    writer.Int(m_pPlayer->m_AccData.m_GunFreeze);
-    writer.EndObject();
-
-	writer.Key("shotgun");
-    writer.StartObject();
-	writer.Key("shotgunspread");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunSpread);
-	writer.Key("shotgunexplode");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunExplode);
-    writer.Key("shotgunstars");
-    writer.Int(m_pPlayer->m_AccData.m_ShotgunStars);
-    writer.EndObject();
-
-	writer.Key("grenade");
-    writer.StartObject();
-	writer.Key("grenadespread");
-    writer.Int(m_pPlayer->m_AccData.m_GunSpread);
-	writer.Key("grenadebounce");
-    writer.Int(m_pPlayer->m_AccData.m_GrenadeBounce);
-    writer.Key("grenademine");
-    writer.Int(m_pPlayer->m_AccData.m_GrenadeMine);
-    writer.EndObject();
-
-	writer.Key("rifle");
-    writer.StartObject();
-	writer.Key("riflespread");
-    writer.Int(m_pPlayer->m_AccData.m_RifleSpread);
-	writer.Key("rifleswap");
-    writer.Int(m_pPlayer->m_AccData.m_RifleSwap);
-    writer.Key("rifleplasma");
-    writer.Int(m_pPlayer->m_AccData.m_RiflePlasma);
-    writer.EndObject();
-
-	writer.Key("hammer");
-    writer.StartObject();
-	writer.Key("hammerwalls");
-    writer.Int(m_pPlayer->m_AccData.m_HammerWalls);
-	writer.Key("hammershot");
-    writer.Int(m_pPlayer->m_AccData.m_HammerShot);
-    writer.Key("hammerkill");
-    writer.Int(m_pPlayer->m_AccData.m_HammerKill);
-	writer.Key("portal");
-    writer.Int(m_pPlayer->m_AccData.m_Portal);
-    writer.EndObject();
-
-	writer.Key("ninja");
-    writer.StartObject();
-	writer.Key("ninjapermanent");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaPermanent);
-	writer.Key("ninjastart");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaStart);
-    writer.Key("ninjaswitch");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaSwitch);
-	writer.Key("fly");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaFly);
-	writer.Key("bomber");
-    writer.Int(m_pPlayer->m_AccData.m_NinjaBomber);
-    writer.EndObject();
-
-	writer.Key("hook");
-	writer.StartObject();
-	writer.Key("endless");
-    writer.Int(m_pPlayer->m_AccData.m_EndlessHook);
-	writer.Key("heal");
-    writer.Int(m_pPlayer->m_AccData.m_HealHook);
-	writer.Key("boost");
-    writer.Int(m_pPlayer->m_AccData.m_BoostHook);
-	writer.EndObject();
-
-	writer.Key("special");
-	writer.StartObject();
-	writer.Key("pushaura");
-    writer.Int(m_pPlayer->m_AccData.m_PushAura);
-	writer.Key("pullaura");
-    writer.Int(m_pPlayer->m_AccData.m_PullAura);
-	writer.EndObject();
-
-    writer.EndObject();
-    writer.EndObject();
-    writer.EndObject();
-
-	Accfile = fopen(aBuf,"a+");
-	fputs(strBuf.GetString(), Accfile);
-	fclose(Accfile);
-}
-
-void CAccount::Reset()
-{
-	if (m_pPlayer->m_AccData.m_Bounty)
-		GameServer()->RemoveFromBountyList(m_pPlayer->GetCID());
-
-	str_copy(m_pPlayer->m_AccData.m_Username, "", 32);
-	str_copy(m_pPlayer->m_AccData.m_Password, "", 32);
-	m_pPlayer->m_AccData.m_UserID = 0;
-	
-	m_pPlayer->m_AccData.m_HouseID = 0;
-	m_pPlayer->m_AccData.m_Money = 0;
-	m_pPlayer->m_AccData.m_Health = 10;
-	m_pPlayer->m_AccData.m_Armor = 10;
-	m_pPlayer->SetLanguage("en");
-
-	m_pPlayer->m_AccData.m_Donor = 0;
-	m_pPlayer->m_AccData.m_VIP = 0;
-
-	m_pPlayer->m_AccData.m_Level = 1;
-	m_pPlayer->m_AccData.m_ExpPoints = 0;
-
-	for (int i = 0; i < 5; i++) {
-		m_pPlayer->m_AccData.m_LvlWeapon[i] = 0;
-		m_pPlayer->m_AccData.m_ExpWeapon[i] = 0;
-	}
+	m_pGameServer = pGameServer;
 		
-	m_pPlayer->m_AccData.m_Bounty = 0;
-
-	m_pPlayer->m_AccData.m_Arrested = 0;
-
-	m_pPlayer->m_AccData.m_AllWeapons = 0;
-	m_pPlayer->m_AccData.m_HealthRegen = 0;
-	m_pPlayer->m_AccData.m_InfinityAmmo = 0;
-	m_pPlayer->m_AccData.m_InfinityJumps = 0;
-	m_pPlayer->m_AccData.m_FastReload = 0;
-	m_pPlayer->m_AccData.m_NoSelfDMG = 0;
-
-	m_pPlayer->m_AccData.m_GrenadeSpread = 0;
-	m_pPlayer->m_AccData.m_GrenadeBounce = 0;
-	m_pPlayer->m_AccData.m_GrenadeMine = 0;
-
-	m_pPlayer->m_AccData.m_ShotgunSpread = 0;
-	m_pPlayer->m_AccData.m_ShotgunExplode = 0;
-	m_pPlayer->m_AccData.m_ShotgunStars = 0;
-
-	m_pPlayer->m_AccData.m_RifleSpread = 0;
-	m_pPlayer->m_AccData.m_RifleSwap = 0;
-	m_pPlayer->m_AccData.m_RiflePlasma = 0;
-
-	m_pPlayer->m_AccData.m_GunSpread = 0;
-	m_pPlayer->m_AccData.m_GunExplode = 0;
-	m_pPlayer->m_AccData.m_GunFreeze = 0;
-
-	m_pPlayer->m_AccData.m_HammerWalls = 0;
-	m_pPlayer->m_AccData.m_HammerShot = 0;
-	m_pPlayer->m_AccData.m_HammerKill = 0;
-	m_pPlayer->m_AccData.m_HammerExplode = 0;
-
-	m_pPlayer->m_AccData.m_NinjaPermanent = 0;
-	m_pPlayer->m_AccData.m_NinjaStart = 0;
-	m_pPlayer->m_AccData.m_NinjaSwitch = 0;
-	m_pPlayer->m_AccData.m_NinjaFly = 0;
-	m_pPlayer->m_AccData.m_NinjaBomber = 0;
-
-	m_pPlayer->m_AccData.m_HealHook = 0;
-	m_pPlayer->m_AccData.m_BoostHook = 0;
-	m_pPlayer->m_AccData.m_EndlessHook = 0;
-
-	m_pPlayer->m_AccData.m_Portal = 0;
-	m_pPlayer->m_AccData.m_PushAura = 0;
-	m_pPlayer->m_AccData.m_PullAura = 0;
-	
-
-	if (GameServer()->m_aPortals[m_pPlayer->GetCID()])
-		GameServer()->m_aPortals[m_pPlayer->GetCID()]->Reset();
-
-	GameServer()->Server()->Logout(m_pPlayer->GetCID());
+	// set database info
+	database = g_Config.m_SvSqlDatabase;
+	prefix = g_Config.m_SvSqlPrefix;
+	user = g_Config.m_SvSqlUser;
+	pass = g_Config.m_SvSqlPw;
+	ip = g_Config.m_SvSqlIp;
+	port = g_Config.m_SvSqlPort;
 }
 
-void CAccount::Delete()
+bool CSQL::connect()
 {
-	char aBuf[128];
-	if(m_pPlayer->m_AccData.m_UserID)
+	try 
 	{
-		Reset();
-		str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", m_pPlayer->m_AccData.m_Username);
-		std::remove(aBuf);
-		dbg_msg("account", "Account deleted ('%s')", m_pPlayer->m_AccData.m_Username);
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Account deleted!"));
-	}
-	else
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please, login to delete your account"));
-}
-
-void CAccount::NewPassword(char *NewPassword)
-{
-	char aBuf[128];
-	if(!m_pPlayer->m_AccData.m_UserID)
+		// Create connection
+		driver = get_driver_instance();
+		char buf[256];
+		str_format(buf, sizeof(buf), "tcp://%s:%d", ip, port);
+		connection = driver->connect(buf, user, pass);
+		
+		// Create Statement
+		statement = connection->createStatement();
+		
+		// Create database if not exists
+		str_format(buf, sizeof(buf), "CREATE DATABASE IF NOT EXISTS %s", database);
+		statement->execute(buf);
+		
+		// Connect to specific database
+		connection->setSchema(database);
+		dbg_msg("SQL", "SQL connection established");
+		return true;
+	} 
+	catch (sql::SQLException &e)
 	{
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Please, login to change the password"));
-		return;
-	}
-
-	if(strlen(NewPassword) > 15 || !strlen(NewPassword))
-	{
-		str_format(aBuf, sizeof(aBuf), "Password too %s!", strlen(NewPassword)?"long":"short");
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_DEFAULT, _("Password too {str:ls}!"), "ls", strlen(NewPassword)?"long":"short", NULL);
-		return;
-    }
-
-	str_copy(m_pPlayer->m_AccData.m_Password, NewPassword, 32);
-	Apply();
-
-	
-	dbg_msg("account", "Password changed - ('%s')", m_pPlayer->m_AccData.m_Username);
-	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Password successfully changed!"));
-}
-
-int CAccount::NextID()
-{
-	FILE *Accfile;
-	int UserID = 1;
-	char aBuf[32];
-	char AccUserID[32];
-
-	str_copy(AccUserID, "accounts/++UserIDs++.acc", sizeof(AccUserID));
-
-	if(Exists("++UserIDs++"))
-	{
-		Accfile = fopen(AccUserID, "r");
-		fscanf(Accfile, "%d", &UserID);
-		fclose(Accfile);
-
-		std::remove(AccUserID);
-
-		Accfile = fopen(AccUserID, "a+");
-		str_format(aBuf, sizeof(aBuf), "%d", UserID+1);
-		fputs(aBuf, Accfile);
-		fclose(Accfile);
-
-		return UserID+1;
-	}
-	else
-	{
-		Accfile = fopen(AccUserID, "a+");
-		str_format(aBuf, sizeof(aBuf), "%d", UserID);
-		fputs(aBuf, Accfile);
-		fclose(Accfile);
-	}
-
-	return 1;
-}
-
-bool CAccount::OldLogin(char *Username, char *Password)
-{
-	char aBuf[128];
-
-	str_format(aBuf, sizeof aBuf, "+%s", Username);
-
-	if(!Exists(aBuf))
-	{
+		dbg_msg("SQL", "ERROR: SQL connection failed");
 		return false;
 	}
+}
 
-	str_format(aBuf, sizeof(aBuf), "accounts/+%s.acc", Username);
-
-	char AccUsername[32];
-	char AccPassword[32];
-	char AccRcon[32];
-	int AccID;
- 
-	FILE *Accfile;
-	Accfile = fopen(aBuf, "r");
-	fscanf(Accfile, "%s\n%s\n%s\n%d", AccUsername, AccPassword, AccRcon, &AccID);
-	fclose(Accfile);
-
-	for(int i = 0; i < MAX_SERVER; i++)
+void CSQL::disconnect()
+{
+	try
 	{
-		for(int j = 0; j < MAX_CLIENTS; j++)
+		delete connection;
+		dbg_msg("SQL", "SQL connection disconnected");
+	}
+	catch (sql::SQLException &e)
+	{
+		dbg_msg("SQL", "ERROR: No SQL connection");
+	}
+}
+
+// create tables... should be done only once
+void CSQL::create_tables()
+{
+	// create connection
+	if(connect())
+	{
+		try
 		{
-			if(GameServer()->m_apPlayers[j] && GameServer()->m_apPlayers[j]->m_AccData.m_UserID == AccID)
-			{
-				dbg_msg("account", "Account login failed ('%s' - already in use (local))", Username);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Account already in use");
-				return true;
-			}
+			// create tables
+			char buf[2048];
+			str_format(buf, sizeof(buf), 
+			"CREATE TABLE IF NOT EXISTS %s_Account "
+			"(UserID INT AUTO_INCREMENT PRIMARY KEY, "
+			"Username VARCHAR(31) NOT NULL, "
+			"Password VARCHAR(32) NOT NULL, "
+			"HouseID INT DEFAULT 0, "
+			"Exp BIGINT DEFAULT 0, "
+			"Level BIGINT DEFAULT 0, "
+			"Health INT DEFAULT 10, "
+			"Armor INT DEFAULT 10, "
+			"Language VARCHAR(10) DEFAULT 'en', "
+			"VIP TINYINT DEFAULT 0, "
+			"Donor TINYINT DEFAULT 0, "
+			"Level BIGINT DEFAULT 0, "
+			"Gun BIGINT DEFAULT 0, "
+			"Shotgun BIGINT DEFAULT 0, "
+			"Grenade BIGINT DEFAULT 0, "
+			"Rifle BIGINT DEFAULT 0, "
+			"Hammer BIGINT DEFAULT 0, "
+			"Bounty BIGINT DEFAULT 0, "	
+			"Arrested BIGINT DEFAULT 0, "
+			"AllWeapons INT DEFAULT 0, "
+			"HealthRegen INT DEFAULT 0, "
+			"InfinityAmmo INT DEFAULT 0, "
+			"InfinityJumps INT DEFAULT 0, "
+			"FastReload INT DEFAULT 0, "
+			"NoSelfDMG INT DEFAULT 0, "
+			"GrenadeSpread INT DEFAULT 0, "
+			"GrenadeBounce INT DEFAULT 0, "
+			"GrenadeMine INT DEFAULT 0, "
+			"ShotgunSpread INT DEFAULT 0, "
+			"ShotgunExplode INT DEFAULT 0, "
+			"ShotgunStars INT DEFAULT 0, "
+			"RifleSpread INT DEFAULT 0, "
+			"RifleSwap INT DEFAULT 0, "
+			"RiflePlasma INT DEFAULT 0, "
+			"GunSpread INT DEFAULT 0, "
+			"GunExplode INT DEFAULT 0, "
+			"GunFreeze INT DEFAULT 0, "
+			"HammerWalls INT DEFAULT 0, "
+			"HammerShot INT DEFAULT 0, "
+			"HammerKill INT DEFAULT 0, "
+			"HammerExplode INT DEFAULT 0, "
+			"NinjaPermanent INT DEFAULT 0, "
+			"NinjaStart INT DEFAULT 0, "
+			"NinjaSwitch INT DEFAULT 0, "
+			"NinjaFly INT DEFAULT 0, "
+			"NinjaBomber INT DEFAULT 0, "
+			"HealHook INT DEFAULT 0, "
+			"BoostHook INT DEFAULT 0, "
+			"EndlessHook INT DEFAULT 0, "
+			"Portal INT DEFAULT 0, "
+			"PushAura INT DEFAULT 0, "
+			"PullAura INT DEFAULT 0, "			
+			"Money BIGINT DEFAULT 0);", prefix);
+			statement->execute(buf);
+			dbg_msg("SQL", "Tables were created successfully");
 
-			if(!GameServer()->m_aaExtIDs[i][j])
-				continue;
+			// delete statement
+			delete statement;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("SQL", "ERROR: Tables were NOT created");
+		}
+		
+		// disconnect from database
+		disconnect();
+	}	
+}
 
-			if(AccID == GameServer()->m_aaExtIDs[i][j])
+// create Account
+static void create_account_thread(void *user)
+{
+	lock_wait(sql_lock);
+	
+	CSqlData *Data = (CSqlData *)user;
+	
+	if(GameServer()->m_apPlayers[Data->m_ClientID])
+	{
+		// Connect to database
+		if(Data->m_SqlData->connect())
+		{
+			try
 			{
-				dbg_msg("account", "Account login failed ('%s' - already in use (extern))", Username);
-				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Account already in use");
-				return true;
+				// check if allready exists
+				char buf[512];
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE Username='%s';", Data->m_SqlData->prefix, Data->name);
+				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+				if(Data->m_SqlData->results->next())
+				{
+					// Account found
+					dbg_msg("SQL", "Account '%s' allready exists", Data->name);
+					
+					GameServer()->SendChatTarget(Data->m_ClientID, "This acoount allready exists!");
+				}
+				else
+				{
+					// create Account \o/
+					str_format(buf, sizeof(buf), "INSERT INTO %s_Account(Username, Password) VALUES ('%s', '%s');", 
+					Data->m_SqlData->prefix, 
+					Data->name, Data->pass);
+					
+					Data->m_SqlData->statement->execute(buf);
+					dbg_msg("SQL", "Account '%s' was successfully created", Data->name);
+					
+					GameServer()->SendChatTarget(Data->m_ClientID, "Acoount was created successfully.");
+					GameServer()->SendChatTarget(Data->m_ClientID, "You may login now. (/login <user> <pass>)");
+				}
+				
+				// delete statement
+				delete Data->m_SqlData->statement;
+				delete Data->m_SqlData->results;
 			}
+			catch (sql::SQLException &e)
+			{
+				dbg_msg("SQL", "ERROR: Could not create Account");
+			}
+			
+			// disconnect from database
+			Data->m_SqlData->disconnect();
 		}
 	}
-
-	if(strcmp(Username, AccUsername))
-	{
-		dbg_msg("account", "Account login failed ('%s' - Wrong username)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Wrong username or password");
-		return true;
-	}
-
-	if(strcmp(Password, AccPassword))
-	{
-		dbg_msg("account", "Account login failed ('%s' - Wrong password)", Username);
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Wrong username or password");
-		return true;
-	}
-
-	Accfile = fopen(aBuf, "r"); 
 	
-	char tmpBuf[128];
-
-	fscanf(Accfile, "%s\n%s\n%s\n%d\n\n\n%d\n%d\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n\n%d\n%d\n%d\n%d\n%d", 
-		m_pPlayer->m_AccData.m_Username, // Done
-		m_pPlayer->m_AccData.m_Password, // Done
-		tmpBuf,
-		&m_pPlayer->m_AccData.m_UserID, // Done
-
-		&m_pPlayer->m_AccData.m_HouseID,
- 		&m_pPlayer->m_AccData.m_Money, // Done
-		&m_pPlayer->m_AccData.m_Health, // Done
-		&m_pPlayer->m_AccData.m_Armor, // Done
-		&m_pPlayer->m_Score, // Done
-
-		&m_pPlayer->m_AccData.m_Donor,
-		&m_pPlayer->m_AccData.m_VIP, // Done
-		&m_pPlayer->m_AccData.m_Arrested, // Done
-
-		&m_pPlayer->m_AccData.m_AllWeapons, // Done
-		&m_pPlayer->m_AccData.m_HealthRegen, // Done
-		&m_pPlayer->m_AccData.m_InfinityAmmo, // Done
-		&m_pPlayer->m_AccData.m_InfinityJumps, // Done
-		&m_pPlayer->m_AccData.m_FastReload, // Done
-		&m_pPlayer->m_AccData.m_NoSelfDMG, // Done
-
-		&m_pPlayer->m_AccData.m_GrenadeSpread, // Done 
-		&m_pPlayer->m_AccData.m_GrenadeBounce, // Done
-		&m_pPlayer->m_AccData.m_GrenadeMine,
-
-		&m_pPlayer->m_AccData.m_ShotgunSpread, // Done
-		&m_pPlayer->m_AccData.m_ShotgunExplode, // Done
-		&m_pPlayer->m_AccData.m_ShotgunStars,
-
-		&m_pPlayer->m_AccData.m_RifleSpread, // Done
-		&m_pPlayer->m_AccData.m_RifleSwap, // Done
-		&m_pPlayer->m_AccData.m_RiflePlasma, // Done
-
-		&m_pPlayer->m_AccData.m_GunSpread, // Done
-		&m_pPlayer->m_AccData.m_GunExplode, // Done
-		&m_pPlayer->m_AccData.m_GunFreeze, // Done
-
-		&m_pPlayer->m_AccData.m_HammerWalls, // Done
-		&m_pPlayer->m_AccData.m_HammerShot, // Done
-		&m_pPlayer->m_AccData.m_HammerKill, // Done
-		&m_pPlayer->m_AccData.m_HammerExplode,
-
-		&m_pPlayer->m_AccData.m_NinjaPermanent, // Done
-		&m_pPlayer->m_AccData.m_NinjaStart, // Done
-		&m_pPlayer->m_AccData.m_NinjaSwitch, // Done
-
-		&m_pPlayer->m_AccData.m_Level,
-		&m_pPlayer->m_AccData.m_ExpPoints); 
-
-	fclose(Accfile);
-
-	m_pPlayer->m_AccData.m_Bounty = 0;
-
-	CCharacter *pOwner = GameServer()->GetPlayerChar(m_pPlayer->GetCID());
-
-	if(pOwner)
-	{
-		if(pOwner->IsAlive())
-			pOwner->Die(m_pPlayer->GetCID(), WEAPON_GAME);
-	}
-	 
-	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
-		m_pPlayer->SetTeam(TEAM_RED);
-  	
-	dbg_msg("account", "Account login sucessful ('%s')", Username);
-	GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _("Login succesful"));
- 
-	if (m_pPlayer->m_AccData.m_GunFreeze > 3) // Remove on acc reset
-		m_pPlayer->m_AccData.m_GunFreeze = 3;
-
-	Apply();
-	std::remove(aBuf);
+	delete Data;
 	
-	return true;
+	lock_release(sql_lock);
 }
 
-void CAccount::SetAuth(char *Username, int lvl) {
-	char aBuf[512];
-	char AccText[65536];
-	FILE *Accfile;
-
-	if (GameServer()->Server()->AuthLvl(m_pPlayer->GetCID()) == lvl)
-		return;
-
-	if (!Exists(Username))
-		return;
-
-	str_format(aBuf, sizeof(aBuf), "accounts/%s.acc", Username);
-
-	Accfile = fopen(aBuf, "r");
-	fscanf(Accfile, "%s\n", AccText);
-	fclose(Accfile);
+void CSQL::create_account(const char* name, const char* pass, int m_ClientID)
+{
+	CSqlData *tmp = new CSqlData();
+	str_copy(tmp->name, name, sizeof(tmp->name));
+	str_copy(tmp->pass, pass, sizeof(tmp->pass));
+	tmp->m_ClientID = m_ClientID;
+	tmp->m_SqlData = this;
 	
-	Document AccD;
-	StringBuffer strBuf;
-	Writer<StringBuffer> writer(strBuf);
-	ParseResult res = AccD.Parse(AccText);
+	void *register_thread = thread_init(create_account_thread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)register_thread);
+#endif
+}
 
-	if (res.IsError()) {
-		GameServer()->SendChatTarget_Localization(m_pPlayer->GetCID(), CHATCATEGORY_INFO, _(" Parse Error: Please contact UrinStone to get this fixed."));
-		dbg_msg("account", "parse error");
-		return;
+// change password
+static void change_password_thread(void *user)
+{
+	lock_wait(sql_lock);
+	
+	CSqlData *Data = (CSqlData *)user;
+	
+	// Connect to database
+	if(Data->m_SqlData->connect())
+	{
+		try
+		{
+			// Connect to database
+			Data->m_SqlData->connect();
+			
+			// check if Account exists
+			char buf[512];
+			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+			Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+			if(Data->m_SqlData->results->next())
+			{
+				// update Account data
+				str_format(buf, sizeof(buf), "UPDATE %s_Account SET Password='%s' WHERE UserID='%d'", Data->m_SqlData->prefix, Data->pass, Data->UserID[Data->m_ClientID]);
+				Data->m_SqlData->statement->execute(buf);
+				
+				// get Account name from database
+				str_format(buf, sizeof(buf), "SELECT name FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+				
+				// create results
+				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+
+				// jump to result
+				Data->m_SqlData->results->next();
+				
+				// finally the name is there \o/
+				char acc_name[32];
+				str_copy(acc_name, Data->m_SqlData->results->getString("Username").c_str(), sizeof(acc_name));	
+				dbg_msg("SQL", "Account '%s' changed password.", acc_name);
+				
+				// Success
+				str_format(buf, sizeof(buf), "Successfully changed your password to '%s'.", Data->pass);
+				GameServer()->SendBroadcast(buf, Data->m_ClientID);
+				GameServer()->SendChatTarget(Data->m_ClientID, buf);
+			}
+			else
+				dbg_msg("SQL", "Account seems to be deleted");
+			
+			// delete statement and results
+			delete Data->m_SqlData->statement;
+			delete Data->m_SqlData->results;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("SQL", "ERROR: Could not update Account");
+		}
+		
+		// disconnect from database
+		Data->m_SqlData->disconnect();
+	}
+	
+	delete Data;
+	
+	lock_release(sql_lock);
+}
+
+void CSQL::change_password(int m_ClientID, const char* new_pass)
+{
+	CSqlData *tmp = new CSqlData();
+	tmp->m_ClientID = m_ClientID;
+	tmp->UserID[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_UserID;
+	str_copy(tmp->pass, new_pass, sizeof(tmp->pass));
+	tmp->m_SqlData = this;
+	
+	void *change_pw_thread = thread_init(change_password_thread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)change_pw_thread);
+#endif
+}
+
+// login stuff
+static void login_thread(void *user)
+{
+	lock_wait(sql_lock);
+	
+	CSqlData *Data = (CSqlData *)user;
+	
+	if(GameServer()->m_apPlayers[Data->m_ClientID] && !GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID)
+	{
+		// Connect to database
+		if(Data->m_SqlData->connect())
+		{
+			try
+			{		
+				// check if Account exists
+				char buf[1024];
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE Username='%s';", Data->m_SqlData->prefix, Data->name);
+				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+				if(Data->m_SqlData->results->next())
+				{
+					// check for right pw and get data
+					str_format(buf, sizeof(buf), "SELECT UserID, "
+					"Level, Exp, Money "
+					"FROM %s_Account WHERE Username='%s' AND Password='%s';", Data->m_SqlData->prefix, Data->name, Data->pass);
+					
+					// create results
+					Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+					
+					// if match jump to it
+					if(Data->m_SqlData->results->next())
+					{
+						// never use player directly!
+						// finally save the result to AccountData() \o/
+
+						// check if Account allready is logged in
+						for(int i = 0; i < MAX_CLIENTS; i++)
+						{
+							if(GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID == Data->m_SqlData->results->getInt("UserID"))
+							{
+								dbg_msg("SQL", "Account '%s' already is logged in", Data->name);
+								
+								GameServer()->SendChatTarget(Data->m_ClientID, "This Account is already logged in.");
+								
+								// delete statement and results
+								delete Data->m_SqlData->statement;
+								delete Data->m_SqlData->results;
+								
+								// disconnect from database
+								Data->m_SqlData->disconnect();
+								
+								// delete Data
+								delete Data;
+	
+								// release lock
+								lock_release(sql_lock);
+								
+								return;
+							}
+						}
+
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_UserID = Data->m_SqlData->results->getInt("UserID");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_ExpPoints = (float)Data->m_SqlData->results->getDouble("Exp");
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_Money = Data->m_SqlData->results->getInt("Money");
+
+						// login should be the last thing
+						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
+						
+						GameServer()->SendChatTarget(Data->m_ClientID, "You are now logged in.");
+						char buf[512];
+						str_format(buf, sizeof(buf), "Welcome %s!", Data->name);
+						GameServer()->SendBroadcast(buf, Data->m_ClientID);
+					}
+					else
+					{
+						// wrong password
+						dbg_msg("SQL", "Account '%s' is not logged in due to wrong password", Data->name);
+						
+						GameServer()->SendChatTarget(Data->m_ClientID, "The password you entered is wrong.");
+					}
+				}
+				else
+				{
+					// no Account
+					dbg_msg("SQL", "Account '%s' does not exists", Data->name);
+					
+					GameServer()->SendChatTarget(Data->m_ClientID, "This Account does not exists.");
+					GameServer()->SendChatTarget(Data->m_ClientID, "Please register first. (/register <user> <pass>)");
+				}
+				
+				// delete statement and results
+				delete Data->m_SqlData->statement;
+				delete Data->m_SqlData->results;
+			}
+			catch (sql::SQLException &e)
+			{
+				dbg_msg("SQL", "ERROR: Could not login Account");
+			}
+			
+			// disconnect from database
+			Data->m_SqlData->disconnect();
+		}
+	}
+	
+	delete Data;
+	
+	lock_release(sql_lock);
+}
+
+void CSQL::login(const char* name, const char* pass, int m_ClientID)
+{
+	CSqlData *tmp = new CSqlData();
+	str_copy(tmp->name, name, sizeof(tmp->name));
+	str_copy(tmp->pass, pass, sizeof(tmp->pass));
+	tmp->m_ClientID = m_ClientID;
+	tmp->m_SqlData = this;
+	
+	void *login_account_thread = thread_init(login_thread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)login_account_thread);
+#endif
+}
+
+// update stuff
+static void update_thread(void *user)
+{
+	lock_wait(sql_lock);
+	
+	CSqlData *Data = (CSqlData *)user;
+	
+	// Connect to database
+	if(Data->m_SqlData->connect())
+	{
+		try
+		{
+			// check if Account exists
+			char buf[1024];
+			str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+			Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+			if(Data->m_SqlData->results->next())
+			{
+				// update account data	
+					str_format(buf, sizeof(buf), "UPDATE %s_Account SET "
+					"HouseID='%d', "
+					"Money='%d', "
+					"Health='%d', "
+					"Armor='%d', "
+					"Donor='%d', "
+					"VIP='%d', "
+					"Level='%d', "
+					"Exp='%d', "
+					"Hammer='%d', "
+					"Gun='%d', "
+					"Shotgun='%d', "
+					"Grenade='%d', "
+					"Rifle='%d', "
+					"Bounty='%d', "
+					"Arrested='%d', "
+					"AllWeapons='%d', "
+					"HealthRegen='%d', "
+					"InfinityAmmo='%d', "
+					"InfinityJumps='%d', "
+					"FastReload='%d', "
+					"NoSelfDMG='%d', "
+					"GrenadeSpread='%d', "
+					"GrenadeBounce='%d', "
+					"GrenadeMine='%d', "
+					"ShotgunSpread='%d', "
+					"ShotgunExplode='%d', "
+					"ShotgunStars='%d', "
+					"RifleSpread='%d', "
+					"RifleSwap='%d', "
+					"RiflePlasma='%d', "
+					"GunSpread='%d', "
+					"GunExplode='%d', "
+					"GunFreeze='%d', "
+					"HammerWalls='%d', "
+					"HammerShot='%d', "
+					"HammerKill='%d', "
+					"HammerExplode='%d', "
+					"NinjaPermanent='%d', "
+					"NinjaStart='%d', "
+					"NinjaSwitch='%d', "
+					"NinjaFly='%d', "
+					"NinjaBomber='%d', "
+					"HealHook='%d', "
+					"BoostHook='%d', "
+					"EndlessHook='%d', "
+					"Portal='%d', "
+					"PushAura='%d', "
+					"PullAura='%d' "
+					"Language='%s' "
+					"FlameThrower='%s' "
+					"WHERE UserID='%d'", 
+					Data->m_SqlData->prefix, 
+					Data->m_HouseID, 
+					Data->m_Money, 
+					Data->m_Health, 
+					Data->m_Armor, 
+					Data->m_Donor, 
+					Data->m_VIP, 
+					Data->m_Level, 
+					Data->m_ExpPoints, 
+					Data->m_LvlHammer, 
+					Data->m_LvlGun, 
+					Data->m_LvlShotgun, 
+					Data->m_LvlGrenade, 
+					Data->m_LvlRifle, 
+					Data->m_Bounty, 
+					Data->m_Arrested, 
+					Data->m_AllWeapons, 
+					Data->m_HealthRegen, 
+					Data->m_InfinityAmmo, 
+					Data->m_InfinityJumps, 
+					Data->m_FastReload, 
+					Data->m_NoSelfDMG, 
+					Data->m_GrenadeSpread, 
+					Data->m_GrenadeBounce, 
+					Data->m_GrenadeMine, 
+					Data->m_ShotgunSpread, 
+					Data->m_ShotgunExplode, 
+					Data->m_ShotgunStars, 
+					Data->m_RifleSpread, 
+					Data->m_RifleSwap, 
+					Data->m_RiflePlasma, 
+					Data->m_GunSpread, 
+					Data->m_GunExplode, 
+					Data->m_GunFreeze, 
+					Data->m_HammerWalls, 
+					Data->m_HammerShot, 
+					Data->m_HammerKill, 
+					Data->m_HammerExplode, 
+					Data->m_NinjaPermanent, 
+					Data->m_NinjaStart, 
+					Data->m_NinjaSwitch, 
+					Data->m_NinjaFly, 
+					Data->m_NinjaBomber, 
+					Data->m_HealHook, 
+					Data->m_BoostHook, 
+					Data->m_EndlessHook, 
+					Data->m_Portal, 
+					Data->m_PushAura, 
+					Data->m_PullAura, 
+					Data->m_aLanguage, 
+					Data->m_FlameThrower, 
+					Data->UserID);
+				Data->m_SqlData->statement->execute(buf);
+				
+				// get Account name from database
+				str_format(buf, sizeof(buf), "SELECT name FROM %s_Account WHERE UserID='%d';", Data->m_SqlData->prefix, Data->UserID[Data->m_ClientID]);
+				
+				// create results
+				Data->m_SqlData->results = Data->m_SqlData->statement->executeQuery(buf);
+
+				// jump to result
+				Data->m_SqlData->results->next();
+				
+				// finally the nae is there \o/
+				char acc_name[32];
+				str_copy(acc_name, Data->m_SqlData->results->getString("name").c_str(), sizeof(acc_name));	
+				dbg_msg("SQL", "Account '%s' was saved successfully", acc_name);
+			}
+			else
+				dbg_msg("SQL", "Account seems to be deleted");
+			
+			// delete statement and results
+			delete Data->m_SqlData->statement;
+			delete Data->m_SqlData->results;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("SQL", "ERROR: Could not update Account");
+		}
+		
+		// disconnect from database
+		Data->m_SqlData->disconnect();
+	}
+	
+	delete Data;
+	
+	lock_release(sql_lock);
+}
+
+void CSQL::update(int m_ClientID)
+{
+	CSqlData *tmp = new CSqlData();
+	tmp->m_ClientID = m_ClientID;
+	tmp->UserID[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_UserID;
+	tmp->m_ExpPoints[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_ExpPoints;
+	tmp->m_Money[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Money;
+	tmp->m_Level[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Level;
+	tmp->m_AllWeapons[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_AllWeapons;
+	tmp->m_Armor[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Armor;
+	tmp->m_Arrested[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Arrested;
+	tmp->m_BoostHook[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_BoostHook;
+	tmp->m_Bounty[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Bounty;
+	tmp->m_Donor[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Donor;
+	tmp->m_EndlessHook[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_EndlessHook;
+	tmp->m_ExpPoints[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_ExpPoints;
+	tmp->m_FastReload[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_FastReload;
+	tmp->m_FlameThrower[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_FlameThrower;
+	tmp->m_GrenadeBounce[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GrenadeBounce;
+	tmp->m_GrenadeMine[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GrenadeMine;
+	tmp->m_GrenadeSpread[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GrenadeSpread;
+	tmp->m_GunExplode[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GunExplode;
+	tmp->m_GunFreeze[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GunFreeze;
+	tmp->m_GunSpread[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_GunSpread;
+	tmp->m_ShotgunExplode[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_ShotgunExplode;
+	tmp->m_ShotgunSpread[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_ShotgunSpread;
+	tmp->m_ShotgunStars[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_ShotgunStars;
+	tmp->m_HammerExplode[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HammerExplode;
+	tmp->m_HammerKill[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HammerKill;
+	tmp->m_HammerShot[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HammerShot;
+	tmp->m_HammerWalls[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HammerWalls;
+	tmp->m_HealHook[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HealHook;
+	tmp->m_Health[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Health;
+	tmp->m_HealthRegen[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HealthRegen;
+	tmp->m_HouseID[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_HouseID;
+	tmp->m_InfinityAmmo[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_InfinityAmmo;
+	tmp->m_InfinityJumps[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_InfinityAmmo;
+	tmp->m_NinjaBomber[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NinjaBomber;
+	tmp->m_NinjaFly[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NinjaFly;
+	tmp->m_NinjaPermanent[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NinjaPermanent;
+	tmp->m_NinjaStart[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NinjaStart;
+	tmp->m_NinjaSwitch[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NinjaSwitch;
+	tmp->m_VIP[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_VIP;
+	tmp->m_NoSelfDMG[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_NoSelfDMG;
+	tmp->m_Portal[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_Portal;
+	tmp->m_PullAura[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_PullAura;
+	tmp->m_PushAura[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_PushAura;
+	tmp->m_RiflePlasma[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_RiflePlasma;
+	tmp->m_RifleSpread[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_RifleSpread;
+	tmp->m_RifleSwap[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_RifleSwap;
+	tmp->m_LvlGun[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_LvlWeapon[WEAPON_GUN];
+	tmp->m_LvlShotgun[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN];
+	tmp->m_LvlGrenade[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_LvlWeapon[WEAPON_GRENADE];
+	tmp->m_LvlRifle[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_LvlWeapon[WEAPON_RIFLE];
+	tmp->m_LvlHammer[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_AccData.m_LvlWeapon[WEAPON_HAMMER];
+	tmp->m_aLanguage[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->GetLanguage();
+
+
+		
+	tmp->m_SqlData = this;
+	
+	void *update_account_thread = thread_init(update_thread, tmp);
+#if defined(CONF_FAMILY_UNIX)
+	pthread_detach((pthread_t)update_account_thread);
+#endif
+}
+
+// update all
+void CSQL::update_all()
+{
+	lock_wait(sql_lock);
+	
+	// Connect to database
+	if(connect())
+	{
+		try
+		{
+			char buf[512];
+			char acc_name[32];
+			for(int i = 0; i < MAX_PLAYERS; i++)
+			{
+				if(!GameServer()->m_apPlayers[i])
+					continue;
+				
+				if(!GameServer()->m_apPlayers[i]->m_AccData.m_UserID)
+					continue;
+				
+				// check if Account exists
+				str_format(buf, sizeof(buf), "SELECT * FROM %s_Account WHERE UserID='%d';", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
+				results = statement->executeQuery(buf);
+				if(results->next())
+				{
+					// update account data	
+					str_format(buf, sizeof(buf), "UPDATE %s_Account SET "
+					"HouseID='%d', "
+					"Money='%d', "
+					"Health='%d', "
+					"Armor='%d', "
+					"Donor='%d', "
+					"VIP='%d', "
+					"Level='%d', "
+					"Exp='%d', "
+					"Hammer='%d', "
+					"Gun='%d', "
+					"Shotgun='%d', "
+					"Grenade='%d', "
+					"Rifle='%d', "
+					"Bounty='%d', "
+					"Arrested='%d', "
+					"AllWeapons='%d', "
+					"HealthRegen='%d', "
+					"InfinityAmmo='%d', "
+					"InfinityJumps='%d', "
+					"FastReload='%d', "
+					"NoSelfDMG='%d', "
+					"GrenadeSpread='%d', "
+					"GrenadeBounce='%d', "
+					"GrenadeMine='%d', "
+					"ShotgunSpread='%d', "
+					"ShotgunExplode='%d', "
+					"ShotgunStars='%d', "
+					"RifleSpread='%d', "
+					"RifleSwap='%d', "
+					"RiflePlasma='%d', "
+					"GunSpread='%d', "
+					"GunExplode='%d', "
+					"GunFreeze='%d', "
+					"HammerWalls='%d', "
+					"HammerShot='%d', "
+					"HammerKill='%d', "
+					"HammerExplode='%d', "
+					"NinjaPermanent='%d', "
+					"NinjaStart='%d', "
+					"NinjaSwitch='%d', "
+					"NinjaFly='%d', "
+					"NinjaBomber='%d', "
+					"HealHook='%d', "
+					"BoostHook='%d', "
+					"EndlessHook='%d', "
+					"Portal='%d', "
+					"PushAura='%d', "
+					"PullAura='%d' "
+					"Language='%s' "
+					"FlameThrower='%s' "
+					"WHERE UserID='%d'", 
+					prefix, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HouseID, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Money, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Health, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Armor, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Donor, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_VIP, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Level, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_ExpPoints, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_LvlWeapon[WEAPON_HAMMER], 
+					GameServer()->m_apPlayers[i]->m_AccData.m_LvlWeapon[WEAPON_GUN], 
+					GameServer()->m_apPlayers[i]->m_AccData.m_LvlWeapon[WEAPON_SHOTGUN], 
+					GameServer()->m_apPlayers[i]->m_AccData.m_LvlWeapon[WEAPON_GRENADE], 
+					GameServer()->m_apPlayers[i]->m_AccData.m_LvlWeapon[WEAPON_RIFLE], 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Bounty, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Arrested, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_AllWeapons, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HealthRegen, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_InfinityAmmo, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_InfinityJumps, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_FastReload, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NoSelfDMG, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GrenadeSpread, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GrenadeBounce, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GrenadeMine, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_ShotgunSpread, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_ShotgunExplode, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_ShotgunStars, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_RifleSpread, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_RifleSwap, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_RiflePlasma, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GunSpread, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GunExplode, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_GunFreeze, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HammerWalls, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HammerShot, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HammerKill, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HammerExplode, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NinjaPermanent, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NinjaStart, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NinjaSwitch, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NinjaFly, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_NinjaBomber, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_HealHook, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_BoostHook, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_EndlessHook, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_Portal, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_PushAura, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_PullAura, 
+					GameServer()->m_apPlayers[i]->GetLanguage(), 
+					GameServer()->m_apPlayers[i]->m_AccData.m_FlameThrower, 
+					GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
+					statement->execute(buf);
+
+					// get Account name from database
+					str_format(buf, sizeof(buf), "SELECT name FROM %s_Account WHERE UserID='%d';", prefix, GameServer()->m_apPlayers[i]->m_AccData.m_UserID);
+					
+					// create results
+					results = statement->executeQuery(buf);
+
+					// jump to result
+					results->next();
+					
+					// finally the name is there \o/	
+					str_copy(acc_name, results->getString("name").c_str(), sizeof(acc_name));	
+					dbg_msg("SQL", "Account '%s' was saved successfully", acc_name);
+				}
+				else
+					dbg_msg("SQL", "Account seems to be deleted");
+				
+				// delete results
+				delete results;
+			}
+			
+			// delete statement
+			delete statement;
+		}
+		catch (sql::SQLException &e)
+		{
+			dbg_msg("SQL", "ERROR: Could not update Account");
+		}
+		
+		// disconnect from database
+		disconnect();
 	}
 
-	tl_assert(AccD.IsObject());
-
-	AccD["user"]["auth"]["authlvl"].SetInt(lvl);
-
-	AccD.Accept(writer);
-	std::remove(aBuf);
-	Accfile = fopen(aBuf, "a+");
-	fscanf(Accfile, "%s\n", AccText);
-	fclose(Accfile);
+	lock_release(sql_lock);
 }
+	
+	

@@ -6,7 +6,6 @@
 // this include should perhaps be removed
 #include "entities/character.h"
 #include "gamecontext.h"
-#include "city/account.h"
 
 // player object
 class CPlayer
@@ -213,7 +212,7 @@ public:
 	int m_ReleaseCarousel;
 	int m_Crown;
 
-	class CAccount *m_pAccount;//(CPlayer *m_Player, CGameContext *gameserver);
+	void ResetAcc();
 
 	void FakeSnap(int SnappingClient);
 

@@ -103,7 +103,7 @@ void CFlameThrower::Snap(int SnappingClient)
             return;
         }
 
-        if (GameServer()->Collision()->IntersectLine(m_pOwner->m_Pos, m_PosTmp[i], NULL, NULL, true) || GameServer()->Collision()->CheckPoint(m_PosTmp[i]))
+        if (GameServer()->Collision()->IntersectLine(m_pOwner->m_Pos, m_PosTmp[i], NULL, NULL) || GameServer()->Collision()->CheckPoint(m_PosTmp[i]))
         {
             Reset();
             return;

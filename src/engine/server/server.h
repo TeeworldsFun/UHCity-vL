@@ -4,8 +4,6 @@
 #define ENGINE_SERVER_SERVER_H
 
 #include <engine/server.h>
-#include "engine/server/sql_connector.h"
-#include "engine/server/sql_server.h"
 
 class CSnapIDPool
 {
@@ -46,8 +44,6 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
-	CSqlServer* m_apSqlReadServers[MAX_SQLSERVERS];
-	CSqlServer* m_apSqlWriteServers[MAX_SQLSERVERS];
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
@@ -259,10 +255,6 @@ public:
 
 	virtual const char* GetClientLanguage(int ClientID);
 	virtual void SetClientLanguage(int ClientID, const char* pLanguage);
-
-// SQL
-public:
-	virtual void FirstInit(int ClientID);
 };
 
 #endif

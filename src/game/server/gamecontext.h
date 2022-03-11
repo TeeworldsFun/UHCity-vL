@@ -18,6 +18,7 @@
 #include "game/server/city/gameevent.h"
 #include "game/server/city/moneycollector.h"
 #include "game/server/city/items/portal.h"
+#include "city/account.h"
 
 #include <game/server/discord/bot.h>
 
@@ -73,6 +74,10 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 
+	/* SQL */
+	CSQL *m_Sql;
+	CAccountData *m_AccountData;
+
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
@@ -102,6 +107,10 @@ public:
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
 	CDiscordBot *Discord() { return m_pDiscord; }
+
+	/* SQL */
+	CSQL *Sql() const { return m_Sql; };
+	CAccountData *AccountData() {return m_AccountData; };
 	
 	CGameContext();
 	~CGameContext();

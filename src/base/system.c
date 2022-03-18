@@ -535,13 +535,19 @@ void lock_wait(LOCK lock)
 #endif
 }
 
-void lock_unlock(LOCK lock)
-{
-	lock_release(lock);
-}
-
 void lock_release(LOCK lock)
 {
+#if defined(CONF_FAMILY_UNIX)
+	pthread_mutex_unlock((LOCKINTERNAL *)lock);
+#elif defined(CONF_FAMILY_WINDOWS)
+	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
+#else
+	#error not implemented on this platform
+#endif
+}
+void lock_unlock(LOCK lock)
+{
+
 #if defined(CONF_FAMILY_UNIX)
 	pthread_mutex_unlock((LOCKINTERNAL *)lock);
 #elif defined(CONF_FAMILY_WINDOWS)

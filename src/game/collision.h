@@ -61,6 +61,14 @@ public:
 	bool DoorOpen(int DoorNumber, bool Open);
 	bool IsDoorOpen(int DoorNumber) { return m_DoorOpen[DoorNumber]; }
 
+	bool InterSectShield(int OwnerID, vec2 Pos);
+	bool IsShield(int NotThis, vec2 Pos);
+
+	int SetShieldAt(vec2 From, vec2 To, int Number);
+	bool GetShieldAt(int x, int y);
+
+	vec2 m_ShieldPositions[64][2];
+
 	//Zomb2
 	bool CheckTiles(vec2 Pos, int Deepness);
 	bool CheckParable(vec2 Pos, int Wideness, int Direction);

@@ -63,6 +63,12 @@ void CPlayer::Tick()
 	Server()->SetClientAccID(m_ClientID, m_AccData.m_UserID);
 	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
 
+	if(GetTeam() != TEAM_SPECTATORS && GetCharacter())
+	{
+		GameServer()->Collision()->m_ShieldPositions[m_ClientID][1] = GetCharacter()->m_Pos;
+		GameServer()->Collision()->m_ShieldPositions[m_ClientID][2] = vec2(GetCharacter()->m_Pos.x, GetCharacter()->m_Pos.y-1000);
+	}
+
 	if(Server()->Tick()%50 == 0)
 	{
 		if(m_ReleaseCarousel)

@@ -385,6 +385,22 @@ int CCollision::SetDoorAt(vec2 From, vec2 To, int Number)
 	return 1;
 }
 
+bool CCollision::GetShieldAt(int x, int y)
+{
+	int Nx = clamp(x / 32, 0, m_Width - 1);
+	int Ny = clamp(y / 32, 0, m_Height - 1);
+
+	if (m_pDoorTiles[Ny * m_Width + Nx].m_Index == 7)
+	{
+		if (m_DoorOpen[m_pDoorTiles[Ny * m_Width + Nx].m_DoorID])
+			return false;
+		else
+			return true;
+	}
+
+	return false;
+}
+
 bool CCollision::IntersectLine2(vec2 Pos0, vec2 Pos1) // Done to avoid lags (checks every tiles instead of every single pos, going 32 by 32 instead of 1 by 1)
 {
     vec2 Dir = normalize(Pos1 - Pos0) * 32;
@@ -488,3 +504,37 @@ bool CCollision::IntersectTile(vec2 Pos0, vec2 Pos1)
 	}
 	return false;
 }
+
+bool CCollision::InterSectShield(int OwnerID, vec2 Pos)
+{
+    if (!m_ShieldPositions[OwnerID])
+        return false;
+
+    float Distance = distance(m_ShieldPositions[OwnerID][0], m_ShieldPositions[OwnerID][1]);
+    int End(Distance+1);
+    for(int i = 0; i < End; i++)
+    {
+        float a = i/Distance;
+        vec2 ShieldPos = mix(m_ShieldPositions[OwnerID][0], m_ShieldPositions[OwnerID][1], a);
+        if (distance(ShieldPos, Pos) < 10.0f)
+            return true;
+    }
+
+    return false;
+}
+
+bool CCollision::IsShield(int NotThis, vec2 Pos)
+{
+    for (int OwnerID = 0; OwnerID < 64; OwnerID++)
+    {
+        if (OwnerID == NotThis)
+            continue;
+            
+        if (!m_ShieldPositions[OwnerID])
+            continue;
+        
+        if (InterSectShield(OwnerID, Pos))
+            return true;
+    }
+    return false;
+} 

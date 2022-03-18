@@ -49,6 +49,10 @@ void CGameContext::Construct(int Resetting)
 	m_pFilesys = new CFileSys(this);
 	m_pGameEvent = new CGameEvent(this);
 	m_pMoneyCollector = new CMoneyCollector(this);
+
+	/* SQL */
+	m_AccountData = new CAccountData;
+	m_Sql = new CSQL(this);
 }
 
 CGameContext::CGameContext(int Resetting)
@@ -88,6 +92,9 @@ void CGameContext::Clear()
 	int NumVoteOptions = m_NumVoteOptions;
 	CTuningParams Tuning = m_Tuning;
 
+	delete m_Sql;
+	delete m_AccountData;
+	
 	m_Resetting = true;
 	this->~CGameContext();
 	mem_zero(this, sizeof(*this));
@@ -265,13 +272,33 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 }
 
 
-void CGameContext::SendChatTarget(int To, const char *pText)
+void CGameContext::SendChatTarget(int To, const char *pText, ...)
 {
+	int Start = (To < 0 ? 0 : To);
+	int End = (To < 0 ? MAX_CLIENTS : To+1);
+	
 	CNetMsg_Sv_Chat Msg;
 	Msg.m_Team = 0;
 	Msg.m_ClientID = -1;
-	Msg.m_pMessage = pText;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+	
+	dynamic_string Buffer;
+	
+	va_list VarArgs;
+	va_start(VarArgs, pText);
+	
+	for(int i = Start; i < End; i++)
+	{
+		if(m_apPlayers[i])
+		{
+			Buffer.clear();
+			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
+			
+			Msg.m_pMessage = Buffer.buffer();
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, i);
+		}
+	}
+	
+	va_end(VarArgs);
 }
 
 void CGameContext::SendPrivate(int From, int To, const char *pText, int SpamProtectionClientID)
@@ -292,7 +319,7 @@ void CGameContext::SendPrivate(int From, int To, const char *pText, int SpamProt
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "teamchat", aBuf);
 
 	CNetMsg_Sv_Chat Msg;
-	Msg.m_Team = 1;
+	Msg.m_Team = 2;
 	Msg.m_ClientID = From;
 	Msg.m_pMessage = pText;
 
@@ -392,15 +419,6 @@ void CGameContext::SendChatTarget_Localization(int To, int Category, const char*
 		if(m_apPlayers[i])
 		{
 			Buffer.clear();
-			switch(Category)
-			{
-				case CHATCATEGORY_INFO:
-					Buffer.append("| ");
-					break;
-				case CHATCATEGORY_JOIN:
-					Buffer.append("★ | ");
-					break;
-			}
 			Server()->Localization()->Format_VL(Buffer, m_apPlayers[i]->GetLanguage(), pText, VarArgs);
 			
 			Msg.m_pMessage = Buffer.buffer();
@@ -430,15 +448,6 @@ void CGameContext::SendChatTarget_Localization_P(int To, int Category, int Numbe
 		if(m_apPlayers[i])
 		{
 			Buffer.clear();
-			switch(Category)
-			{
-				case CHATCATEGORY_INFO:
-					Buffer.append("$ |: ");
-					break;
-				case CHATCATEGORY_JOIN:
-					Buffer.append("★ |: ");
-					break;
-			}
 			Server()->Localization()->Format_VLP(Buffer, m_apPlayers[i]->GetLanguage(), Number, pText, VarArgs);
 			
 			Msg.m_pMessage = Buffer.buffer();
@@ -911,9 +920,10 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
-	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Welcome on UH|City"));
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Welcome on UH|City-vL!"));
 	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Made by TeeFun Team!"));
-	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("use /help for some help"));
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("Special Thanks to Pikotee!!!!!!!!"));
+	SendChatTarget_Localization(ClientID, CHATCATEGORY_JOIN, _("use /help for some help!"));
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);

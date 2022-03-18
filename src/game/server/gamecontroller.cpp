@@ -47,6 +47,10 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_MonsterSpawnNum = 0;
 	m_MonsterSpawnCurrentNum = 0;
 	m_MonsterEvent = false;
+
+	/* SQL */
+	// create tables
+	GameServer()->Sql()->create_tables();
 }
 
 IGameController::~IGameController()

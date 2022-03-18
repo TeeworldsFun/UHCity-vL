@@ -1,45 +1,55 @@
-UserID 
-HouseID
-Money
-Health
-Armor
-Donor
-VIP
-Level
-ExpPoints
-LvlWeapon
-Bounty
-Arrested
-AllWeapons
-HealthRegen
-InfinityAmmo
-InfinityJumps
-FastReload
-NoSelfDMG
-GrenadeSpread
-GrenadeBounce
-GrenadeMine
-ShotgunSpread
-ShotgunExplode
-ShotgunStars
-RifleSpread
-RifleSwap
-RiflePlasma
-GunSpread
-GunExplode
-GunFreeze
-HammerWalls
-HammerShot
-HammerKill
-HammerExplode
-NinjaPermanent
-NinjaStart
-NinjaSwitch
-NinjaFly
-NinjaBomber
-HealHook
-BoostHook
-EndlessHook
-Portal
-PushAura
-PullAura
+"CREATE TABLE IF NOT EXISTS %s_Account "
+			"(UserID INT(11) AUTO_INCREMENT PRIMARY KEY, "
+			"Username VARCHAR(31) NOT NULL, "
+			"Password VARCHAR(32) NOT NULL, "
+			"HouseID INT(11)(11) NOT NULL DEFAULT '0', "
+			"Exp BIGINT(11) DEFAULT '0', "
+			"Level BIGINT(11) DEFAULT '0', "
+			"Health INT(11) DEFAULT '10', "
+			"Armor INT(11) DEFAULT '10', "
+			"Language VARCHAR(16) DEFAULT 'en', "
+			"VIP TINYINT(11) DEFAULT '0', "
+			"Donor TINYINT(11) DEFAULT '0', "
+			"Gun BIGINT(11) DEFAULT '0', "
+			"Shotgun BIGINT(11) DEFAULT '0', "
+			"Grenade BIGINT(11) DEFAULT '0', "
+			"Rifle BIGINT(11) DEFAULT '0', "
+			"Hammer BIGINT(11) DEFAULT '0', "
+			
+			//upgr
+			"Bounty BIGINT(11) DEFAULT '0', "	
+			"Arrested BIGINT(11) DEFAULT '0', "
+			"AllWeapons INT(11) DEFAULT '0', "
+			"HealthRegen INT(11) DEFAULT '0', "
+			"InfinityAmmo INT(11) DEFAULT '0', "
+			"InfinityJumps INT(11) DEFAULT '0', "
+			"FastReload INT(11) DEFAULT '0', "
+			"NoSelfDMG INT(11) DEFAULT '0', "
+			"GrenadeSpread INT(11) DEFAULT '0', "
+			"GrenadeBounce INT(11) DEFAULT '0', "
+			"GrenadeMine INT(11) DEFAULT '0', "
+			"ShotgunSpread INT(11) DEFAULT '0', "
+			"ShotgunExplode INT(11) DEFAULT '0', "
+			"ShotgunStars INT(11) DEFAULT '0', "
+			"RifleSpread INT(11) DEFAULT '0', "
+			"RifleSwap INT(11) DEFAULT '0', "
+			"RiflePlasma INT(11) DEFAULT '0', "
+			"GunSpread INT(11) DEFAULT '0', "
+			"GunExplode INT(11) DEFAULT '0', "
+			"GunFreeze INT(11) DEFAULT '0', "
+			"HammerWalls INT(11) DEFAULT '0', "
+			"HammerShot INT(11) DEFAULT '0', "
+			"HammerKill INT(11) DEFAULT '0', "
+			"HammerExplode INT(11) DEFAULT '0', "
+			"NinjaPermanent INT(11) DEFAULT '0', "
+			"NinjaStart INT(11) DEFAULT '0', "
+			"NinjaSwitch INT(11) DEFAULT '0', "
+			"NinjaFly INT(11) DEFAULT '0', "
+			"NinjaBomber INT(11) DEFAULT '0', "
+			"HealHook INT(11) DEFAULT '0', "
+			"BoostHook INT(11) DEFAULT '0', "
+			"EndlessHook INT(11) DEFAULT '0', "
+			"Portal INT(11) DEFAULT '0', "
+			"PushAura INT(11) DEFAULT '0', "
+			"PullAura INT(11) DEFAULT '0', "			
+			"Money BIGINT(11) DEFAULT '0');

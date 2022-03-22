@@ -909,6 +909,8 @@ set_glob(GAME_SERVER GLOB_RECURSE src/game/server
   city/shopitems/shotgun.h
   city/shopitems/vip.cpp
   city/shopitems/vip.h
+  city/bots/monster.cpp
+  city/bots/monster.h
   discord/bot.cpp
   discord/bot.h
   entity.cpp
@@ -942,6 +944,7 @@ set(LIBS_SERVER
   ${LIBS}
   ${OPENSSL_LIBRARIES}
   ${MYSQL_LIBRARIES}
+  maxminddb
 )
 
 # Target

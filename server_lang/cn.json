@@ -106,14 +106,6 @@
             "value": "电击枪状态切换"
         },
         {
-            "key": "God {str:RD}",
-            "value": "无敌状态切换"
-        },
-        {
-            "key": "Instagib is not enabled",
-            "value": "激光瞬杀游戏已被禁止"
-        },
-        {
             "key": "{str:PName} joined Instagib",
             "value": "玩家'{str:PName}'加入了激光瞬杀"
         },
@@ -122,8 +114,8 @@
             "value": "玩家'{str:PName}'离开了激光瞬杀"
         },
         {
-            "key": "Zomb is not enabled",
-            "value": "僵尸末日游戏已被禁止"
+            "key": "Minigame is not enabled",
+            "value": "小游戏已被禁止"
         },
         {
             "key": "usage: /transfer <amount>",

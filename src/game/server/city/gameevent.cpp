@@ -25,7 +25,6 @@ void CGameEvent::Tick() {
             Reset();
 
             GetEventStr(m_CurrentEvent, aEvent, sizeof aEvent);
-            dbg_msg("event", "'%s' Event ended", aEvent);
 
             m_CurrentEvent = EVENT_NONE;
             m_isEvent = false;

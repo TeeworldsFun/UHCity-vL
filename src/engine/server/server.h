@@ -150,7 +150,6 @@ public:
 	CMapChecker m_MapChecker;
 
 	void BotJoin(int BotID, int BotMode);
-	void BotJoin(int BotID, int BotMode, bool Puppy = false);
 
 	CServer();
 

@@ -469,7 +469,7 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 					GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 				}
 
-				pKiller->GetCharacter()->GameServer()->SendChatTarget_Localization(pKiller->GetCID(), CHATCATEGORY_INFO, _("+{str:b1}$ || Current: {str:b0}$ || {int:IK} Insta-Kills"), "b1", numBuf[1], "b0", numBuf[0], "IK", pKiller->GetCharacter()->m_InstaKills);
+				pKiller->GetCharacter()->GameServer()->SendChatTarget_Localization(pKiller->GetCID(), CHATCATEGORY_INFO, _("+{str:b1}$ || Current: {str:b0}$ || {int:IK} Insta-Kills"), "b1", numBuf[1], "b0", numBuf[0], "IK", &pKiller->GetCharacter()->m_InstaKills);
 
 				if(pVictim->m_InstaKills >= 5)
 				{
@@ -729,34 +729,11 @@ void IGameController::Tick()
 
 	// Scheduled server message
 	if (Server()->Tick() % 30000 == 0) { // every 10 min
+		GameServer()->Sql()->update_all();
 		GameServer()->SendChatTarget_Localization(-1, CHATCATEGORY_JOIN, _("Visit our Discord server https://discord.gg/PhgUmS2qey"));
 	}
 
 	DoWincheck();
-
-	/*for(int i = 0; i <= MAX_MONSTERS; i++)
-    {
-    	if(!GameServer()->GetValidMonster(i) && m_AliveMonsters <= MAX_MONSTERS)
-    	{
-    	    NewMonster(i);
-			m_AliveMonsters++;
-		}
-    }*/
-}
-
-void IGameController::NewMonster(int MonsterID)
-{
-	/*int m_Type = 0;
-	if(!g_Config.m_EnableMonster)
-		return;
-    m_Type = rand()%NUM_WEAPONS;
-	if(MonsterID >= 0 && MonsterID <= MAX_MONSTERS)
-    {
-        if(!GameServer()->m_apMonsters[MonsterID])
-        {
-            GameServer()->m_apMonsters[MonsterID] = new CMonster(&GameServer()->m_World, m_Type, MonsterID, 10, 10, 5);
-        }
-    }*/
 }
 
 bool IGameController::IsTeamplay() const
@@ -955,8 +932,6 @@ int IGameController::ClampTeam(int Team)
 
 void IGameController::CheckZombie()
 {
-	if(!g_Config.m_EnableMonster)
-		return;
 	for(int i = MAX_PLAYERS + 1; i < MAX_CLIENTS; i++)//...
 	{
 		if(!GameServer()->m_apPlayers[i])//Check if the CID is free

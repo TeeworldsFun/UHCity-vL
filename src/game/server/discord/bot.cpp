@@ -24,6 +24,8 @@ CDiscordBot::CDiscordBot(CGameContext *GameServer)
             bot_prt->set_presence(dpp::presence(dpp::ps_idle, dpp::at_game, "UH|City-vL"));
         });
 
+        SendChatTarget_Discord("Server is ONLINE", "Server");
+
         m_Bot->on_message_create([bot_prt, chann_ptr](const dpp::message_create_t &event) {
             if(*chann_ptr == event.msg.channel_id &&(!event.msg.author.is_bot() || !event.msg.content.empty()))
                 CGS->SendChatFromDiscord(std::string("[Discord] " + ((event.msg.member.nickname.empty() == true) ? event.msg.author.username : event.msg.member.nickname) + ": " + event.msg.content).c_str());

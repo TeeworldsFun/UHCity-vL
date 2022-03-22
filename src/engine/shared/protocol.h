@@ -125,4 +125,13 @@ enum {
 	UPGRADE_BOOSTHOOK,
 };
 
+enum // Bot Type List.
+{
+	BOTTYPE_PIG,
+	BOTTYPE_PUPPET,
+	BOTTYPE_FFS,
+	
+	NUM_BOTTYPE,
+};
+
 #endif

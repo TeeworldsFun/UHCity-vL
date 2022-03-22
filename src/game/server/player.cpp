@@ -3,6 +3,7 @@
 #include <new>
 #include <engine/shared/config.h>
 #include "player.h"
+#include <game/server/city/bots/monster.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
@@ -41,8 +42,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team, int Zomb)
 
 	SetLanguage(Server()->GetClientLanguage(ClientID));
 
-	m_Bot = Zomb;
-	mem_zero(m_SubZomb, sizeof(m_SubZomb));
+	m_IsBot = (ClientID > MAX_PLAYERS);
 }
 
 CPlayer::~CPlayer()
@@ -62,12 +62,6 @@ void CPlayer::Tick()
 	Server()->SetClientScore(m_ClientID, m_Score);
 	Server()->SetClientAccID(m_ClientID, m_AccData.m_UserID);
 	Server()->SetClientLanguage(m_ClientID, m_aLanguage);
-
-	if(GetTeam() != TEAM_SPECTATORS && GetCharacter())
-	{
-		GameServer()->Collision()->m_ShieldPositions[m_ClientID][1] = GetCharacter()->m_Pos;
-		GameServer()->Collision()->m_ShieldPositions[m_ClientID][2] = vec2(GetCharacter()->m_Pos.x, GetCharacter()->m_Pos.y-1000);
-	}
 
 	if(Server()->Tick()%50 == 0)
 	{
@@ -157,10 +151,11 @@ void CPlayer::Tick()
 	RainbowColor = (RainbowColor + 1) % 256;
 	m_RainbowColor = RainbowColor * 0x010000 + 0xff00;
 
-	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS && !m_Bot)
+	if(g_Config.m_SvTournamentMode && !m_AccData.m_UserID && m_Team != TEAM_SPECTATORS && !IsBot() && !m_Puppy)
 		SetTeam(TEAM_SPECTATORS);
 
-	
+	if((m_Bot || m_Puppy) && GetTeam() == TEAM_SPECTATORS)
+		SetTeam(TEAM_RED);
 	str_copy(m_aRank, "", sizeof(m_aRank));
 	
 	if(GameServer()->Server()->IsAdmin(GetCID()))
@@ -229,41 +224,20 @@ void CPlayer::Snap(int SnappingClient)
 	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
 	if(!pClientInfo && !m_Bot)
 		return;
-	
-	if(!m_Bot)
-	{
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
-	
-		if(str_comp(m_aRank, "") && Server()->Tick() % 100 < 50)
-			StrToInts(&pClientInfo->m_Clan0, 3, m_aRank);
-		else
-			StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
-		StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-		pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-		pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-	
 
-		pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-		pClientInfo->m_UseCustomColor = m_Rainbow?true:m_TeeInfos.m_UseCustomColor;
+	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 
-		pClientInfo->m_ColorBody = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorFeet;
-	}
+	if(str_comp(m_aRank, "") && Server()->Tick() % 100 < 50)
+		StrToInts(&pClientInfo->m_Clan0, 3, m_aRank);
 	else
-	{
-		StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientID));
 		StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientID));
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
-		pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
-		pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
-		pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
-	}
-	
+
+	pClientInfo->m_Country = Server()->ClientCountry(m_ClientID);
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_SkinName);
+	pClientInfo->m_UseCustomColor = m_Rainbow?true:m_TeeInfos.m_UseCustomColor;
+	pClientInfo->m_ColorBody = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorBody;
+	pClientInfo->m_ColorFeet = m_Rainbow?m_RainbowColor:m_TeeInfos.m_ColorFeet;
+
 
 	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
 	if(!pPlayerInfo && !m_Bot)
@@ -441,6 +415,8 @@ void CPlayer::SetTeam(int Team)
 				GameServer()->m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
 		}
 	}
+	else
+		m_Score = m_AccData.m_Level;
 }
 
 void CPlayer::TryRespawn()
@@ -452,6 +428,12 @@ void CPlayer::TryRespawn()
 		else
 			return;
 
+	}
+	else if(IsBot())
+	{
+		m_pCharacter = new(m_ClientID) CMonster(&GameServer()->m_World);
+		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Afk?3:0))
+			return;
 	}
 	else if (m_Afk) {
 		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, m_Afk?3:0))
@@ -468,7 +450,8 @@ void CPlayer::TryRespawn()
 	}
 
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
+	if(!m_Puppy && !IsBot())
+		m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World);
 	m_pCharacter->Spawn(this, SpawnPos);
 
 	GameServer()->CreatePlayerSpawn(SpawnPos);
@@ -506,14 +489,7 @@ void CPlayer::SetLanguage(const char* pLanguage)
 
 bool CPlayer::GetBot(int Type)
 {
-	if(m_Bot == Type)
-		return true;
-	for(int i = 0; i < (int)(sizeof(m_SubZomb)/sizeof(m_SubZomb[0])); i++)
-	{
-		if(m_SubZomb[i] == Type)
-			return true;
-	}
-	return false;
+// nothing
 }
 
 void CPlayer::DeleteCharacter()

@@ -73,6 +73,7 @@ CGameContext::~CGameContext()
 		delete m_pVoteOptionHeap;
 
 	if(m_pDiscord) delete m_pDiscord;
+
 }
 
 void CGameContext::ClearVotes(int ClientID)
@@ -2367,9 +2368,8 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode, int ClientID)
 	m_apPlayers[DummyID]->m_TeeInfos.m_UseCustomColor = 0;
 	m_apPlayers[DummyID]->m_TeeInfos.m_ColorFeet = 16776960;
 	m_apPlayers[DummyID]->m_TeeInfos.m_ColorBody = 16776960;
-	m_apPlayers[DummyID]->m_Puppy = DummyMode < 0;
-	m_apPlayers[DummyID]->m_PuppyOwner = ClientID;
-    Server()->BotJoin(DummyID, DummyMode, DummyMode < 0);
+
+	Server()->BotJoin(DummyID, DummyMode);
 
 	if(DummyMode >= 0 && DummyMode <= 13) //Zombie dummy
 		str_copy(m_apPlayers[DummyID]->m_TeeInfos.m_SkinName, "voodoo_tee", MAX_NAME_LENGTH);
@@ -2381,27 +2381,6 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode, int ClientID)
     //OnClientEnter(DummyID);
 
     return DummyID;
-}
-
-void CGameContext::OnZombieKill(int ClientID)
-{
-	for(int i = 0;i < 10; i++)
-	{
-		CPickup *pPickup = new CPickup(&this->m_World, POWERUP_HEALTH, POWERUP_HEALTH);
-		pPickup->m_Pos = m_apPlayers[ClientID]->GetCharacter()->m_Pos;
-	}
-	if(m_apPlayers[ClientID] && m_apPlayers[ClientID]->GetCharacter())
-		m_apPlayers[ClientID]->DeleteCharacter();
-	if(m_apPlayers[ClientID])
-		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = 0;
-
-	// update spectator modes
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(m_apPlayers[i] && m_apPlayers[i]->m_SpectatorID == ClientID)
-			m_apPlayers[i]->m_SpectatorID = SPEC_FREEVIEW;
-	}
 }
 
 void CGameContext::SCT_Discord(const char *pText, const char *Desp)

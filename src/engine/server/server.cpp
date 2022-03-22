@@ -1982,53 +1982,30 @@ void CNetServer::BotInit(int BotID)
     m_aSlots[BotID].m_Connection.BotConnect();
 }
 
-void CServer::BotJoin(int BotID, int BotMode, bool Puppy)
+void CServer::BotJoin(int BotID, int BotMode)
 {
-	const char *pNames[] = {
-        "The Man",
-        "Zaby",
-        "Zoomer",
-        "Zooker",
-        "Zamer",
-        "Zunny",
-        "Zaster",
-        "Zotter",
-        "Zenade",
-        "Flombie",
-        "Zinja",
-        "Zele",
-        "Zinvis",
-        "Zeater",
-        "AniBot-pdf",
-        "Seabot",
-        "Chara",
-    };
-    const char *pClans[] = { 
-        "FFS",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]",
-        "[*/Zomb*]"
-    };
-
     m_NetServer.BotInit(BotID);
     m_aClients[BotID].m_State = CClient::STATE_INGAME;
     m_aClients[BotID].m_Authed = AUTHED_NO;
 
-    str_copy(m_aClients[BotID].m_aName, Puppy ? "Puppy" : pNames[BotMode], MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
-    str_copy(m_aClients[BotID].m_aClan, Puppy ? "_Pet"  : pClans[BotMode], MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
+	switch(BotMode)
+	{
+	case BOTTYPE_PIG:
+		str_copy(m_aClients[BotID].m_aName, "Piggy", MAX_NAME_LENGTH); //Namen des Jeweiligen Dummys setzten
+		str_copy(m_aClients[BotID].m_aClan, "::Bot::", MAX_CLAN_LENGTH); //Clan des jeweiligen Dummys setzten
+		break;
+	case BOTTYPE_PUPPET:
+		str_copy(m_aClients[BotID].m_aName, "F|Puppet", MAX_NAME_LENGTH);
+		str_copy(m_aClients[BotID].m_aClan, "_Developer", MAX_CLAN_LENGTH);
+		break;
+	case 3:
+		str_copy(m_aClients[BotID].m_aName, "F|Sans", MAX_NAME_LENGTH);
+		str_copy(m_aClients[BotID].m_aClan, "_Developer", MAX_CLAN_LENGTH);
+		break;
+	default:
+		str_copy(m_aClients[BotID].m_aName, "", MAX_NAME_LENGTH);
+    	str_copy(m_aClients[BotID].m_aClan, "", MAX_CLAN_LENGTH);
+		m_aClients[BotID].m_Country = 826;
+		break;
+	}
 }

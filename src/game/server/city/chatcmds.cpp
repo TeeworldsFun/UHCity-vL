@@ -349,8 +349,8 @@ void CGameContext::ConChatInstagib(IConsole::IResult *pResult, void *pUserData)
     CPlayer *pP = pSelf->m_apPlayers[pResult->GetClientID()];
     CCharacter *pChr = pP->GetCharacter();
 
-    if (!g_Config.m_EnableInstagib) {
-        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Instagib is not enabled"));
+    if (!g_Config.m_EnableMinigames) {
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Minigame is not enabled"));
         return;
     }
 
@@ -364,8 +364,6 @@ void CGameContext::ConChatInstagib(IConsole::IResult *pResult, void *pUserData)
 
     pP->m_Insta ^= 1;
     pChr->Die(pP->GetCID(), WEAPON_GAME);
-//    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("{str:PName} {str:RD} Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), "RD", pP->m_Insta ? "joined" : "left", NULL);
-    pSelf->SendChatTarget_Localization_P(-1, CHATCATEGORY_INFO, pP->m_Insta, _P("{str:PName} left Instagib", "{str:PName} joined Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), NULL);
     if(pP->m_Insta)
         pSelf->SendChatTarget_Localization(-1, CHATCATEGORY_INFO, _("{str:PName} left Instagib"), "PName", pSelf->Server()->ClientName(pP->GetCID()), NULL);
     else
@@ -379,8 +377,8 @@ void CGameContext::ConChatMonster(IConsole::IResult *pResult, void *pUserData)
     CCharacter *pChr = pP->GetCharacter();
     char aBuf[128];
 
-    if (!g_Config.m_EnableMonster) {
-        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Zomb is not enabled"));
+    if (!g_Config.m_EnableMinigames) {
+        pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Minigames is not enabled"));
         return;
     }
 
@@ -914,7 +912,7 @@ void CGameContext::ConChatInfo(IConsole::IResult *pResult, void *pUserData)
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("UH|City is made by UrinStone."));
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Join our Discord to be always informed about the latest updates."));
     pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("If you forget your password or wish to donate, please ONLY contact TeeFlowerFell-Sans#9358 on Discord."));
-    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Thanks Anime-pdf, Puppet, ST-Chara for keeping development!"));
+    pSelf->SendChatTarget_Localization(pP->GetCID(), CHATCATEGORY_INFO, _("Thanks Anime-pdf, Puppet, StarOnTheSky, ST-Chara for keeping development!"));
 }
 
 void CGameContext::ConChatWriteStats(IConsole::IResult *pResult, void *pUserData)

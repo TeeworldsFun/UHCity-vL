@@ -197,6 +197,7 @@ static void create_account_thread(void *user)
 					
 					GameServer()->SendChatTarget(Data->m_ClientID, "Acoount was created successfully.");
 					GameServer()->SendChatTarget(Data->m_ClientID, "You may login now. (/login <user> <pass>)");
+					GameServer()->Sql()->login(Data->name, Data->pass, Data->m_ClientID);
 				}
 				
 				// delete statement
@@ -389,16 +390,7 @@ static void login_thread(void *user)
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_ExpWeapon[WEAPON_GRENADE] = Data->m_SqlData->results->getInt("Grenade");
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_ExpWeapon[WEAPON_RIFLE] = Data->m_SqlData->results->getInt("Rifle");
 						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_ExpWeapon[WEAPON_HAMMER] = Data->m_SqlData->results->getInt("Hammer");
-						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_Bounty = Data->m_SqlData->results->getInt("Bounty");
-
-						// login should be the last thing
-						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
-						
-//						GameServer()->SendChatTarget(Data->m_ClientID, "You are now logged in.");
-						char buf[512];
-						str_format(buf, sizeof(buf), "Welcome %s!", Data->name);
-						GameServer()->SendBroadcast(buf, Data->m_ClientID);
-						
+						GameServer()->m_apPlayers[Data->m_ClientID]->m_AccData.m_Bounty = Data->m_SqlData->results->getInt("Bounty");						
 					}
 					else
 					{
@@ -456,9 +448,7 @@ static void login_thread(void *user)
 						dbg_msg("SQL", "Account '%s' logged in sucessfully", Data->name);
 						
 						GameServer()->SendChatTarget(Data->m_ClientID, "You are now logged in.");
-						char buf[512];
-						str_format(buf, sizeof(buf), "Welcome %s!", Data->name);
-						GameServer()->SendBroadcast(buf, Data->m_ClientID);
+						GameServer()->m_apPlayers[Data->m_ClientID]->SetTeam(TEAM_RED);
 					}
 					
 				}

@@ -429,13 +429,10 @@ public:
 	
 	//int m_TeleID[MAX_CLIENTS];
 
-/*    CMonster *GetValidMonster(int MonsterID) const;
-	void OnMonsterDeath(int MonsterID);*/
 	bool IsValidPlayer(int PlayerID);
 
 	//Zomb2
 	void OnZombie(int ClientID, int Zomb);
-	void OnZombieKill(int ClientID);
 
 	int CreateNewDummy(int DummyID, int DummyMode, int ClientID = -1);
 

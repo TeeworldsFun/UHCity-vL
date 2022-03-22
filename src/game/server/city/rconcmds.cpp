@@ -19,7 +19,7 @@ void CGameContext::ConSpawnBot(IConsole::IResult *pResult, void *pUserData)
 		if(pChr->GameServer()->m_apPlayers[i])
 			continue;
 
-		pChr->GameServer()->CreateNewDummy(i, -1, ClientID);
+		pChr->GameServer()->CreateNewDummy(i, BOTTYPE_PIG, ClientID);
 		break;
 	}
 }

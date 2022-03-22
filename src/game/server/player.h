@@ -108,7 +108,7 @@ public:
 		int m_Max;
 	} m_Latency;
 
-	// City
+	// Cityf
 
 	bool m_Puppy;
 	int m_PuppyOwner;
@@ -219,25 +219,10 @@ public:
 	const char* GetLanguage();
 	void SetLanguage(const char* pLanguage);
 
-	//Zomb2
-	int m_SubZomb[3];//all Types, 3 times ( 0, 1, 2)
+	bool m_IsBot;
 	int m_Bot;
-	///////////////////////////////
-	//1 = Zaby
-	//2 = Zoomer
-	//3 = Zooker
-	//4 = Zamer
-	//5 = Zunner
-	//6 = Zaster
-	//7 = Zotter
-	//8 = Zenade
-	//9 = Flombie
-	//10 = Zinja
-	//11 = Zele
-	//12 = Zinvis
-	//13 = Zeater
-	////////////////////////////////
-	
+	int m_BigBot;
+	bool IsBot() { return m_IsBot; };
 private:
 	CCharacter *m_pCharacter;
 	CGameContext *m_pGameServer;

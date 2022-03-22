@@ -24,6 +24,9 @@ class CCharacter : public CEntity
 	MACRO_ALLOC_POOL_ID()
 
 public:
+	// player controlling this character
+	class CPlayer *m_pPlayer;
+
 	//character's size
 	static const int ms_PhysSize = 28;
 
@@ -173,6 +176,14 @@ public:
 
 	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
+
+	// these are non-heldback inputs
+	CNetObj_PlayerInput m_LatestPrevInput;
+	CNetObj_PlayerInput m_LatestInput;
+
+	// input
+	int m_NumInputs;
+	int m_Jumped;
 		
 	int m_Health;
 	int m_Armor;
@@ -213,9 +224,12 @@ public:
 	int m_LoveTick;
 	int m_PoisonTick;
 	int m_Poison;
+
+	int EmoteNormal;
+	int m_ActiveWeapon;
+	int m_LastWeapon;
+	int m_QueuedWeapon;
 private:
-	// player controlling this character
-	class CPlayer *m_pPlayer;
 
 	bool m_Alive;
 
@@ -223,9 +237,6 @@ private:
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;
 
-	int m_ActiveWeapon;
-	int m_LastWeapon;
-	int m_QueuedWeapon;
 
 	int m_ReloadTimer;
 	int m_AttackTick;
@@ -235,13 +246,6 @@ private:
 	// last tick that the player took any action ie some input
 	int m_LastAction;
 
-	// these are non-heldback inputs
-	CNetObj_PlayerInput m_LatestPrevInput;
-	CNetObj_PlayerInput m_LatestInput;
-
-	// input
-	int m_NumInputs;
-	int m_Jumped;
 
 	int m_DamageTakenTick;
 

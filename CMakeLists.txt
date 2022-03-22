@@ -74,6 +74,7 @@ endif()
 
 option(SERVER_COMPILE "Build the server together with the client" ON)
 option(CLIENT "Compile client" OFF)
+option(DC "Enable Discord bot" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -263,7 +264,9 @@ find_package(Threads)
 find_package(Wavpack)
 find_package(OpenSSL)
 find_package(MySQL)
-add_subdirectory(other/DPP)
+if(DC)
+  add_subdirectory(other/DPP)
+endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(DMG dmg)
@@ -957,10 +960,11 @@ add_executable(${TARGET_SERVER}
   $<TARGET_OBJECTS:game-shared>
 )
 
-target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
-target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
-target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
-
+if(DC)
+  target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
+  target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
+  target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
+endif()
 
 
 list(APPEND TARGETS_OWN ${TARGET_SERVER})
@@ -1373,6 +1377,10 @@ foreach(target ${TARGETS_OWN})
   if(OPENSSL_FOUND)
 	target_compile_definitions(${target} PRIVATE CONF_OPENSSL)
 	target_include_directories(${target} PRIVATE ${OPENSSL_INCLUDE_DIRS})
+  endif()
+
+  if(DC)
+    target_compile_definitions(${target} PRIVATE CONF_DISCORD)
   endif()
 endforeach()
 

@@ -68,7 +68,9 @@ class CGameContext : public IGameServer
 	class CFileSys *m_pFilesys;
 	class CMoneyCollector *m_pMoneyCollector;
 	class CGameEvent *m_pGameEvent;
-	CDiscordBot *m_pDiscord;
+	#ifdef CONF_DISCORD
+		CDiscordBot *m_pDiscord;
+	#endif
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CNetObjHandler m_NetObjHandler;
@@ -106,8 +108,9 @@ public:
 	CMoneyCollector *MoneyCollector() { return m_pMoneyCollector; }
 	CCollision *Collision() { return &m_Collision; }
 	CTuningParams *Tuning() { return &m_Tuning; }
-	CDiscordBot *Discord() { return m_pDiscord; }
-
+	#ifdef CONF_DISCORD
+		CDiscordBot *Discord() { return m_pDiscord; }
+	#endif
 	/* SQL */
 	CSQL *Sql() const { return m_Sql; };
 	CAccountData *AccountData() {return m_AccountData; };

@@ -71,7 +71,9 @@ void CGameEvent::Create(int Type, int Duration) {
     EventInfo();
     GetEventStr(Type, aEvent, sizeof aEvent);
     str_format(aBuf, sizeof(aBuf), "'%s' Event started for %d seconds", aEvent, Duration);
-    GameServer()->Discord()->SendChatTarget_Discord(aBuf, "Event");
+    #ifdef CONF_DISCORD
+        GameServer()->Discord()->SendChatTarget_Discord(aBuf, "Event");
+    #endif
     dbg_msg("event", "'%s' Event started for %d seconds", aEvent, Duration);
 }
 

@@ -72,8 +72,9 @@ CGameContext::~CGameContext()
 	if(!m_Resetting)
 		delete m_pVoteOptionHeap;
 
-	if(m_pDiscord) delete m_pDiscord;
-
+	#ifdef CONF_DISCORD
+		if(m_pDiscord) delete m_pDiscord;
+	#endif
 }
 
 void CGameContext::ClearVotes(int ClientID)
@@ -912,8 +913,9 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput)
 
 void CGameContext::OnClientEnter(int ClientID)
 {
-
-	if(Discord()) Discord()->LogEnter(Server()->ClientName(ClientID));
+	#ifdef CONF_DISCORD
+		if(Discord()) Discord()->LogEnter(Server()->ClientName(ClientID));
+	#endif
 
 	//world.insert_entity(&players[client_id]);
 	m_apPlayers[ClientID]->Respawn();
@@ -965,7 +967,9 @@ void CGameContext::OnClientConnected(int ClientID)
 
 void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 {
-	if(Discord() && ClientID <= MAX_PLAYERS) Discord()->LogExit(Server()->ClientName(ClientID));
+	#ifdef CONF_DISCORD
+		if(Discord() && ClientID <= MAX_PLAYERS) Discord()->LogExit(Server()->ClientName(ClientID));
+	#endif
 
 	AbortVoteKickOnDisconnect(ClientID);
 	m_apPlayers[ClientID]->OnDisconnect(pReason);
@@ -1177,7 +1181,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else
 		{
-			if(m_pDiscord) Discord()->LogChat(Team, Server()->ClientName(ClientID), pMsg->m_pMessage);
+			#ifdef CONF_DISCORD	
+				if(m_pDiscord) Discord()->LogChat(Team, Server()->ClientName(ClientID), pMsg->m_pMessage);
+			#endif
 			SendChat(ClientID, Team, pMsg->m_pMessage, ClientID);
 		}
 	}
@@ -2220,6 +2226,7 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 		}
 	}
 #endif
+#ifdef CONF_DISCORD
 	try
 	{
 		m_pDiscord = new CDiscordBot(this);	
@@ -2228,8 +2235,8 @@ void CGameContext::OnInit(/*class IKernel *pKernel*/)
 	{
 		std::cerr << e.what() << '\n';
 	}
-
 	Discord()->SendChatTarget_Discord("The server is start up!", "Server");
+#endif
 }
 
 int CGameContext::ProcessSpamProtection(int ClientID)
@@ -2385,7 +2392,9 @@ int CGameContext::CreateNewDummy(int DummyID, int DummyMode, int ClientID)
 
 void CGameContext::SCT_Discord(const char *pText, const char *Desp)
 {
-	Discord()->SendChatTarget_Discord(pText, Desp);
+	#ifdef CONF_DISCORD
+		Discord()->SendChatTarget_Discord(pText, Desp);
+	#endif
 }
 
 int CGameContext::GetPlayerNum()

@@ -1,3 +1,4 @@
+#ifdef CONF_DISCORD
 /* (c) Paul 'Anime.pdf'. */
 #include <game/server/gamecontext.h>
 #include <iostream>
@@ -87,3 +88,4 @@ void CDiscordBot::SendChatTarget_Discord(std::string Text, std::string Desp)
     dpp::message msg(m_Channel, embed);
     m_Bot->message_create(msg);
 }
+#endif

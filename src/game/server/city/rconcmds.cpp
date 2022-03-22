@@ -52,7 +52,7 @@ void CGameContext::ConLolText(IConsole::IResult *pResult, void *pUserData)
 //	if(pResult->NumArguments() < 0 || pResult->NumArguments() > 1)
 //		return;
 
-	pChr->GameServer()->CreateLolText(pCharacter, true, vec2(0, -75), vec2 (0,-1), 10, Value);
+	pSelf->CreateLolText(pCharacter, true, vec2(0, -75), vec2 (0,-1), 10, Value);
 }
 
 void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)

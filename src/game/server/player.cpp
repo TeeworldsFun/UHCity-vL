@@ -431,9 +431,9 @@ void CPlayer::TryRespawn()
 	}
 	else if(IsBot())
 	{
-		if(rand()% 2 == 1) m_BigBot = true;
+		m_BigBot = true;
 		m_pCharacter = new(m_ClientID) CMonster(&GameServer()->m_World);
-		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, 0))
+		if(!GameServer()->m_pController->CanSpawn(m_Team, &SpawnPos, 4))
 			return;
 	}
 	else if (m_Afk) {

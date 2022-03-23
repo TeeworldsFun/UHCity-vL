@@ -161,10 +161,12 @@ MACRO_CONFIG_INT(NinjaDmg, ninja_dmg, 10, 0, 10000000, CFGFLAG_SERVER, "")
 MACRO_CONFIG_INT(HammerExplodeDmg, hammer_explode_dmg, 1, 0, 10000000, CFGFLAG_SERVER, "")
 MACRO_CONFIG_INT(PlasmaDmg, plasma_dmg, 20, 0, 10000000, CFGFLAG_SERVER, "")
 
+#ifdef CONF_DISCORD
 /* # Discord # */
 MACRO_CONFIG_STR(SvDiscordToken, sv_discord_token, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's token.")
 MACRO_CONFIG_STR(SvDiscordChannel, sv_discord_channel, 128, "", CFGFLAG_SAVE|CFGFLAG_SERVER, "Discord Bot's needed channel's ID.")
 /* # Discord # */
+#endif
 
 MACRO_CONFIG_INT(SvLoltextHspace, sv_loltext_hspace, 14, 10, 25, CFGFLAG_SERVER, "horizontal offset between loltext 'pixels'")
 MACRO_CONFIG_INT(SvLoltextVspace, sv_loltext_vspace, 14, 10, 25, CFGFLAG_SERVER, "vertical offset between loltext 'pixels'")

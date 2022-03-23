@@ -20,7 +20,9 @@
 #include "game/server/city/items/portal.h"
 #include "city/account.h"
 
+#ifdef CONF_DISCORD
 #include <game/server/discord/bot.h>
+#endif
 
 #include <city/components/localization.h>
 

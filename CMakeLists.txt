@@ -74,7 +74,7 @@ endif()
 
 option(SERVER_COMPILE "Build the server together with the client" ON)
 option(CLIENT "Compile client" OFF)
-option(DC "Enable Discord bot" OFF)
+option(DC "Enable Discord bot" ON)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 
@@ -964,6 +964,10 @@ if(DC)
   target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES} dpp)
   target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
   target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS} other/DPP/include)
+else()
+  target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER} ${ICU_LIBRARIES})
+  target_link_libraries(${TARGET_SERVER} ${LIBS} ${SERVER_LIBRARIES})
+  target_include_directories(${TARGET_SERVER} PRIVATE ${SERVER_INCLUDES_DIRS})
 endif()
 
 
